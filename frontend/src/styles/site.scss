@@ -1347,11 +1347,17 @@ a {
         transition: transform 0.1s linear, filter 0.1s linear;
 
         @include media-breakpoint-up(lg) {
+            position: relative;
+            top: auto;
+            transform: none !important;
+            filter: none !important;
+            box-shadow: none;
             grid-template-columns: 1fr 1fr;
             align-items: center;
             padding: 2.5rem 3rem;
             gap: 3.5rem;
             min-height: 24rem;
+            margin-bottom: 3rem;
 
             &:nth-child(even) {
                 .nt-blueprint__text {

@@ -87,18 +87,22 @@ export function FeatureBlocks({ data }) {
     const items = data.items ?? [];
     const listRef = useRef(null);
 
-    // Cards stack while scrolling: each sticks near the top and the next slides over it.
-    // A covered card shrinks and dims slightly. Active on all screens.
+    // Phones and small tablets (< 992px): cards stack while scrolling.
+    // Desktop (>= 992px): unaffected, scrolls naturally without stacking/animation.
     useEffect(() => {
         const list = listRef.current;
         if (!list || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+        const narrow = window.matchMedia('(max-width: 991.98px)');
         let frame = 0;
         const update = () => {
             frame = 0;
             const cards = [...list.querySelectorAll('.nt-blueprint__block')];
             cards.forEach((card, i) => {
                 const next = cards[i + 1];
-                if (!next) return card.style.removeProperty('--cover');
+                if (!narrow.matches || !next) {
+                    card.style.removeProperty('--cover');
+                    return;
+                }
                 const box = card.getBoundingClientRect();
                 const covered = 1 - (next.getBoundingClientRect().top - box.top) / box.height;
                 card.style.setProperty('--cover', Math.min(1, Math.max(0, covered)).toFixed(3));
