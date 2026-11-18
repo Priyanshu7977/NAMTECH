@@ -2081,9 +2081,10 @@ $nt-lab-ease: cubic-bezier(0.22, 1, 0.36, 1);
         aspect-ratio: 1;
         border-radius: 0.75rem;
         overflow: hidden;
+        width: 100%;
         @include media-breakpoint-up(lg) {
             aspect-ratio: 1;
-            max-height: 480px;
+            // No max-height: image fills the full left grid column (matching testlink.beanstalkasia.com)
         }
     }
 
