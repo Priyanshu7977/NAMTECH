@@ -273,7 +273,7 @@ function Announcements({ items }) {
                         <Icon name="chevronLeft" strokeWidth={2} />
                     </span>
                 )}
-                <p className="m-0 d-flex align-items-center gap-2" aria-live="polite">
+                <p className="m-0 d-flex align-items-center justify-content-center gap-2" aria-live="polite">
                     {item.label ? <span className="nt-announcement__label">{item.label}</span> : null}
                     {item.url ? <SmartLink href={item.url}>{item.text}</SmartLink> : <span>{item.text}</span>}
                 </p>
