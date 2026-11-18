@@ -1,0 +1,3 @@
+# Keep database files tracked for instant setup
+!database.sqlite
+!namtech_mysql.sql

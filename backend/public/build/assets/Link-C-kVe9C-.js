@@ -1,0 +1,1 @@
+import{r as e,t}from"./app-BDI4wrNZ.js";import{n}from"./usePage-D3L4H6KI.js";var r=t();function i({href:t,method:i=`get`,children:a,...o}){if(i.toLowerCase()===`get`&&n(t)){let{as:e,data:n,preserveScroll:i,preserveState:s,only:c,replace:l,...u}=o;return(0,r.jsx)(`a`,{href:t,...u,children:a})}return(0,r.jsx)(e,{href:t,method:i,...o,children:a})}export{i as t};

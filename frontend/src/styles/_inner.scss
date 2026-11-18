@@ -1,0 +1,3571 @@
+// Inner-page components (About, Admissions, Placements, Schools, Research, Impact, Outreach,
+// Careers, Events, Media) and the site-wide motion layer. Imported at the end of site.scss.
+
+$nt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+$nt-lilac: #e9c7f1;
+
+// ---------------------------------------------------------------------------
+// Motion
+// ---------------------------------------------------------------------------
+
+@keyframes nt-rise {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes nt-fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes nt-zoom-out {
+    from {
+        transform: scale(1.08);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+// Scroll reveal (motion.js adds .rv to below-the-fold elements and .rv-in when visible).
+.rv {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s $nt-ease, transform 0.8s $nt-ease;
+    transition-delay: var(--rv-delay, 0ms);
+    &.rv-in {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+// Hero copy rises in on load; the hero image settles with a slow zoom.
+.nt-hero-in {
+    animation: nt-rise 0.9s $nt-ease both;
+    animation-delay: calc(var(--d, 0) * 110ms + 80ms);
+}
+
+.nt-page-hero__media .nt-media img,
+.nt-plain-hero__media img,
+.nt-profile-hero__media img,
+.nt-statement__media img {
+    animation: nt-zoom-out 1.6s $nt-ease both;
+}
+
+// Simple page heroes (programs, schools, partner stories, listings, galleries) rise in like
+// the CMS heroes; items already marked .nt-hero-in keep their own timing.
+.nt-page-hero__content > :not(.nt-hero-in),
+.nt-page-hero--plain .container > :not(.nt-hero-in) {
+    animation: nt-rise 0.9s $nt-ease both;
+    @for $i from 2 through 5 {
+        &:nth-child(#{$i}) {
+            animation-delay: #{($i - 1) * 110 + 80}ms;
+        }
+    }
+}
+
+.nt-fade-in {
+    animation: nt-fade 0.5s ease both;
+}
+
+// New page fading up after a client-side visit (motion.js adds the class).
+.nt-page-enter {
+    animation: nt-page-enter 0.5s $nt-ease both;
+}
+
+@keyframes nt-page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+// Image zoom on hover for cards that contain a photo.
+.nt-zoom img,
+.nt-post-card__media img,
+.nt-simple-card .nt-media img,
+.nt-leader-card__media img,
+.nt-event-card__media img,
+.nt-pub-card__media img,
+.nt-story-tile__media img,
+.nt-tall-card__media img,
+.nt-logo-card__media img,
+.nt-hcard__media img,
+.nt-row-card__media img,
+.nt-event-row__media img,
+.nt-person-card .nt-media img,
+.nt-program-card__media img,
+.nt-featured-post__media img {
+    transition: transform 0.9s $nt-ease;
+}
+
+@media (hover: hover) {
+    .nt-zoom:hover img,
+    .nt-post-card:hover .nt-post-card__media img,
+    .nt-simple-card:hover .nt-media img,
+    .nt-leader-card:hover img,
+    .nt-event-card:hover img,
+    .nt-pub-card:hover img,
+    .nt-story-tile:hover img,
+    .nt-tall-card:hover img,
+    .nt-logo-card:hover .nt-logo-card__media img,
+    .nt-hcard:hover img,
+    .nt-row-card:hover img,
+    .nt-event-row:hover img,
+    .nt-person-card:hover .nt-media img,
+    .nt-program-card:hover .nt-program-card__media img,
+    .nt-featured-post:hover img {
+        transform: scale(1.06);
+    }
+
+    .nt-icon-card,
+    .nt-joined-card,
+    .nt-stat-card,
+    .nt-checklist,
+    .nt-date-table,
+    .nt-contact-card,
+    .nt-event-card,
+    .nt-pub-card,
+    .nt-doc-grid li {
+        transition: transform 0.45s $nt-ease, box-shadow 0.45s $nt-ease, border-color 0.3s;
+    }
+    .nt-icon-card:hover,
+    .nt-stat-card:hover,
+    .nt-checklist:hover,
+    .nt-date-table:hover,
+    .nt-contact-card:hover,
+    .nt-event-card:hover,
+    .nt-pub-card:hover,
+    .nt-doc-grid li:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 40px -22px rgba($nt-ink, 0.35);
+    }
+    .nt-joined-card:hover {
+        background: $nt-lavender;
+    }
+
+    .nt-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .nt-link-arrow .nt-arrow-dot,
+    .nt-link-arrow svg {
+        transition: transform 0.3s $nt-ease;
+    }
+    .nt-link-arrow:hover .nt-arrow-dot,
+    .nt-link-arrow:hover svg {
+        transform: translateX(4px);
+    }
+}
+
+// Animated underline for tab links and in-page navigation.
+.nt-tabs [role='tab'],
+.nt-tabs--links a,
+.nt-tabs button[aria-pressed],
+.nt-subnav a {
+    position: relative;
+    &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 2px;
+        background: $nt-primary;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.35s $nt-ease;
+    }
+    &[aria-selected='true']::after,
+    &[aria-current]::after,
+    &[aria-pressed='true']::after {
+        transform: scaleX(1);
+    }
+}
+
+.nt-tabs [role='tab'][aria-selected='true'] {
+    border-bottom-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rv {
+        opacity: 1;
+        transform: none;
+    }
+    .nt-hero-in,
+    .nt-fade-in,
+    .nt-page-enter,
+    .nt-page-hero__content > *,
+    .nt-page-hero--plain .container > *,
+    .nt-page-hero__media .nt-media img,
+    .nt-plain-hero__media img,
+    .nt-profile-hero__media img,
+    .nt-statement__media img {
+        animation: none;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tones, shared bits
+// ---------------------------------------------------------------------------
+
+.nt-tone-white {
+    background: #fff;
+}
+.nt-tone-light {
+    background: #f7f7f9;
+    --nt-tabs-bg: #f7f7f9;
+}
+.nt-tone-gradient {
+    background: linear-gradient(180deg, #fff 0%, $nt-lavender 40%, #efe9ff 100%);
+    --nt-tabs-bg: #{$nt-lavender};
+}
+.nt-tone-purple {
+    color: #fff;
+    .nt-h2,
+    .nt-h3,
+    h2,
+    h3 {
+        color: #fff;
+    }
+}
+
+.nt-btn svg {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+}
+
+.nt-btn--ghost {
+    background: transparent;
+    border-color: #fff;
+    color: #fff;
+    &:hover {
+        background: rgba(#fff, 0.12);
+        border-color: #fff;
+    }
+}
+
+.nt-empty {
+    padding: 2rem;
+    background: $nt-lavender;
+    border-radius: 0.5rem;
+    color: $nt-muted;
+}
+
+.nt-footnote {
+    font-size: 0.8125rem;
+    color: $nt-muted;
+    margin-top: 1.5rem;
+}
+
+.nt-meta-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    svg {
+        width: 1.1rem;
+        height: 1.1rem;
+        flex: none;
+        color: $nt-accent;
+    }
+    &--row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1.75rem;
+    }
+    .on-dark & svg {
+        color: #fff;
+    }
+}
+
+.nt-page-hero__meta {
+    margin-top: 1.5rem;
+}
+
+.nt-stat-figure {
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: $nt-primary;
+    font-weight: 500;
+}
+
+.nt-intro__icon {
+    width: 3rem;
+    height: 3rem;
+    color: $nt-accent;
+    margin-bottom: 1.5rem;
+}
+
+.nt-card-grid--3 {
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.nt-search-box {
+    position: relative;
+    min-width: min(100%, 18rem);
+    input {
+        padding-right: 2.75rem;
+        border-radius: 999px;
+    }
+    svg {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        width: 1.1rem;
+        height: 1.1rem;
+        transform: translateY(-50%);
+        color: $nt-muted;
+        pointer-events: none;
+    }
+}
+
+.nt-selects {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: repeat(2, minmax(0, 22rem));
+    }
+}
+
+// Tab bar as links / filter buttons (listing pages).
+.nt-tabs--links,
+.nt-tabs[role='group'] {
+    gap: 0.25rem;
+    a,
+    button {
+        flex: 0 0 auto;
+        padding: 0.9rem 1.25rem;
+        color: $nt-ink;
+        text-decoration: none;
+        white-space: nowrap;
+        background: none;
+        border: 0;
+        font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1.0625rem);
+        &[aria-current],
+        &[aria-pressed='true'] {
+            color: $nt-primary;
+        }
+        &:hover {
+            color: $nt-primary;
+        }
+    }
+}
+
+.nt-tabs--compact {
+    margin-bottom: 1.5rem;
+}
+
+.nt-tabs-center .nt-tabs {
+    justify-content: center;
+    [role='tab'] {
+        flex: 0 0 auto;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Heroes
+// ---------------------------------------------------------------------------
+
+.nt-plain-hero {
+    padding-block: clamp(2.5rem, 6vw, 5rem) 0;
+    background: linear-gradient(180deg, $nt-lavender 0%, #fff 100%);
+    h1 {
+        font-size: clamp(2rem, 1.4rem + 2.4vw, 3.5rem);
+        line-height: 1.15;
+        font-weight: 500;
+        color: $nt-ink;
+        max-width: 52rem;
+        margin-bottom: 1rem;
+    }
+    &__body {
+        max-width: 46rem;
+        font-size: 1.0625rem;
+        line-height: 1.7;
+    }
+    &__media {
+        aspect-ratio: 21 / 9;
+        border-radius: 0.75rem;
+    }
+    > .container:last-child:not(:first-child) {
+        padding-bottom: 0;
+    }
+}
+
+.nt-profile-hero {
+    background: linear-gradient(180deg, $nt-lavender 0%, #fff 100%);
+    padding-block: clamp(2rem, 5vw, 4rem);
+    &__grid {
+        display: grid;
+        gap: 2rem;
+        align-items: center;
+        @include media-breakpoint-up(md) {
+            grid-template-columns: minmax(0, 24rem) 1fr;
+            gap: 4rem;
+        }
+    }
+    &__media {
+        aspect-ratio: 4 / 5;
+        border-radius: 0.75rem;
+    }
+    h1 {
+        font-size: clamp(2rem, 1.4rem + 2.2vw, 3.25rem);
+        font-weight: 500;
+        color: $nt-ink;
+        margin-bottom: 0.5rem;
+    }
+    &__role {
+        font-size: 1.125rem;
+        color: $nt-primary;
+        margin-bottom: 0.5rem;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Page structure
+// ---------------------------------------------------------------------------
+
+.nt-subnav {
+    border-bottom: 1px solid $nt-border;
+    background: #fff;
+    ul {
+        display: flex;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+        gap: 0.5rem;
+    }
+    a {
+        display: block;
+        padding: 1.1rem 1rem;
+        white-space: nowrap;
+        color: $nt-ink;
+        text-decoration: none;
+        font-size: 0.9375rem;
+        &[aria-current] {
+            color: $nt-primary;
+        }
+        &:hover {
+            color: $nt-primary;
+        }
+    }
+}
+
+// Full-width image with a purple statement box.
+.nt-statement {
+    position: relative;
+    min-height: clamp(26rem, 55vw, 40rem);
+    display: flex;
+    align-items: center;
+    padding-block: 3rem;
+    overflow: hidden;
+    &__media {
+        position: absolute !important;
+        inset: 0;
+    }
+    .container {
+        position: relative;
+        display: flex;
+        justify-content: flex-end;
+    }
+    &--left .container {
+        justify-content: flex-start;
+    }
+    &__box {
+        background: rgba($nt-primary, 0.94);
+        color: #fff;
+        padding: clamp(1.75rem, 4vw, 3.25rem);
+        max-width: 34rem;
+        border-radius: 0.5rem;
+        backdrop-filter: blur(4px);
+        h2 {
+            color: #fff;
+            font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.75rem);
+            margin-bottom: 1rem;
+        }
+    }
+}
+
+.nt-value-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    li {
+        display: grid;
+        grid-template-columns: 3rem 1fr;
+        gap: 1.5rem;
+        padding-block: 1.75rem;
+        border-bottom: 1px solid $nt-border;
+        &:first-child {
+            border-top: 1px solid $nt-border;
+        }
+    }
+    svg {
+        width: 2.5rem;
+        height: 2.5rem;
+        color: $nt-accent;
+    }
+    h3 {
+        font-size: 1.25rem;
+        color: $nt-ink;
+        margin-bottom: 0.5rem;
+    }
+    p {
+        margin: 0;
+        font-size: 0.9375rem;
+    }
+}
+
+.nt-stat-cards {
+    display: grid;
+    gap: 1.25rem;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    }
+}
+
+.nt-stat-card {
+    background: #fff;
+    border: 1px solid $nt-lilac;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    svg {
+        width: 2.25rem;
+        height: 2.25rem;
+        color: $nt-accent;
+        margin-bottom: 1.5rem;
+    }
+    strong {
+        font-size: clamp(2.25rem, 1.6rem + 2vw, 3.5rem);
+        font-weight: 500;
+        color: $nt-primary;
+        line-height: 1.05;
+    }
+    &__label {
+        font-size: 1.0625rem;
+        color: $nt-ink;
+    }
+    p {
+        font-size: 0.875rem;
+        margin: 0.5rem 0 0;
+        color: $nt-muted;
+    }
+    .nt-tone-purple & {
+        background: rgba(#fff, 0.08);
+        border-color: rgba(#fff, 0.3);
+        strong,
+        .nt-stat-card__label,
+        p,
+        svg {
+            color: #fff;
+        }
+    }
+}
+
+.nt-stat-dividers {
+    display: grid;
+    margin: 0;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    }
+    > div {
+        display: flex;
+        flex-direction: column-reverse;
+        padding: 1.5rem 2rem;
+        border-left: 1px solid $nt-border;
+        &:first-child {
+            border-left: 0;
+            padding-left: 0;
+        }
+    }
+    dd {
+        margin: 0;
+        font-size: clamp(2.5rem, 1.8rem + 2.6vw, 4.25rem);
+        font-weight: 500;
+        color: $nt-primary;
+        line-height: 1.05;
+    }
+    dt {
+        font-weight: 400;
+    }
+}
+
+// Timeline
+.nt-timeline {
+    &__panel {
+        display: grid;
+        gap: 2rem;
+        align-items: center;
+        min-height: 22rem;
+        @include media-breakpoint-up(lg) {
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+    }
+    &__text {
+        animation: nt-rise 0.6s $nt-ease both;
+        h3 {
+            font-size: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+            color: $nt-ink;
+            margin-bottom: 1rem;
+        }
+    }
+    &__media {
+        aspect-ratio: 4 / 3;
+        border-radius: 0.75rem;
+        animation: nt-fade 0.7s ease both;
+    }
+    &__axis {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        list-style: none;
+        padding: 2.5rem 0 0;
+        margin: 2.5rem 0 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            top: 1rem;
+            left: 0;
+            height: 2px;
+            background: #d9cffa;
+            right: 0;
+        }
+        &::after {
+            right: auto;
+            width: calc(var(--progress, 0) * 100%);
+            background: $nt-primary;
+            transition: width 0.6s $nt-ease;
+        }
+        button {
+            position: relative;
+            background: none;
+            border: 0;
+            padding: 0.25rem 0.75rem;
+            font-size: 1.125rem;
+            color: $nt-muted;
+            transition: color 0.3s;
+            &::before {
+                content: '';
+                position: absolute;
+                top: -1.85rem;
+                left: 50%;
+                width: 0.9rem;
+                height: 0.9rem;
+                border-radius: 50%;
+                background: #fff;
+                border: 2px solid #d9cffa;
+                transform: translateX(-50%);
+                transition: border-color 0.3s, background 0.3s, transform 0.3s;
+            }
+            &[aria-current] {
+                color: $nt-primary;
+                font-weight: 500;
+                &::before {
+                    border-color: $nt-primary;
+                    background: $nt-primary;
+                    transform: translateX(-50%) scale(1.25);
+                }
+            }
+        }
+    }
+}
+
+.nt-carousel__arrow[disabled] {
+    opacity: 0.35;
+}
+
+// Video / quote feature
+.nt-feature {
+    display: grid;
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 1.4fr 1fr;
+        min-height: 32rem;
+    }
+    &__visual {
+        position: relative;
+        min-height: 18rem;
+        .nt-media {
+            position: absolute;
+            inset: 0;
+        }
+        // These are mostly portraits, so keep faces in frame when the photo is cropped.
+        .nt-media img {
+            object-position: 50% 20%;
+        }
+    }
+    &__panel {
+        background: $nt-primary;
+        color: #fff;
+        padding: clamp(2rem, 5vw, 4rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        h2 {
+            color: #fff;
+            font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.5rem);
+            margin-bottom: 1.25rem;
+        }
+    }
+}
+
+.nt-video-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.nt-play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(#fff, 0.92);
+    color: $nt-primary;
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 0 0 0 rgba(#fff, 0.6);
+    animation: nt-pulse 2.4s infinite;
+    transition: transform 0.3s $nt-ease;
+    svg {
+        width: 1.75rem;
+        height: 1.75rem;
+    }
+    &:hover {
+        transform: translate(-50%, -50%) scale(1.08);
+    }
+}
+
+@keyframes nt-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(#fff, 0.55);
+    }
+    70% {
+        box-shadow: 0 0 0 1.25rem rgba(#fff, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(#fff, 0);
+    }
+}
+
+.nt-quote-feature {
+    position: relative;
+    min-height: clamp(28rem, 50vw, 38rem);
+    display: flex;
+    align-items: flex-end;
+    color: #fff;
+    > .nt-media {
+        position: absolute;
+        inset: 0;
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(#000, 0) 20%, rgba($nt-ink, 0.85) 100%);
+        }
+    }
+    &__inner {
+        position: relative;
+        display: grid;
+        gap: 2rem;
+        padding-block: 3rem;
+        @include media-breakpoint-up(lg) {
+            grid-template-columns: 1fr 1fr;
+            align-items: end;
+        }
+        h2 {
+            color: #fff;
+            font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.75rem);
+        }
+    }
+    blockquote {
+        margin: 0;
+        font-size: 1.0625rem;
+        footer {
+            margin-top: 1rem;
+            strong,
+            span {
+                display: block;
+            }
+            span {
+                font-size: 0.875rem;
+                opacity: 0.85;
+            }
+        }
+    }
+}
+
+// Leaders
+.nt-leaders {
+    display: grid;
+    gap: 2.5rem 2rem;
+    @include media-breakpoint-up(sm) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.nt-leader-card {
+    &__media {
+        aspect-ratio: 4 / 4.4;
+        border-radius: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+    h3 {
+        font-size: 1.25rem;
+        color: $nt-ink;
+        margin-bottom: 0.5rem;
+    }
+    p {
+        font-size: 0.875rem;
+        color: $nt-muted;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+.nt-contact-card {
+    position: relative;
+    border: 1px solid $nt-lilac;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    &__icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background: $nt-lavender;
+        color: $nt-primary;
+        display: grid;
+        place-items: center;
+        margin-bottom: 0.75rem;
+        svg {
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+    }
+    &__region {
+        font-size: 0.8125rem;
+        color: $nt-accent;
+        margin: 0;
+    }
+    h3 {
+        font-size: 1.0625rem;
+        color: $nt-ink;
+        margin: 0 0 0.25rem;
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+    }
+    p,
+    a {
+        font-size: 0.875rem;
+        margin: 0;
+        word-break: break-word;
+    }
+}
+
+// Ranks / awards rows
+.nt-achievements {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    li {
+        display: grid;
+        grid-template-columns: 6rem 1fr auto;
+        gap: 1.5rem;
+        align-items: center;
+        padding-block: 1.5rem;
+        border-bottom: 1px solid $nt-border;
+        &:first-child {
+            border-top: 1px solid $nt-border;
+        }
+        @include media-breakpoint-down(sm) {
+            grid-template-columns: 4.5rem 1fr;
+            .nt-achievements__icon {
+                display: none;
+            }
+        }
+    }
+    &__value {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        img {
+            max-width: 5rem;
+            height: auto;
+        }
+        strong {
+            font-size: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+            font-weight: 500;
+            color: $nt-primary;
+        }
+    }
+    &__text {
+        h3 {
+            font-size: 1.125rem;
+            color: $nt-ink;
+            margin-bottom: 0.35rem;
+        }
+        p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: $nt-muted;
+        }
+    }
+    &__icon {
+        width: 2.25rem;
+        height: 2.25rem;
+        color: $nt-accent;
+    }
+}
+
+// Core pillars
+.nt-pillars__nav {
+    @include media-breakpoint-up(lg) {
+        position: sticky;
+        top: calc(var(--nt-header-h) + 2rem);
+    }
+    .nt-pillars__body {
+        margin: 1rem 0 0;
+        color: $nt-muted;
+        font-size: 0.9375rem;
+    }
+    ol {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0 0;
+        border-left: 1px solid $nt-border;
+    }
+    a {
+        display: block;
+        padding: 0.6rem 1rem;
+        margin-left: -1px;
+        border-left: 2px solid transparent;
+        color: $nt-muted;
+        text-decoration: none;
+        transition: color 0.3s, border-color 0.3s;
+        &[aria-current] {
+            color: $nt-primary;
+            border-left-color: $nt-primary;
+        }
+    }
+    @include media-breakpoint-down(lg) {
+        ol {
+            display: none;
+        }
+    }
+}
+
+.nt-pillar {
+    display: grid;
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    border: 1px solid $nt-border;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    background: #fff;
+    transition: border-color 0.4s, box-shadow 0.4s, transform 0.5s $nt-ease;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: 1.2fr 1fr;
+        align-items: center;
+    }
+    h3 {
+        font-size: clamp(1.375rem, 1.1rem + 0.8vw, 2rem);
+        color: $nt-ink;
+        margin-bottom: 1rem;
+    }
+    p {
+        margin: 0;
+    }
+    &__media {
+        aspect-ratio: 4 / 3;
+        border-radius: 0.5rem;
+    }
+    &.is-active {
+        border-color: $nt-primary;
+        box-shadow: 0 24px 50px -30px rgba($nt-primary, 0.55);
+    }
+}
+
+// Admissions
+.nt-date-tables {
+    display: grid;
+    gap: 1.25rem;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    }
+}
+
+.nt-date-table {
+    border: 1px solid $nt-lilac;
+    border-radius: 0.5rem;
+    padding: 1.75rem;
+    background: #fff;
+    > svg {
+        width: 2.25rem;
+        height: 2.25rem;
+        color: $nt-accent;
+        margin-bottom: 1.25rem;
+    }
+    h3 {
+        font-size: 1.25rem;
+        color: $nt-ink;
+        margin-bottom: 1rem;
+    }
+    dl {
+        margin: 0;
+        div {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-block: 0.6rem;
+            border-top: 1px solid $nt-border;
+        }
+        dt {
+            font-weight: 400;
+            color: $nt-muted;
+        }
+        dd {
+            margin: 0;
+            color: $nt-ink;
+            text-align: right;
+        }
+    }
+    &.is-highlight {
+        background: $nt-primary;
+        border-color: $nt-primary;
+        color: #fff;
+        h3,
+        dd,
+        dt,
+        > svg {
+            color: #fff;
+        }
+        dl div {
+            border-color: rgba(#fff, 0.25);
+        }
+    }
+}
+
+.nt-criteria {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.25rem;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    }
+    li {
+        background: $nt-lavender;
+        border-radius: 0.5rem;
+        padding: 1.75rem;
+    }
+    span {
+        display: block;
+        font-size: 2rem;
+        color: $nt-primary;
+        margin-bottom: 0.75rem;
+    }
+    p {
+        margin: 0;
+    }
+}
+
+.nt-icon-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    li {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 1rem 1.25rem;
+        border: 1px solid $nt-border;
+        border-radius: 0.5rem;
+        font-size: 0.9375rem;
+    }
+    svg {
+        width: 1.75rem;
+        height: 1.75rem;
+        color: $nt-accent;
+        flex: none;
+    }
+}
+
+.nt-checklists {
+    display: grid;
+    gap: 1.25rem;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    }
+}
+
+.nt-checklist {
+    border: 1px solid $nt-lilac;
+    border-radius: 0.5rem;
+    padding: 1.75rem;
+    background: #fff;
+    > svg {
+        width: 2.25rem;
+        height: 2.25rem;
+        color: $nt-accent;
+        margin-bottom: 1.25rem;
+    }
+    h3 {
+        font-size: 1.25rem;
+        color: $nt-ink;
+        margin-bottom: 1rem;
+    }
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.6rem;
+    }
+    li {
+        display: flex;
+        gap: 0.6rem;
+        font-size: 0.9375rem;
+        svg {
+            width: 1.1rem;
+            height: 1.1rem;
+            color: $nt-primary;
+            flex: none;
+            margin-top: 0.2rem;
+        }
+    }
+}
+
+.nt-fees {
+    display: grid;
+    gap: 1.25rem;
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 1fr 1.2fr;
+    }
+    &__table,
+    &__scholarships {
+        border-radius: 0.5rem;
+        padding: clamp(1.5rem, 3vw, 2.5rem);
+    }
+    &__table {
+        border: 1px solid $nt-lilac;
+        dl {
+            margin: 1.5rem 0 0;
+            div {
+                display: flex;
+                justify-content: space-between;
+                gap: 1rem;
+                padding-block: 0.75rem;
+                border-top: 1px solid $nt-border;
+            }
+            dt {
+                font-weight: 400;
+            }
+            dd {
+                margin: 0;
+                color: $nt-ink;
+            }
+        }
+    }
+    &__label {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.5rem;
+        color: $nt-accent;
+        .on-dark & {
+            color: rgba(#fff, 0.85);
+        }
+    }
+    &__amount {
+        font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+        font-weight: 500;
+        color: $nt-primary;
+        margin: 0;
+    }
+    &__scholarships {
+        background: $nt-primary;
+        color: #fff;
+    }
+    &__grid {
+        display: grid;
+        gap: 1.5rem;
+        margin-top: 1rem;
+        @include media-breakpoint-up(sm) {
+            grid-template-columns: 1fr 1fr;
+        }
+        h3 {
+            font-size: 1.0625rem;
+            color: #fff;
+            margin-bottom: 0.35rem;
+        }
+        p {
+            font-size: 0.875rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+    }
+    &__link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        color: #fff;
+        svg {
+            width: 1rem;
+            height: 1rem;
+        }
+    }
+    &__notes {
+        display: grid;
+        gap: 1.25rem;
+        margin-top: 1.25rem;
+        @include media-breakpoint-up(md) {
+            grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+        }
+        > div {
+            background: $nt-lavender;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+        svg {
+            width: 2rem;
+            height: 2rem;
+            color: $nt-accent;
+            margin-bottom: 1rem;
+        }
+        h3 {
+            font-size: 1.0625rem;
+            color: $nt-ink;
+        }
+        p {
+            font-size: 0.875rem;
+            margin: 0;
+        }
+    }
+}
+
+// Icon list in a lavender box; every item sits above a thin divider (Why Partner with NAMTECH? design).
+.nt-feature-list {
+    background: $nt-lavender;
+    border-radius: 0.25rem;
+    padding: clamp(1.25rem, 3vw, 1.5rem) clamp(1.25rem, 3vw, 2.5rem) clamp(1.5rem, 3vw, 2.5rem);
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0 3.5rem;
+        animation: nt-fade 0.5s ease both;
+        @include media-breakpoint-up(md) {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    li {
+        display: flex;
+        gap: 1.75rem;
+        align-items: center;
+        padding-block: 1.5rem;
+        border-bottom: 1px solid #ddd3fb;
+        font-size: 0.9375rem;
+        svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            color: $nt-accent;
+            flex: none;
+        }
+    }
+}
+
+// Contact band (Connect with our Team design): plain grey label, then each person's name and role on one line
+// with the email underlined below, separated by thin dividers.
+.nt-contact-band {
+    &__label {
+        margin: 2.5rem 0 1.25rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: $nt-muted;
+    }
+    &__people {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.25rem 0;
+        li {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-right: 1.5rem;
+            margin-right: 1.5rem;
+            &:not(:last-child) {
+                border-right: 1px solid #c9bff0;
+            }
+        }
+        span {
+            font-size: 1.125rem;
+            color: $nt-ink;
+        }
+        strong {
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+        a {
+            font-size: 1.125rem;
+            color: $nt-ink;
+            text-decoration: underline;
+            text-underline-offset: 0.2em;
+            &:hover {
+                color: $nt-primary;
+            }
+        }
+    }
+}
+
+// Outreach
+// Current Gaps (Outreach design): tinted rows whose titles start at the halfway line; the open row becomes an
+// image beside a lavender panel holding the title and text.
+.nt-acc-section {
+    border-block: 1px solid $nt-border;
+    .nt-h2 {
+        max-width: 50rem;
+        margin-inline: auto;
+    }
+}
+.nt-acc-media {
+    border-top: 1px solid $nt-border;
+    &__item {
+        background: #f9f8fd;
+        border-bottom: 1px solid $nt-border;
+        h3 {
+            margin: 0;
+        }
+        button {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: 0;
+            padding: 1.5rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: $nt-ink;
+            @include media-breakpoint-up(md) {
+                padding-left: 50%;
+            }
+            &:hover,
+            &:focus-visible {
+                color: $nt-primary;
+            }
+        }
+        &.is-open {
+            border-bottom: 0;
+        }
+    }
+    &__panel {
+        display: grid;
+        animation: nt-rise 0.5s $nt-ease both;
+        @include media-breakpoint-up(md) {
+            grid-template-columns: 43.6% 1fr;
+            min-height: 22.75rem;
+        }
+        .nt-media {
+            aspect-ratio: 558 / 363;
+            border-radius: 0;
+            @include media-breakpoint-up(md) {
+                aspect-ratio: auto;
+                align-self: stretch;
+                min-height: 22.75rem;
+            }
+        }
+        > div:not(.nt-media) {
+            background: #ece8fc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            @include media-breakpoint-up(md) {
+                padding: 2.5rem clamp(2rem, 14%, 5.125rem);
+            }
+        }
+        p {
+            max-width: 28.5rem;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+        }
+    }
+    .nt-acc-media__panel &__title {
+        max-width: none;
+        font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+        color: $nt-ink;
+        margin-bottom: 1rem;
+    }
+}
+
+.nt-numbered {
+    list-style: none;
+    margin: 0;
+    background: $nt-lavender;
+    padding: 1.5rem 2.5rem;
+    li {
+        display: grid;
+        grid-template-columns: 3.875rem 1fr;
+        align-items: baseline;
+        padding-block: 1.5rem;
+        font-size: 0.9375rem;
+        & + li {
+            border-top: 1px solid #ddd8ee;
+        }
+    }
+    span {
+        font-size: 1.25rem;
+        color: $nt-primary;
+    }
+    @include media-breakpoint-down(md) {
+        padding: 0.75rem 1.25rem;
+    }
+    &__label {
+        color: $nt-text;
+        font-size: 1.5rem;
+        margin: 1.5rem 0 2.5rem;
+    }
+}
+
+// Joined icon cards share one purple grid line, as in the designs (Careers, Outreach).
+$nt-card-line: #b05df7;
+
+.nt-joined-cards {
+    display: grid;
+    border-top: 1px solid $nt-card-line;
+    border-left: 1px solid $nt-card-line;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: repeat(var(--cols, 3), 1fr);
+    }
+}
+
+.nt-joined-card {
+    position: relative;
+    border-right: 1px solid $nt-card-line;
+    border-bottom: 1px solid $nt-card-line;
+    padding: 2rem;
+    background: #fff;
+    // Figma: 40px padding, 32px icon, dark 18px title, 13px text; about 296px tall on desktop.
+    @include media-breakpoint-up(lg) {
+        padding: 2.5rem;
+        min-height: 18.5rem;
+    }
+    svg {
+        width: 2rem;
+        height: 2rem;
+        color: $nt-accent;
+        margin-bottom: 2.5rem;
+    }
+    h3 {
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: $nt-text;
+        margin-bottom: 1.5rem;
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+    }
+    p {
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+}
+
+.nt-tab-media {
+    display: grid;
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 1fr 1fr;
+        min-height: 30rem;
+    }
+    &__img {
+        min-height: 18rem;
+    }
+    &__panel {
+        background: $nt-lavender;
+        padding: clamp(1.75rem, 4vw, 4rem);
+        h3 {
+            font-size: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+            color: $nt-ink;
+            margin-bottom: 1rem;
+        }
+    }
+    &__point {
+        padding-block: 1rem;
+        border-top: 1px solid #ddd3fb;
+        h4 {
+            font-size: 1.0625rem;
+            color: $nt-primary;
+            margin-bottom: 0.35rem;
+        }
+        p {
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+    }
+    &__links {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        a {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: 1px solid $nt-primary;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+    }
+}
+
+// Life @ NAMTECH
+.nt-image-list {
+    display: grid;
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 1fr 1fr;
+        min-height: 34rem;
+    }
+    &__media {
+        min-height: 20rem;
+    }
+    &__panel {
+        background: $nt-lavender;
+        padding: clamp(2rem, 5vw, 4.5rem);
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0 0;
+        }
+        li {
+            padding-block: 1.25rem;
+            border-top: 1px solid #ddd3fb;
+        }
+        h3 {
+            font-size: 1.125rem;
+            color: $nt-primary;
+            margin-bottom: 0.35rem;
+        }
+        p {
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+        // Introduction under the heading.
+        .nt-image-list__intro {
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+    }
+}
+
+// Mosaic
+.nt-mosaic {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(2, 1fr);
+    .nt-media {
+        border-radius: 0.5rem;
+        aspect-ratio: 4 / 3;
+    }
+    &--1 {
+        grid-template-columns: 1fr;
+        .nt-media {
+            aspect-ratio: 16 / 9;
+        }
+    }
+    &--3 .nt-media:first-child {
+        grid-row: span 2;
+        aspect-ratio: auto;
+        height: 100%;
+    }
+    &--4 {
+        @include media-breakpoint-up(md) {
+            grid-template-columns: 2fr 1fr 1fr;
+            .nt-media:first-child {
+                grid-row: span 2;
+                aspect-ratio: auto;
+                height: 100%;
+            }
+        }
+    }
+    &__quote {
+        grid-column: 1 / -1;
+        margin: 0;
+        background: $nt-primary;
+        color: #fff;
+        padding: 1.75rem;
+        border-radius: 0.5rem;
+        p {
+            font-size: 1.0625rem;
+        }
+        footer strong,
+        footer span {
+            display: block;
+        }
+        footer span {
+            font-size: 0.8125rem;
+            opacity: 0.85;
+        }
+    }
+}
+
+// Placement trends
+.nt-trend-card {
+    border: 1px solid $nt-lilac;
+    border-radius: 0.75rem;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    h3 {
+        font-size: clamp(1.375rem, 1.1rem + 0.8vw, 2rem);
+        color: $nt-ink;
+        margin-bottom: 1rem;
+    }
+    &__inner {
+        display: grid;
+        gap: 2rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid $nt-border;
+        @include media-breakpoint-up(lg) {
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+        }
+    }
+    &__stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin: 0;
+        div {
+            display: flex;
+            flex-direction: column;
+        }
+        dd {
+            margin: 0;
+            font-size: clamp(1.75rem, 1.3rem + 1.5vw, 2.75rem);
+            color: $nt-primary;
+            font-weight: 500;
+            order: -1;
+        }
+        dt {
+            font-weight: 400;
+            font-size: 0.875rem;
+        }
+    }
+}
+
+.nt-logos--compact {
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: flex-start;
+    img {
+        max-height: 2.5rem;
+        width: auto;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Extended layouts of core sections
+// ---------------------------------------------------------------------------
+
+.nt-image-panel {
+    display: grid;
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 1.25fr 1fr;
+        min-height: 32rem;
+        &--reverse {
+            grid-template-columns: 1fr 1.25fr;
+            .nt-image-panel__media {
+                order: 2;
+            }
+        }
+    }
+    &__media {
+        min-height: 18rem;
+    }
+    &__text {
+        background: $nt-primary;
+        color: #fff;
+        padding: clamp(2rem, 5vw, 4.5rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        .nt-h2 {
+            color: #fff;
+        }
+    }
+}
+
+// Vision / Mission (Outreach design): a half-width image inside the page margins with plain text beside it.
+// Consecutive blocks sit close together so the two read as one staggered pair.
+.nt-section.nt-staggered {
+    padding-bottom: 2rem;
+}
+.nt-section.nt-staggered + .nt-section.nt-staggered {
+    padding-top: 2rem;
+}
+.nt-staggered {
+    .nt-staggered__row {
+        @include media-breakpoint-up(lg) {
+            --bs-gutter-x: 0;
+            .nt-media {
+                aspect-ratio: 641 / 560 !important;
+            }
+        }
+    }
+    &__text {
+        @include media-breakpoint-up(lg) {
+            max-width: 22rem;
+            margin-left: clamp(2rem, 9.6vw, 8.625rem);
+        }
+        .nt-pill {
+            margin-bottom: 1rem;
+        }
+        p {
+            line-height: 1.65;
+        }
+    }
+}
+
+.nt-toc {
+    @include media-breakpoint-up(lg) {
+        position: sticky;
+        top: calc(var(--nt-header-h) + 1.5rem);
+    }
+    &__title {
+        font-size: 0.8125rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: $nt-accent;
+        margin-bottom: 0.75rem;
+    }
+    ol {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 2rem;
+        border-left: 1px solid $nt-border;
+    }
+    li a {
+        display: block;
+        padding: 0.45rem 1rem;
+        margin-left: -1px;
+        border-left: 2px solid transparent;
+        color: $nt-muted;
+        text-decoration: none;
+        font-size: 0.9375rem;
+        &:hover,
+        &:focus {
+            color: $nt-primary;
+            border-left-color: $nt-primary;
+        }
+    }
+}
+
+.nt-latest {
+    ul li + li {
+        margin-top: 1rem;
+    }
+    a {
+        display: grid;
+        grid-template-columns: 4.5rem 1fr;
+        gap: 0.75rem;
+        align-items: center;
+        color: $nt-text;
+        text-decoration: none;
+        font-size: 0.875rem;
+        line-height: 1.4;
+        .nt-media {
+            aspect-ratio: 1;
+            border-radius: 0.35rem;
+        }
+        &:hover span {
+            color: $nt-primary;
+        }
+    }
+}
+
+.nt-article {
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin-block: 1rem;
+    }
+}
+
+.nt-showcase-card {
+    margin: 0;
+    position: relative;
+    .nt-media {
+        aspect-ratio: 16 / 9;
+        border-radius: 0.75rem;
+    }
+    figcaption {
+        padding-top: 1.25rem;
+        text-align: center;
+        h3 {
+            font-size: 1.25rem;
+            color: $nt-ink;
+        }
+        p {
+            max-width: 40rem;
+            margin-inline: auto;
+            font-size: 0.9375rem;
+        }
+    }
+}
+
+.nt-hcard {
+    display: grid;
+    border: 1px solid $nt-lilac;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    height: 100%;
+    background: #fff;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: 1fr 1fr;
+    }
+    &__text {
+        padding: clamp(1.5rem, 3vw, 2.5rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        > svg {
+            width: 2.25rem;
+            height: 2.25rem;
+            color: $nt-accent;
+            margin-bottom: 1rem;
+        }
+        h3 {
+            font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+            color: $nt-ink;
+            margin: 0;
+        }
+        p {
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+        .nt-link-arrow {
+            margin-top: auto;
+        }
+    }
+    &__sub {
+        color: $nt-primary;
+        font-size: 0.9375rem;
+    }
+    &__media {
+        min-height: 15rem;
+    }
+}
+
+.nt-story-panel {
+    display: grid;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    height: 100%;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: 1.1fr 1fr;
+    }
+    &__media {
+        min-height: 16rem;
+    }
+    &__body {
+        background: $nt-lavender;
+        padding: clamp(1.5rem, 3vw, 2.75rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        h3 {
+            font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.75rem);
+            color: $nt-ink;
+            margin: 0;
+        }
+        p {
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+    }
+}
+
+.nt-logo-card {
+    border: 1px solid $nt-border;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    &__media {
+        aspect-ratio: 16 / 10;
+    }
+    &__body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        flex: 1;
+        h3 {
+            font-size: 1.125rem;
+            color: $nt-ink;
+            margin: 0;
+        }
+        p {
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+        .nt-link-arrow {
+            margin-top: auto;
+        }
+    }
+    &__logo {
+        max-height: 2.25rem;
+        width: auto;
+        align-self: flex-start;
+    }
+}
+
+.nt-tall-card {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    &__media {
+        aspect-ratio: 3 / 3.4;
+    }
+    &__body {
+        background: $nt-lavender;
+        padding: 1.5rem;
+        flex: 1;
+        h3 {
+            font-size: 1.0625rem;
+            color: $nt-ink;
+            margin-bottom: 0.5rem;
+            a {
+                color: inherit;
+                text-decoration: none;
+            }
+        }
+        p {
+            font-size: 0.875rem;
+            margin: 0;
+        }
+    }
+    &__meta {
+        font-size: 0.8125rem;
+        color: $nt-accent;
+        margin-bottom: 0.5rem !important;
+    }
+}
+
+.nt-faq-panel {
+    background: $nt-lavender;
+    border-radius: 0.75rem;
+    padding: clamp(1.75rem, 5vw, 4.5rem);
+    max-width: 60rem;
+    margin-inline: auto;
+    .nt-faq {
+        background: transparent;
+    }
+}
+
+.nt-steps-panel {
+    display: grid;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 1fr 1fr;
+    }
+    &__media {
+        min-height: 18rem;
+    }
+    &__list {
+        background: $nt-primary;
+        color: #fff;
+        padding: clamp(1.75rem, 4vw, 3.5rem);
+        ol {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            display: grid;
+            grid-template-columns: 3rem 1fr;
+            gap: 1rem;
+            padding-block: 1.1rem;
+            border-top: 1px solid rgba(#fff, 0.25);
+        }
+        span {
+            font-size: 1.25rem;
+            opacity: 0.8;
+        }
+        h3 {
+            color: #fff;
+            font-size: 1.125rem;
+            margin-bottom: 0.25rem;
+        }
+        p {
+            margin: 0;
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+    }
+    &__title {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 1rem;
+    }
+}
+
+.nt-people-list {
+    margin: 0;
+    li {
+        position: relative;
+        display: grid;
+        grid-template-columns: 4.5rem 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        padding-block: 1rem;
+        border-bottom: 1px solid $nt-border;
+        .nt-media {
+            aspect-ratio: 1;
+            border-radius: 50%;
+        }
+        h3 {
+            font-size: 1.0625rem;
+            margin: 0 0 0.25rem;
+            a {
+                color: $nt-ink;
+                text-decoration: none;
+            }
+        }
+        p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: $nt-muted;
+        }
+        > svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: $nt-primary;
+        }
+    }
+}
+
+.nt-portrait-quote {
+    display: grid;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: 1fr 1.2fr;
+    }
+    &__media {
+        aspect-ratio: 4 / 4.5;
+        border-radius: 0.75rem 0.75rem 0 0;
+        @include media-breakpoint-up(md) {
+            border-radius: 0.75rem 0 0 0.75rem;
+        }
+    }
+    &__box {
+        background: $nt-primary;
+        color: #fff;
+        padding: clamp(1.75rem, 4vw, 3.5rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1.25rem;
+        border-radius: 0 0 0.75rem 0.75rem;
+        @include media-breakpoint-up(md) {
+            border-radius: 0 0.75rem 0.75rem 0;
+        }
+        > svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            opacity: 0.7;
+        }
+        blockquote {
+            margin: 0;
+            font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.375rem);
+            line-height: 1.6;
+        }
+        strong,
+        span {
+            display: block;
+        }
+        span {
+            font-size: 0.875rem;
+            opacity: 0.85;
+        }
+    }
+}
+
+.nt-spotlight {
+    display: grid;
+    gap: 2rem;
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 1fr 1.4fr;
+        align-items: start;
+    }
+    &__names {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border-top: 1px solid $nt-border;
+        button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: 0;
+            border-bottom: 1px solid $nt-border;
+            padding: 1.1rem 0.25rem;
+            transition: padding 0.3s $nt-ease, color 0.3s;
+            strong {
+                display: block;
+                font-weight: 500;
+                color: $nt-ink;
+            }
+            span {
+                font-size: 0.8125rem;
+                color: $nt-muted;
+            }
+            &[aria-selected='true'] {
+                padding-left: 1rem;
+                box-shadow: inset 3px 0 0 $nt-primary;
+                strong {
+                    color: $nt-primary;
+                }
+            }
+        }
+    }
+    &__card {
+        margin: 0;
+        background: $nt-lavender;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        blockquote {
+            padding: 1.75rem 1.75rem 0;
+            margin: 0;
+            font-size: 1.125rem;
+            line-height: 1.6;
+            color: $nt-ink;
+        }
+        figcaption {
+            padding: 1rem 1.75rem 1.75rem;
+            strong,
+            span {
+                display: block;
+            }
+            span {
+                font-size: 0.875rem;
+                color: $nt-muted;
+            }
+        }
+    }
+    &__media {
+        aspect-ratio: 16 / 10;
+    }
+}
+
+.nt-doc-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    li {
+        position: relative;
+        border: 1px solid $nt-lilac;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-height: 11rem;
+        background: #fff;
+        > svg:first-child {
+            width: 2rem;
+            height: 2rem;
+            color: $nt-accent;
+        }
+    }
+    &__title {
+        color: $nt-ink;
+        font-size: 1rem;
+        line-height: 1.4;
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+    }
+    &__meta {
+        font-size: 0.75rem;
+        color: $nt-muted;
+        margin-top: auto;
+    }
+    &__dl {
+        position: absolute;
+        right: 1.25rem;
+        bottom: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: $nt-primary;
+    }
+}
+
+.nt-doc-rows {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid $nt-border;
+    li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding-block: 1.25rem;
+        border-bottom: 1px solid $nt-border;
+        font-size: 1.0625rem;
+        color: $nt-ink;
+    }
+    svg {
+        width: 1rem;
+        height: 1rem;
+    }
+}
+
+.nt-cta-band--white {
+    background: #fff;
+    border-block: 1px solid $nt-border;
+}
+.nt-cta-band--gradient {
+    background: linear-gradient(90deg, $nt-lavender, #ece4ff);
+}
+
+// ---------------------------------------------------------------------------
+// Cards for events, publications, stories, jobs
+// ---------------------------------------------------------------------------
+
+.nt-event-card,
+.nt-pub-card {
+    position: relative;
+    border: 1px solid $nt-border;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    &__media {
+        aspect-ratio: 16 / 10;
+    }
+    &__body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        flex: 1;
+    }
+    h2,
+    h3 {
+        font-size: 1.125rem;
+        line-height: 1.4;
+        margin: 0;
+        a {
+            color: $nt-ink;
+            text-decoration: none;
+        }
+    }
+}
+
+.nt-pub-card {
+    &__authors {
+        font-size: 0.875rem;
+        color: $nt-muted;
+        margin: 0;
+    }
+    &__meta {
+        font-size: 0.8125rem;
+        color: $nt-accent;
+        margin: auto 0 0;
+    }
+}
+
+.nt-event-rows {
+    margin: 0;
+    display: grid;
+    gap: 1.25rem;
+}
+
+.nt-event-row {
+    position: relative;
+    display: grid;
+    border: 1px solid $nt-border;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: #fff;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: 17rem 1fr;
+    }
+    &__media {
+        min-height: 12rem;
+    }
+    &__body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        h2 {
+            font-size: 1.25rem;
+            margin: 0;
+            a {
+                color: $nt-ink;
+                text-decoration: none;
+            }
+        }
+        p {
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+    }
+}
+
+.nt-speaker {
+    display: grid;
+    gap: 2rem;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: minmax(0, 22rem) 1fr;
+        gap: 3.5rem;
+    }
+    &__media {
+        aspect-ratio: 4 / 4.6;
+        border-radius: 0.75rem;
+    }
+    &__role {
+        color: $nt-primary;
+    }
+    &__quote {
+        border-left: 3px solid $nt-primary;
+        padding-left: 1.25rem;
+        font-size: 1.125rem;
+        color: $nt-ink;
+        margin: 1.5rem 0;
+    }
+}
+
+.nt-story-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    &__media {
+        aspect-ratio: 4 / 3;
+        border-radius: 0.75rem;
+    }
+    &__body {
+        padding-top: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        flex: 1;
+        h2 {
+            font-size: 1.25rem;
+            line-height: 1.35;
+            margin: 0;
+            a {
+                color: $nt-ink;
+                text-decoration: none;
+            }
+        }
+        p {
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+        .nt-link-arrow {
+            margin-top: auto;
+        }
+    }
+    &--large {
+        display: grid;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: $nt-lavender;
+        @include media-breakpoint-up(lg) {
+            grid-template-columns: 1.3fr 1fr;
+        }
+        .nt-story-tile__media {
+            border-radius: 0;
+            aspect-ratio: auto;
+            min-height: 18rem;
+        }
+        .nt-story-tile__body {
+            padding: clamp(1.5rem, 4vw, 3rem);
+            h2 {
+                font-size: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+            }
+        }
+    }
+}
+
+.nt-featured-post {
+    position: relative;
+    display: grid;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: $nt-lavender;
+    margin-bottom: 2.5rem;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: 1.2fr 1fr;
+    }
+    &__media {
+        min-height: 16rem;
+    }
+    &__body {
+        padding: clamp(1.5rem, 4vw, 2.75rem);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        h2 {
+            font-size: clamp(1.375rem, 1.1rem + 1vw, 2rem);
+            margin: 0;
+            a {
+                color: $nt-ink;
+                text-decoration: none;
+            }
+        }
+        p {
+            margin: 0;
+        }
+    }
+}
+
+.nt-row-cards {
+    display: grid;
+    gap: 0;
+    border-top: 1px solid $nt-border;
+}
+
+.nt-row-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 1.25rem;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid $nt-border;
+    @include media-breakpoint-up(md) {
+        grid-template-columns: 15rem 1fr;
+        gap: 2rem;
+    }
+    &__media {
+        aspect-ratio: 4 / 3;
+        border-radius: 0.5rem;
+    }
+    &__meta {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        font-size: 0.8125rem;
+        color: $nt-muted;
+        margin-bottom: 0.5rem;
+    }
+    h2 {
+        font-size: clamp(1rem, 0.95rem + 0.4vw, 1.25rem);
+        line-height: 1.4;
+        margin: 0 0 0.5rem;
+        a {
+            color: $nt-ink;
+            text-decoration: none;
+        }
+    }
+    &__excerpt {
+        font-size: 0.9375rem;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    // Press coverage shows the publication's logo, which must not be cropped.
+    &--press &__media {
+        border: 1px solid $nt-border;
+        background: #fff;
+        img {
+            object-fit: contain;
+            padding: 1rem;
+        }
+    }
+}
+
+// Open positions (Careers): search bar, role tabs and job cards.
+.nt-job-search {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: $nt-lavender;
+    border-radius: 0.375rem;
+    padding: 1rem 1rem 1rem 2rem;
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+    > svg {
+        width: 1.375rem;
+        height: 1.375rem;
+        flex: none;
+        color: $nt-muted;
+    }
+    input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        background: transparent;
+        font-size: 1rem;
+        padding: 0.75rem 0;
+        &:focus {
+            outline: none;
+        }
+    }
+    &:focus-within {
+        box-shadow: 0 0 0 2px rgba($nt-primary, 0.35);
+    }
+    .nt-btn {
+        flex: none;
+        border-radius: 0.125rem;
+        padding: 1rem 1.75rem;
+        text-transform: uppercase;
+    }
+    @include media-breakpoint-down(sm) {
+        padding-left: 1rem;
+        .nt-btn {
+            padding-inline: 1rem;
+        }
+    }
+}
+
+.nt-job-tabs {
+    margin-bottom: 1.5rem;
+}
+
+.nt-job-card {
+    display: grid;
+    gap: 1.5rem;
+    align-items: center;
+    background: $nt-lavender;
+    border-radius: 0.75rem;
+    padding: clamp(1.5rem, 3vw, 2.5rem) 2rem;
+    & + & {
+        margin-top: 1.5rem;
+    }
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 1fr auto;
+        gap: 2rem;
+    }
+    &__dept {
+        margin: 0 0 0.5rem;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.01em;
+        color: $nt-muted;
+    }
+    h3 {
+        font-size: 1.375rem;
+        font-weight: 500;
+        color: $nt-ink;
+        margin: 0 0 1.75rem;
+    }
+    &__facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.25rem 3rem;
+        margin: 0;
+        > div {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            column-gap: 1rem;
+            align-items: center;
+        }
+        dt {
+            grid-column: 2;
+            font-size: 0.75rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            color: $nt-muted;
+        }
+        dd {
+            grid-column: 2;
+            margin: 0;
+            font-size: 1.125rem;
+            color: $nt-ink;
+        }
+    }
+    &__icon {
+        grid-row: 1 / span 2;
+        display: grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.375rem;
+        background: #fff;
+        color: $nt-primary;
+        svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+    }
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem 2rem;
+        .nt-btn {
+            text-transform: uppercase;
+        }
+    }
+    &__more {
+        font-size: 0.875rem;
+        color: $nt-primary;
+        text-decoration: none;
+        border-bottom: 1px solid currentColor;
+        padding-bottom: 0.125rem;
+        &:hover {
+            color: $nt-ink;
+        }
+    }
+}
+
+.nt-finder {
+    padding-block: clamp(2rem, 4vw, 3rem);
+    &__result {
+        display: grid;
+        gap: 1.5rem;
+        background: #fff;
+        border-radius: 0.75rem;
+        padding: clamp(1.25rem, 3vw, 2rem);
+        @include media-breakpoint-up(lg) {
+            grid-template-columns: 1fr auto;
+            align-items: center;
+        }
+        h3 {
+            font-size: 1.375rem;
+            color: $nt-ink;
+            margin-bottom: 1rem;
+        }
+    }
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+}
+
+.nt-facts-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid $nt-border;
+    dt {
+        font-weight: 400;
+        font-size: 0.8125rem;
+        color: $nt-muted;
+    }
+    dd {
+        margin: 0;
+        color: $nt-ink;
+    }
+}
+
+// Listing sidebars
+.nt-sidebar-filter {
+    border: 1px solid $nt-border;
+    border-radius: 0.75rem;
+    @include media-breakpoint-up(lg) {
+        position: sticky;
+        top: calc(var(--nt-header-h) + 1rem);
+    }
+    summary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        font-weight: 500;
+        color: $nt-ink;
+        list-style: none;
+        &::-webkit-details-marker {
+            display: none;
+        }
+        svg {
+            width: 1.1rem;
+            height: 1.1rem;
+            color: $nt-primary;
+        }
+    }
+    &__body {
+        padding: 0 1.25rem 1.25rem;
+    }
+}
+
+.nt-checkgroup {
+    border-top: 1px solid $nt-border;
+    padding-top: 1rem;
+    margin-bottom: 1rem;
+    legend {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: $nt-accent;
+        margin-bottom: 0.75rem;
+    }
+    .form-check {
+        margin-bottom: 0.45rem;
+        font-size: 0.9375rem;
+    }
+}
+
+// Read more (biographies)
+.nt-readmore {
+    position: relative;
+    .nt-prose {
+        max-height: 14rem;
+        overflow: hidden;
+        transition: max-height 0.6s $nt-ease;
+        -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent);
+        mask-image: linear-gradient(180deg, #000 60%, transparent);
+    }
+    &.is-open .nt-prose {
+        max-height: 400rem;
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+    &__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 1rem;
+        background: none;
+        border: 0;
+        padding: 0;
+        color: $nt-primary;
+        font-weight: 500;
+        svg {
+            width: 1rem;
+            height: 1rem;
+            transition: transform 0.3s;
+        }
+    }
+    &.is-open &__toggle svg {
+        transform: rotate(180deg);
+    }
+}
+
+.nt-entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    li {
+        display: grid;
+        grid-template-columns: 7rem 1fr;
+        gap: 1rem;
+        padding-block: 1rem;
+        border-top: 1px solid $nt-border;
+        &:first-child {
+            border-top: 0;
+        }
+        @include media-breakpoint-down(sm) {
+            grid-template-columns: 1fr;
+            gap: 0.25rem;
+        }
+    }
+    &__period {
+        color: $nt-primary;
+        font-size: 0.875rem;
+    }
+    h4 {
+        font-size: 1rem;
+        color: $nt-ink;
+        margin-bottom: 0.25rem;
+    }
+    &__org {
+        font-size: 0.875rem;
+        color: $nt-muted;
+        margin-bottom: 0.25rem;
+    }
+    p {
+        font-size: 0.9375rem;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Modal dialogs (enquiry, case study, job application)
+// ---------------------------------------------------------------------------
+
+.nt-modal {
+    width: min(36rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    border: 0;
+    border-radius: 0.75rem;
+    box-shadow: 0 40px 80px -30px rgba($nt-ink, 0.55);
+    overflow: auto;
+    &[open] {
+        animation: nt-modal-in 0.4s $nt-ease both;
+    }
+    &::backdrop {
+        background: rgba($nt-ink, 0.55);
+        backdrop-filter: blur(3px);
+        animation: nt-fade 0.3s ease both;
+    }
+    &__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem 1.75rem 1rem;
+        background: $nt-lavender;
+        h2 {
+            font-size: 1.5rem;
+            color: $nt-ink;
+            margin: 0;
+        }
+    }
+    &__sub {
+        margin: 0.25rem 0 0;
+        font-size: 0.875rem;
+        color: $nt-primary;
+    }
+    &__close {
+        background: #fff;
+        border: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        flex: none;
+        svg {
+            width: 1.1rem;
+            height: 1.1rem;
+        }
+    }
+    &__body {
+        padding: 1.5rem 1.75rem 1.75rem;
+    }
+    &__form {
+        display: grid;
+        gap: 0.85rem;
+    }
+    &__grid {
+        display: grid;
+        gap: 0.85rem;
+        @include media-breakpoint-up(sm) {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    &__phone {
+        display: grid;
+        grid-template-columns: 6rem 1fr;
+        gap: 0.5rem;
+    }
+    &__done {
+        text-align: center;
+        padding-block: 1.5rem;
+        > svg {
+            width: 3rem;
+            height: 3rem;
+            color: $nt-primary;
+            margin-bottom: 1rem;
+            animation: nt-rise 0.6s $nt-ease both;
+        }
+        h3 {
+            color: $nt-ink;
+        }
+    }
+}
+
+@keyframes nt-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.nt-steps-indicator {
+    display: flex;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.5rem;
+    counter-reset: step;
+    li {
+        flex: 1;
+        font-size: 0.8125rem;
+        color: $nt-muted;
+        padding-top: 0.6rem;
+        border-top: 3px solid $nt-border;
+        counter-increment: step;
+        transition: border-color 0.3s, color 0.3s;
+        &::before {
+            content: counter(step) '. ';
+        }
+        &[aria-current] {
+            border-color: $nt-primary;
+            color: $nt-primary;
+        }
+    }
+}
+
+.nt-file {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border: 1px dashed #b9b0d9;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    transition: border-color 0.2s, background 0.2s;
+    &:hover,
+    &:focus-within {
+        border-color: $nt-primary;
+        background: $nt-lavender;
+    }
+    svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        color: $nt-primary;
+        flex: none;
+    }
+    input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+}
+
+// Slides contain positioning context so screen-reader-only text can't widen the page.
+.nt-carousel__track > * {
+    position: relative;
+}
+
+// Bootstrap's g-5 gutter is wider than the mobile container padding.
+@include media-breakpoint-down(lg) {
+    .row.g-5 {
+        --bs-gutter-x: 2rem;
+    }
+}
+
+// Homepage sizes measured from the approved desktop design ("1 Homepage - Desktop.pdf", 1440px wide).
+.nt-hero__title {
+    line-height: 1.11;
+}
+.nt-hero__body {
+    @include media-breakpoint-up(lg) {
+        font-size: 1rem;
+        line-height: 1.625;
+    }
+}
+
+.nt-blueprint__heading {
+    line-height: 1.11;
+    color: $nt-text;
+    max-width: 58rem;
+}
+.nt-blueprint__text p {
+    @include media-breakpoint-up(lg) {
+        font-size: 1rem;
+        line-height: 1.625;
+    }
+}
+
+.nt-tabs [role='tab'] {
+    @include media-breakpoint-up(lg) {
+        font-size: 1.125rem;
+    }
+}
+
+.nt-carousel--programs .nt-program-card {
+    @include media-breakpoint-up(md) {
+        grid-template-columns: 54% 46%;
+        .nt-program-card__media {
+            min-height: 36.75rem;
+        }
+        .nt-program-card__panel {
+            padding: 3rem 3rem 2.5rem;
+        }
+        h3 {
+            font-size: 1.75rem;
+        }
+        p {
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        dt {
+            font-size: 0.75rem;
+        }
+        dd {
+            font-size: 1rem;
+            small {
+                font-size: 0.75rem;
+            }
+        }
+    }
+}
+
+.nt-program-card h3 a,
+.nt-program-card h3 a:hover {
+    text-decoration: none;
+}
+
+.nt-carousel--stories .nt-story-card,
+.nt-carousel--programs .nt-program-card {
+    @include media-breakpoint-up(md) {
+        .nt-media picture,
+        .nt-media img {
+            position: absolute;
+            inset: 0;
+        }
+    }
+}
+
+// Partner stories: full-bleed carousel; as in Figma the current card is centred with the previous and next cards
+// peeking in on both sides (phones keep the card at the page edge).
+.nt-carousel--stories {
+    .nt-carousel__track {
+        margin-inline: calc(-1 * var(--nt-edge));
+        padding-inline: var(--nt-edge);
+        scroll-padding-inline: var(--nt-edge);
+        > * {
+            scroll-snap-align: start;
+            @include media-breakpoint-up(lg) {
+                scroll-snap-align: center;
+            }
+        }
+    }
+    .nt-story-card {
+        @include media-breakpoint-up(md) {
+            grid-template-columns: 44% 56%;
+            min-height: 30.625rem;
+            h3 {
+                font-size: 2rem;
+            }
+            p {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+            .nt-story-card__highlight {
+                font-size: 0.875rem;
+            }
+        }
+    }
+}
+
+.nt-faculty__grid {
+    > * {
+        min-width: 0;
+    }
+    @include media-breakpoint-up(lg) {
+        // Design (1440px): text column 480px wide, photo slider starting 528px into the content.
+        grid-template-columns: minmax(0, 0.423fr) minmax(0, 0.577fr);
+        column-gap: 0;
+        align-items: center;
+        > :first-child {
+            max-width: 30rem;
+        }
+    }
+}
+
+.nt-faculty {
+    .nt-lead {
+        color: $nt-ink;
+    }
+    .nt-h2 {
+        @include media-breakpoint-up(lg) {
+            white-space: pre-line;
+        }
+    }
+    .nt-person-card {
+        aspect-ratio: 355 / 450;
+    }
+    .nt-person-card__info {
+        padding-inline: 1rem;
+    }
+}
+.nt-person-card__info {
+    h2,
+    h3 {
+        @include media-breakpoint-up(lg) {
+            font-size: 1.25rem;
+        }
+    }
+}
+
+// Headings may contain a deliberate line break (e.g. "Learn / by Building").
+.nt-h2 {
+    @include media-breakpoint-up(lg) {
+        white-space: pre-line;
+    }
+}
+
+.nt-lab-slide {
+    @include media-breakpoint-up(lg) {
+        aspect-ratio: 1014 / 580;
+    }
+    &__caption {
+        @include media-breakpoint-up(lg) {
+            font-size: 1.25rem;
+            font-weight: 400;
+        }
+    }
+}
+
+.nt-campus {
+    @include media-breakpoint-up(lg) {
+        &__grid {
+            grid-template-columns: minmax(0, 584fr) minmax(0, 600fr);
+            gap: 4rem;
+            align-items: center;
+        }
+        // The text, buttons and thumbnails stay together, centred beside the square photo.
+        &__feature {
+            justify-content: center;
+            gap: 1.25rem;
+            h3 {
+                font-size: 2rem;
+                line-height: 1.22;
+            }
+            p {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+        }
+    }
+}
+
+.nt-mission {
+    background-color: $nt-primary;
+    position: relative;
+    isolation: isolate;
+
+    > .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    // Vector India map from the approved design ("1 Homepage - Desktop.pdf"), placed exactly as in the
+    // 1440px design and scaled with the section width. Dots pulse in turn inside the SVG.
+    &__map {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        max-width: none;
+        height: auto;
+        z-index: 0;
+        pointer-events: none;
+        user-select: none;
+        // Entrance (as in the reference): the map glides in from the right as the section appears.
+        &.rv {
+            opacity: 0;
+            transform: translateX(34px) scale(1.015);
+            transform-origin: right top;
+            transition: opacity 1.1s $nt-ease, transform 1.4s $nt-ease;
+        }
+        &.rv-in {
+            opacity: 1;
+            transform: none;
+        }
+    }
+
+    @include media-breakpoint-down(lg) {
+        // On phones and tablets the map sits behind longer text, so it is softened to keep the copy readable.
+        &__map,
+        &__map.rv-in {
+            width: 190%;
+            left: -55%;
+            opacity: 0.6;
+        }
+    }
+
+    @include media-breakpoint-up(lg) {
+        // Sizes scale with the viewport and reach the design values at 1440px.
+        &__heading {
+            font-size: clamp(2.75rem, 4.45vw, 4rem);
+            line-height: 1.19;
+            max-width: 10em;
+            white-space: pre-line;
+        }
+        &__heading {
+            margin-bottom: 0;
+        }
+        &__body {
+            font-size: 1rem;
+            line-height: 1.625;
+            max-width: min(40rem, 52%);
+            margin-top: 1.3rem;
+            margin-bottom: clamp(3rem, 6.2vw, 5.5rem);
+        }
+    }
+}
+
+
+// As in the designs, sliders run to the right edge of the screen so the next card is cut by the window,
+// while the first card stays aligned with the section content.
+.nt-carousel__track {
+    margin-right: calc(-1 * var(--nt-edge));
+    padding-right: var(--nt-edge);
+    scroll-padding-right: var(--nt-edge);
+}
+
+// 360° virtual tour mark in the utility bar (wider than the square icons).
+.nt-icon-btn .nt-tour-icon {
+    width: 2.25rem;
+    height: 1.25rem;
+}
+.nt-icon-btn:has(.nt-tour-icon) {
+    width: 3rem;
+    border-radius: 999px;
+}
+
+// ---------------------------------------------------------------------------
+// Responsive images: one set of rules for every image on the site.
+// - Photos in frames (banners, heroes, cards, galleries) fill their frame with object-fit: cover,
+//   centred, never stretched; the frame sets the shape (aspect-ratio or the grid row).
+// - Logos, icons and the lightbox stay fully visible with object-fit: contain.
+// - Nothing may be wider than its parent, so images never cause horizontal scrolling.
+// ---------------------------------------------------------------------------
+
+img,
+picture,
+video,
+svg,
+iframe {
+    max-width: 100%;
+}
+
+img {
+    height: auto;
+}
+
+.nt-media {
+    overflow: hidden;
+    > picture {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+}
+
+// Rich text and article images keep their natural shape and scale down with the column.
+.nt-prose img,
+.nt-article img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    margin-inline: auto;
+    display: block;
+}
+
+// Logos (header, footer, partner strips, cards, rankings, recruiter lists) are never cropped.
+// Only the fit is set here; each logo keeps the size its component gives it.
+.nt-logo img,
+.nt-footer img,
+.nt-logos img,
+.nt-logo-card__logo,
+.nt-achievements__value img,
+.nt-trend-card img {
+    object-fit: contain;
+    object-position: center;
+}
+
+.nt-lightbox img {
+    object-fit: contain;
+    max-width: 100%;
+    height: auto;
+}
+
+// Filter chips (homepage program levels, faculty type).
+.nt-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1.75rem;
+    button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 1.1rem;
+        border: 1px solid #d6cdf7;
+        border-radius: 999px;
+        background: #fff;
+        color: $nt-ink;
+        font-size: 0.9375rem;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+        &:hover {
+            border-color: $nt-primary;
+        }
+        &[aria-pressed='true'] {
+            background: $nt-primary;
+            border-color: $nt-primary;
+            color: #fff;
+            .nt-chips__count {
+                background: rgba(255, 255, 255, 0.2);
+                color: #fff;
+            }
+        }
+    }
+    &__count {
+        font-size: 0.75rem;
+        min-width: 1.4rem;
+        padding: 0.05rem 0.4rem;
+        border-radius: 999px;
+        background: $nt-lavender;
+        color: $nt-primary;
+        text-align: center;
+    }
+}
+
+.nt-academics__intro {
+    margin-top: 0.75rem;
+    p {
+        font-size: 1rem;
+        line-height: 1.65;
+        color: $nt-muted;
+        margin: 0 auto 0.75rem;
+        max-width: 48rem;
+    }
+}
+.nt-academics .nt-chips {
+    justify-content: center;
+}
+
+// Card text typed on several lines in the CMS keeps its line breaks.
+.nt-pre-line {
+    white-space: pre-line;
+}
+
+// Program finder introduction text.
+.nt-finder__intro {
+    max-width: 62rem;
+    margin-bottom: 1rem;
+}
+.nt-finder__intro:last-of-type {
+    margin-bottom: 1.5rem;
+}
+
+// Card tabs (Hub-and-Spoke Model design): wide heading, intro beside the button, tabs spread across the width and
+// cards drawn on the section background.
+.nt-card-tabs {
+    &__intro {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem 3rem;
+        margin-bottom: clamp(2rem, 4vw, 3rem);
+        p {
+            max-width: 49rem;
+            font-size: 0.9375rem;
+        }
+    }
+    &__tabs {
+        margin-bottom: 3rem;
+        @include media-breakpoint-up(lg) {
+            > button {
+                flex: 1 1 0;
+                text-align: center;
+            }
+        }
+    }
+    .nt-joined-card {
+        background: transparent;
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: $nt-text;
+            margin-bottom: 2rem;
+        }
+        p {
+            font-size: 0.9375rem;
+        }
+    }
+}
+
+// Partnership Models (Outreach design): tabs at their natural width from the left edge over a full-width line,
+// then the image and a lavender panel whose points have dark titles and dividers.
+.nt-tabs-media {
+    .nt-tabs-bar {
+        margin-top: clamp(1.5rem, 3vw, 2.5rem);
+        border-bottom: 1px solid $nt-border;
+        .nt-tabs {
+            border-bottom: 0;
+            margin-bottom: 0;
+            gap: 0 2.4rem;
+        }
+        [role='tab'] {
+            flex: 0 0 auto;
+            padding-inline: 0;
+        }
+    }
+    .nt-tab-media {
+        margin-top: clamp(2rem, 4vw, 4rem);
+    }
+    .nt-tab-media__panel {
+        padding: clamp(1.75rem, 5vw, 5rem);
+        h3 {
+            font-size: clamp(1.75rem, 1.3rem + 1.2vw, 2.5rem);
+            margin-bottom: 1.5rem;
+        }
+    }
+    .nt-tab-media__point {
+        padding-block: 1.75rem;
+        h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: $nt-ink;
+            margin-bottom: 0.75rem;
+        }
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+    }
+}
+
+// Joined grid with light lines and tall, airy cards (Support & Partnership Opportunities design).
+.nt-joined-cards--light {
+    border-color: #d3c2f3;
+    .nt-joined-card {
+        border-color: #d3c2f3;
+        @include media-breakpoint-up(lg) {
+            padding: 2rem;
+        }
+        svg {
+            width: 2.75rem;
+            height: 2.75rem;
+            margin-bottom: 2rem;
+        }
+        h3 {
+            margin-bottom: 1rem;
+        }
+        p {
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+    }
+}
+
+// Mission initiatives. Phones swipe one at a time (carousel); tablets show two per row; desktops show three per row
+// as in Figma (392 x 344 cards, 52px apart, 40px padding).
+.nt-mission .nt-mission__cards {
+    gap: 1.25rem;
+    grid-template-columns: 1fr !important;
+    @include media-breakpoint-up(sm) {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    @include media-breakpoint-up(lg) {
+        gap: clamp(1.5rem, 3.6vw, 3.25rem);
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+.nt-mission .nt-icon-card {
+    padding: 1.5rem 1.75rem 1.75rem;
+    @include media-breakpoint-up(lg) {
+        padding: 2.5rem;
+        min-height: 21.5rem;
+    }
+    .nt-icon-card__icon {
+        margin-bottom: 1.25rem;
+        @include media-breakpoint-up(lg) {
+            margin-bottom: 2.5rem;
+        }
+        svg {
+            width: 2rem;
+            height: 2rem;
+        }
+    }
+    h3 {
+        font-size: 1.25rem;
+        line-height: 1.4;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+    p {
+        font-size: 0.875rem;
+        line-height: 1.6;
+    }
+}

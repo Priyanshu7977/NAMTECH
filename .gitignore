@@ -1,0 +1,35 @@
+# Dependencies
+backend/vendor/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment files
+backend/.env
+backend/.env.backup
+backend/.env.production
+
+# Cache and logs
+backend/storage/logs/*.log
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+
+# Symlinks & OS
+backend/public/storage
+backend/public/hot
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.claude/
+
+# Scratch & Temporary
+scratch/
+download_figma_assets.py
+inspect_figma_images.py
+replace_assets.py
+scan_metadata_images.py
+scratch_test.py
+test_endpoints.py
+*.tmp
