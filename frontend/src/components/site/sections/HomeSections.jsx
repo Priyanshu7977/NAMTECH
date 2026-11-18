@@ -71,7 +71,7 @@ export function HomeHero({ data }) {
 
 function BlueprintText({ item, className }) {
     return (
-        <div className={`nt-blueprint__text ${className}`}>
+        <div className={`nt-blueprint__text ${className || ''}`}>
             <h3>{item.title}</h3>
             <p>{item.body}</p>
             {item.link_url ? (
@@ -85,10 +85,14 @@ function BlueprintText({ item, className }) {
 
 export function FeatureBlocks({ data }) {
     const items = data.items ?? [];
+    const pairs = [];
+    for (let i = 0; i < items.length; i += 2) {
+        pairs.push(items.slice(i, i + 2));
+    }
     const listRef = useRef(null);
 
     // Phones and small tablets (< 992px): cards stack while scrolling.
-    // Desktop (>= 992px): unaffected, scrolls naturally without stacking/animation.
+    // Desktop (>= 992px): editorial interlocking 12-column grid matching Figma handoff.
     useEffect(() => {
         const list = listRef.current;
         if (!list || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
@@ -133,18 +137,22 @@ export function FeatureBlocks({ data }) {
                     </h2>
                 ) : null}
                 <div className="nt-blueprint__pairs">
-                    {items.map((item, i) => (
-                        <div key={i} className="nt-blueprint__block" style={{ '--i': i }}>
-                            <div className="nt-blueprint__text">
-                                <h3>{item.title}</h3>
-                                <p>{item.body}</p>
-                                {item.link_url ? (
-                                    <SmartLink href={item.link_url} className="nt-link-arrow" aria-label={`Learn more about ${item.title}`}>
-                                        <ArrowDot />
-                                    </SmartLink>
-                                ) : null}
+                    {pairs.map((pair, pIdx) => (
+                        <div
+                            key={pIdx}
+                            className={`nt-blueprint__pair ${pair.length === 2 ? 'nt-blueprint__pair--two' : 'nt-blueprint__pair--one'}`}
+                            style={{ '--p': pIdx }}
+                        >
+                            <div className="nt-blueprint__block" style={{ '--i': pIdx * 2 }}>
+                                <BlueprintText item={pair[0]} className="b1-text" />
+                                <Media className="nt-blueprint__img b1-img" image={pair[0].image} sizes="(min-width: 992px) 55vw, 100vw" />
                             </div>
-                            <Media className="nt-blueprint__img" image={item.image} sizes="(min-width: 992px) 50vw, 100vw" />
+                            {pair[1] ? (
+                                <div className="nt-blueprint__block" style={{ '--i': pIdx * 2 + 1 }}>
+                                    <Media className="nt-blueprint__img b2-img" image={pair[1].image} sizes="(min-width: 992px) 55vw, 100vw" />
+                                    <BlueprintText item={pair[1]} className="b2-text" />
+                                </div>
+                            ) : null}
                         </div>
                     ))}
                 </div>
