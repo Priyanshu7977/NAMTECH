@@ -24,6 +24,7 @@ use App\Models\School;
 use App\Models\Setting;
 use App\Sections\SectionRegistry;
 use App\Services\MediaUploader;
+use App\Services\PartnershipPageDesign;
 use App\Support\ContentCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
@@ -66,6 +67,7 @@ class ContentSeeder extends Seeder
         $this->seedSmartManufacturingMaster();
         $pages = $this->seedPages($schools);
         $this->seedMenus($pages, $schools, $centres);
+        app(PartnershipPageDesign::class)->apply();
 
         ContentCache::flush();
     }
@@ -97,12 +99,18 @@ class ContentSeeder extends Seeder
             'professional-tablet' => 'Professional holding a tablet in a modern office',
         ];
         foreach ($images as $file => $alt) {
-            $this->media[$file] = $uploader->storePath(__DIR__.'/assets/'.$file.'.jpg', $file.'.jpg', ['alt' => $alt], sync: false)->id;
+            $this->media[$file] = $uploader->storePath(__DIR__.'/assets/'.$file.'.jpg', $file.'.jpg', ['alt' => $alt], sync: true)->id;
         }
 
         $logos = [
-            'amns-india' => 'AM/NS India', 'tum-asia' => 'TUM Asia', 'schneider-electric' => 'Schneider Electric', 'cisco' => 'Cisco',
+            'amns-india' => 'AM/NS India', 'schneider-electric' => 'Schneider Electric', 'cisco' => 'Cisco',
             'micron' => 'Micron', 'festo' => 'Festo', 'siemens' => 'Siemens', 'lt-heavy-engineering' => 'L&T Heavy Engineering',
+            'mit' => 'MIT MechE', 'carnegie-mellon-university' => 'Carnegie Mellon University',
+            'iit-roorkee' => 'IIT Roorkee', 'purdue-university-northwest' => 'Purdue University Northwest', 'itees' => 'ITEES Singapore',
+            'abb' => 'ABB', 'asdc' => 'ASDC', 'icici-foundation' => 'ICICI Foundation',
+            'rockwell-automation' => 'Rockwell Automation', 'analog-devices' => 'Analog Devices',
+            'fanuc' => 'FANUC', 'hitech-pipes' => 'Hi-Tech Pipes', 'surya-roshni' => 'Surya Roshni',
+            'kpmg' => 'KPMG in India', 'ntpc' => 'NTPC',
         ];
         foreach ($logos as $file => $name) {
             $this->media['logo-'.$file] = $uploader->storePath(__DIR__.'/assets/logos/'.$file.'.jpg', $file.'.jpg', ['alt' => $name.' logo'], sync: true)->id;
@@ -120,14 +128,14 @@ class ContentSeeder extends Seeder
                 'virtual_tour_url' => null,
             ],
             'Contact' => [
-                'address_title' => 'Transitory Campus:',
+                'address_title' => 'Campus:',
                 'address' => 'Research Park, IIT Gandhinagar Campus, Palaj, Gandhinagar, Gujarat - 382055, India',
-                'phones' => [['number' => '+91 7923277000'], ['number' => '+91 7923277001']],
+                'phones' => [['number' => '+91 7923277000']],
                 'email' => 'contact@namtech.ac',
                 'map_url' => null,
                 'call_url' => '/contact',
             ],
-            'Social' => ['linkedin_url' => 'https://www.linkedin.com/school/namtech-india/', 'x_url' => 'https://x.com/namtech_india', 'youtube_url' => 'https://www.youtube.com/@namtech_india', 'instagram_url' => 'https://www.instagram.com/namtech_india/', 'facebook_url' => 'https://www.facebook.com/namtech.india'],
+            'Social' => ['linkedin_url' => 'https://www.linkedin.com/company/namtechofficial/', 'x_url' => 'https://twitter.com/namtechofficial', 'youtube_url' => 'https://www.youtube.com/@NAMTECHOfficial', 'instagram_url' => 'https://www.instagram.com/namtech_official/', 'facebook_url' => 'https://www.facebook.com/profile.php?id=100092336407864'],
             'Footer & forms' => [
                 'newsletter_heading' => 'Subscribe to our newsletter',
                 'newsletter_consent' => 'I agree to receive email updates from NAMTECH. I can unsubscribe at any time.',
@@ -155,10 +163,10 @@ class ContentSeeder extends Seeder
     {
         // Schools, centres and programs as described in the client's homepage copy ("NAMTECHs Homepage_DTEdit_vF_090926.docx").
         $schoolList = [
-            ['School of Manufacturing Technologies', 'program-student-hardware', 'The School of Manufacturing Technologies is focused on advancing the capabilities required for the next era of manufacturing. By bringing together engineering expertise, emerging technologies, industry collaboration, and experiential learning, the School prepares learners to create value across the evolving manufacturing ecosystem and contribute to India’s ambition to become a globally competitive manufacturing powerhouse.'],
-            ['School of Manufacturing Design & AI', 'experiential-learning-robotics', 'The School of Manufacturing Design & AI focuses on the convergence of design, engineering, computation, and artificial intelligence to shape the next generation of products, systems, and industrial innovation. Through an industry-first and experiential approach, the school prepares learners to work at the intersection of technology and human needs, translating emerging capabilities into solutions with real-world impact.'],
-            ['School of Robotics', 'labs-soldering', 'The School of Robotics prepares the next generation of professionals to design, develop, and deploy intelligent machines and autonomous systems that will transform industry and society. By combining engineering, emerging technologies, hands-on experimentation, and real-world application, the school equips learners to build the future of human–machine collaboration and intelligent automation.'],
-            ['School of Sustainability', 'labs-research', 'The School of Sustainability focuses on enabling the transition towards more resilient, resource-efficient, and sustainable industries. By bringing together technology, engineering, innovation, and systems thinking, the School prepares learners to address complex environmental and industrial challenges and create solutions that balance economic growth, resource security, and long-term sustainability.'],
+            ['School of Manufacturing Technologies', 'program-student-hardware', 'The School of Manufacturing Technologies develops engineers who can become leaders across the two forces shaping India’s industrial future: the rise of intelligent, connected manufacturing and scale-up of heavy industries that anchor the economy. As steel plants, ports, and mines become as data-driven as a smart factory, India’s next industrial revolution requires engineers capable of integrating digital precision with large-scale industrial operations.'],
+            ['School of Manufacturing Design & AI', 'experiential-learning-robotics', 'The School of Manufacturing Design & AI develops engineers equipped to shape the future of semiconductor manufacturing, where precision engineering, intelligent automation and advanced manufacturing converge. As India accelerates its ambitions to build a globally competitive semiconductor ecosystem, the industry needs professionals who can bridge chip design, manufacturing technologies and AI-driven processes.'],
+            ['School of Robotics', 'labs-soldering', "The School of Robotics at NAMTECH is building a national nucleus for robotics education, innovation, and entrepreneurship. As engineering evolves from core disciplines toward interdisciplinary applications, the School brings together learners, researchers, and industry to explore robotics across autonomous systems, aerial robotics, locomotion, human-robot interaction, and soft robotics. The School aims to accelerate India's robotics capabilities and develop the talent that will power the next generation of intelligent machines, automation and advanced manufacturing."],
+            ['School of Sustainability', 'labs-research', "The School of Sustainability develops professionals equipped to lead the transition towards a resource-efficient, low-carbon and sustainable industrial future. The School brings together engineering, technology and management to address challenges across energy transition, climate action, resource efficiency, sustainable manufacturing and ESG, preparing professionals to translate sustainability ambitions into measurable industrial impact. and accelerate India's transition towards a net-zero future."],
             ['School of Technical Education', 'precision-machining', 'The School of Technical Education enables ITI and diploma-qualified learners to build on their technical foundations and progress into higher levels of technological capability. Through practical, industry-oriented learning and curriculum designed in collaboration with ITE Education Services, Singapore, the School creates pathways for skilled technicians to evolve into confident, industry-ready technologists capable of contributing to the future of modern industry.'],
         ];
         $schools = [];
@@ -170,13 +178,13 @@ class ContentSeeder extends Seeder
         // The School of Technical Education already has its own section of the site.
         Redirect::create(['from_path' => '/schools/school-of-technical-education', 'to_url' => '/school-of-technical-education', 'status_code' => 301]);
 
-        // The header mega menu uses the "CoE in …" labels from the navigation design.
+        // The header mega menu uses the updated Center labels from the navigation specifications.
         $centres = [];
         $centreList = [
-            ['Center of Excellence in Automotive Engineering', 'coe-in-automotive-engineering', 'CoE in Automotive Engineering', 'specialized-labs-vehicle', 'The Center of Excellence in Automotive Engineering advances the future of mobility by bringing together engineering, technology, design, and industry expertise. The Center enables learners and industry to explore emerging opportunities, address real-world mobility challenges, and develop solutions that contribute to a more intelligent, connected, and sustainable automotive ecosystem.'],
-            ['Center of Advanced Computing & AI', 'centre-of-advanced-computing-ai', 'CoE in Advanced Computing & AI', 'precision-machining', 'The Center for Advanced Computing & AI focuses on harnessing computing and artificial intelligence to address complex challenges across industry and society. By connecting advanced technology with real-world application, the Center enables learners, researchers, and industry to develop intelligent solutions and unlock new possibilities for technology-led transformation.'],
-            ['Center of Management Studies', 'center-of-management', 'CoE in Management Studies', 'professional-tablet', 'The Center of Management Studies helps NAMTECH graduates develop the strategic, business, and managerial capabilities required to navigate an increasingly technology-driven economy. By bringing together design thinking, strategic intelligence, and business & professional communication, the Center prepares professionals to bridge technology and enterprise, drive transformation, and drive organizational value.'],
-            ['Experiential Learning Center for Sustainable Energy & Circularity', 'experiential-learning-center-for-sustainable-energy-circularity', 'ELC: Sustainable Energy & Circularity', 'turbine-engineer', 'Co-created with IIT Roorkee and supported by NTPC, The Experiential Learning Center for Sustainable Energy & Circularity (ELC:SEC) focuses on enabling the transition towards more sustainable, resource-efficient, and resilient industrial systems. The Center addresses the interconnected challenges of energy, resources, and industrial growth through convergence of technology, innovation, and systems thinking, for a low-carbon and circular future.'],
+            ['Center of Excellence in Automotive Engineering', 'coe-in-automotive-engineering', 'Center of Excellence in Automotive Engineering', 'specialized-labs-vehicle', "The Centre of Excellence in Automotive Engineering is advancing the talent and capabilities needed to shape the future of mobility in India. As the automotive industry undergoes a profound transformation driven by electrification, intelligent vehicle systems, autonomous technologies and advanced manufacturing, the sector demands engineers who can integrate emerging technologies with real-world automotive applications. By converging engineering, innovation and industry to develop expertise across next-generation mobility, the Center is preparing professionals to drive India's transition towards a future-ready automotive ecosystem."],
+            ['Center of Advanced Computing & AI', 'centre-of-advanced-computing-ai', 'Center of Advanced Computing & AI', 'precision-machining', 'The Center of Advanced Computing and Artificial Intelligence is built to develop competent professionals leading the intelligent transformation of Indian manufacturing & industry. Through industry-driven learning in artificial intelligence, data science, machine learning, generative AI, advanced computing and intelligent automation, the Center enables learners to move beyond theory, and build solutions for real-world industrial challenges.'],
+            ['Center of Management Studies', 'center-of-management', 'Center of Management Studies', 'professional-tablet', 'The Center of Management Studies helps NAMTECH graduates develop the strategic, business, and managerial capabilities required to navigate an increasingly technology-driven economy. By bringing together design thinking, strategic intelligence, and business & professional communication, the Center prepares professionals to bridge technology and enterprise, drive transformation, and drive organizational value.'],
+            ['Experiential Learning Center for Sustainable Energy & Circularity', 'experiential-learning-center-for-sustainable-energy-circularity', 'Experiential Learning Center for Sustainable Energy & Circularity (ELC:SEC)', 'turbine-engineer', 'Co-created with IIT Roorkee and supported by NTPC, The Experiential Learning Center for Sustainable Energy & Circularity (ELC:SEC) focuses on enabling the transition towards more sustainable, resource-efficient, and resilient industrial systems. The Center addresses the interconnected challenges of energy, resources, and industrial growth through convergence of technology, innovation, and systems thinking, for a low-carbon and circular future.'],
         ];
         foreach ($centreList as $i => [$name, $slug, $menuLabel, $image, $summary]) {
             $centre = $this->live(Centre::create([
@@ -186,23 +194,23 @@ class ContentSeeder extends Seeder
             $centres[$slug] = $centre;
         }
 
-        // Undergraduate, postgraduate, executive and technical programs from the Figma design.
+        // UG and executive descriptions were left as "AA" in the copy, so they are empty until supplied.
         $programs = [
-            ['B.Tech. Mechanical Engineering (Smart Manufacturing)', 'undergraduate', 'B.Tech', 'school-of-manufacturing-technologies', 'A forward-looking undergraduate degree integrating core mechanical engineering with cyber-physical systems, additive manufacturing, industrial IoT, and digital twin simulation to engineer next-generation smart factories.'],
-            ['B.Tech. Mechanical Engineering (Automotive)', 'undergraduate', 'B.Tech', 'school-of-manufacturing-technologies', 'Focuses on modern vehicle architecture, powertrain electrification, autonomous driving dynamics, and advanced materials engineering designed in collaboration with leading automotive OEMs.'],
-            ['B.Tech. Robotics & AI', 'undergraduate', 'B.Tech', 'school-of-robotics', 'Brings together mechanical kinematics, sensor fusion, computer vision, and machine learning to build autonomous robotic systems, collaborative cobots, and intelligent automation platforms.'],
-            ['B.Tech. Smart & Sustainable Energy', 'undergraduate', 'B.Tech', 'school-of-sustainability', 'Prepares engineers to pioneer clean energy transitions, renewable grid integration, hydrogen storage systems, and circular manufacturing frameworks to achieve net-zero industrial targets.'],
-            ['B.Tech. Computer Science Engineering', 'undergraduate', 'B.Tech', 'school-of-manufacturing-design-ai', 'Focuses on high-performance computing, distributed cloud architectures, industrial cybersecurity, and data-driven systems powering mission-critical manufacturing and enterprise environments.'],
-            ['B.Tech. Electronics Engineering (Semiconductor Technology)', 'undergraduate', 'B.Tech', 'school-of-manufacturing-technologies', 'Equips engineers with expertise in VLSI design, semiconductor fabrication processes, cleanroom operations, and microelectronics packaging aligned with India’s national semiconductor mission.'],
-            ['B.Tech. Electronics Engineering (Space Technology)', 'undergraduate', 'B.Tech', 'school-of-manufacturing-technologies', 'Explores satellite payload engineering, telemetry communications, high-reliability aerospace avionics, and space-grade materials for emerging commercial space missions.'],
+            ['B.Tech. Mechanical Engineering (Smart Manufacturing)', 'undergraduate', 'B.Tech', 'school-of-manufacturing-technologies', null],
+            ['B.Tech. Mechanical Engineering (Automotive)', 'undergraduate', 'B.Tech', null, null],
+            ['B.Tech. Robotics & AI', 'undergraduate', 'B.Tech', 'school-of-robotics', null],
+            ['B.Tech. Smart & Sustainable Energy', 'undergraduate', 'B.Tech', 'school-of-sustainability', null],
+            ['B.Tech. Computer Science Engineering', 'undergraduate', 'B.Tech', null, null],
+            ['B.Tech. Electronics Engineering (Semiconductor Technology)', 'undergraduate', 'B.Tech', null, null],
+            ['B.Tech. Electronics Engineering (Space Technology)', 'undergraduate', 'B.Tech', null, null],
             ['Master in Smart Manufacturing Technology & Management', 'postgraduate', 'Master', 'school-of-manufacturing-technologies', 'Develop advanced expertise in smart manufacturing, Industry 4.0 and 5.0, intelligent automation, digital production systems, and technology management to lead the transformation of modern manufacturing enterprises.'],
             ['Master in Heavy Industry Engineering & Management', 'postgraduate', 'Master', 'school-of-manufacturing-technologies', 'Developed in collaboration with the ArcelorMittal Design and Engineering Center (AMDEC), this program prepares engineers for heavy industries like steel manufacturing, mining and mineral processing, ports, and capital infrastructure. It combines a rigorous engineering foundation with three specialization tracks and an extended paid industry residency at AMDEC.'],
-            ['Master in Semiconductor Manufacturing Technology & Management', 'postgraduate', 'Master', 'school-of-manufacturing-technologies', 'Master Industrial AI and semiconductor technologies, designing intelligent products and next-generation systems that integrate advanced computing, human-centered design, and emerging technologies to shape the future of manufacturing.'],
+            ['Master in Semiconductor Manufacturing Technology & Management', 'postgraduate', 'Master', 'school-of-manufacturing-technologies', "Drive India's indigenous semiconductor revolution through immersive and practice-led learning alongside curriculum built on world-class fabrication standards, co-created with industry titans and leading Tiwanese institutions."],
             ['Master in Robotics Engineering & Management', 'postgraduate', 'Master', 'school-of-robotics', 'Build hands-on expertise in aerial and legged robotics, collaborative robots, and autonomous systems to engineer connected, adaptive, and human-centric factories of the future.'],
             ['Master in Sustainability Engineering & Management', 'postgraduate', 'Master', 'school-of-sustainability', 'Develop industrial frameworks and technical strategies to build industries that balance innovation and performance with long-term environmental responsibility while working toward net-zero emissions.'],
-            ['Master in Automotive Technology & Management', 'postgraduate', 'Master', 'school-of-manufacturing-technologies', 'Advance the future of mobility through the integration of advanced design, engineering and industry expertise to develop next-generation automotive solutions, intelligent vehicle systems, and emerging mobility technologies.'],
-            ['Master in Data Analytics & Artificial Intelligence', 'postgraduate', 'Master', 'school-of-manufacturing-design-ai', 'Build intelligent systems, optimize industrial processes, and translate emerging technologies into real-world industrial use-cases through advanced computing and AI.'],
-            ['iPMPX Smart Manufacturing', 'executive', 'iPMPX', 'school-of-manufacturing-technologies', 'An executive leadership program for senior engineering professionals and factory managers seeking to master digital transformation, Industry 5.0 strategies, and smart operations management.'],
+            ['Master in Automotive Technology & Management', 'postgraduate', 'Master', 'school-of-manufacturing-technologies', "Drive India's next-generation mobility revolution through immersive, practice-led learning and an industry-aligned curriculum focused on advanced automotive technologies, electric mobility and intelligent vehicle systems, co-created with leading industry partners and experts."],
+            ['Master in Data Analytics & Artificial Intelligence', 'postgraduate', 'Master', null, 'Build intelligent systems, optimize industrial processes, and translate emerging technologies into real-world industrial use-cases through advanced computing and AI.'],
+            ['iPMPX Smart Manufacturing', 'executive', null, 'school-of-manufacturing-technologies', null],
             ['iPTP Automation', 'technical', 'iPTP', 'school-of-technical-education', 'Build upon your ITI or diploma foundation with advanced expertise in industrial automation, control systems, instrumentation, and connected production technologies to configure, integrate, and optimize automated manufacturing systems.'],
             ['iPTP Semiconductor Manufacturing', 'technical', 'iPTP', 'school-of-technical-education', 'Gain specialized expertise in semiconductor manufacturing, precision processes, cleanroom practices, and advanced production technologies to build the capabilities needed for India’s growing semiconductor ecosystem.'],
             ['iPTP Industrial Robotics', 'technical', 'iPTP', 'school-of-technical-education', 'Strengthen your ITI or diploma foundation with specialized expertise in industrial robotics, robotic programming, machine vision, and robot–machine integration to evolve from a skilled technician into an industry-ready technologist.'],
@@ -217,14 +225,15 @@ class ContentSeeder extends Seeder
                 'summary' => $summary,
                 'school_id' => $school ? $schools[$school]->id : null,
                 'image_id' => $this->media[$images[$i % count($images)]],
-                'is_featured' => true,
+                'is_featured' => $title !== 'iPMPX Smart Manufacturing',
                 'apply_url' => '/admissions#enquire',
+                // Key facts as shown on the homepage design (sample values – see REVIEW-FLAGS 2.4).
                 'mode' => $level === 'technical' ? null : 'On-Campus',
                 'location' => $level === 'technical' ? null : 'Ahmedabad',
                 'intake' => $level === 'technical' ? null : 'August, 2026',
                 'application_deadline' => $level === 'technical' ? null : '2026-07-30',
-                'duration' => $level === 'postgraduate' ? '2 years' : ($level === 'undergraduate' ? '4 years' : ($level === 'executive' ? '1 year' : null)),
-                'duration_detail' => $level === 'postgraduate' ? '4 Semesters' : ($level === 'undergraduate' ? '8 Semesters' : ($level === 'executive' ? 'Executive Mode' : null)),
+                'duration' => $level === 'postgraduate' ? '24 Months' : null,
+                'duration_detail' => $level === 'postgraduate' ? '4 Semesters' : null,
                 'sort_order' => $i,
             ]));
         }
@@ -240,13 +249,33 @@ class ContentSeeder extends Seeder
         // Order: partners with stories follow the client's homepage copy (MIT, CMU, IIT Roorkee, Siemens, ABB, Schneider Electric);
         // partners without a logo are not shown in the logo strip.
         $partners = [
-            ['Massachusetts Institute of Technology', 'mit', $academic], ['Carnegie Mellon University', 'carnegie-mellon-university', $academic],
+            // Academic partners (all academic partners from https://www.namtech.ac/partnership, removing TUM Asia)
+            ['Massachusetts Institute of Technology', 'mit', $academic],
+            ['Carnegie Mellon University', 'carnegie-mellon-university', $academic],
             ['Indian Institute of Technology (IIT), Roorkee', 'iit-roorkee', $academic],
-            ['AM/NS India', 'amns-india', $industry], ['TUM Asia', 'tum-asia', $academic], ['Siemens', 'siemens', $industry],
-            ['Cisco', 'cisco', $industry], ['Micron', 'micron', $industry], ['Festo', 'festo', $industry], ['ABB', 'abb', $industry],
-            ['Schneider Electric', 'schneider-electric', $industry], ['L&T Heavy Engineering', 'lt-heavy-engineering', $industry],
+            ['Purdue University Northwest', 'purdue-university-northwest', $academic],
+            ['ITEES Singapore', 'itees', $academic],
+
+            // Corporate / Industry partners (all corporate partners)
+            ['Siemens', 'siemens', $industry],
+            ['ABB', 'abb', $industry],
+            ['AM/NS India', 'amns-india', $industry],
+            ['Schneider Electric', 'schneider-electric', $industry],
+            ['Festo', 'festo', $industry],
+            ['Micron', 'micron', $industry],
+            ['Cisco', 'cisco', $industry],
+            ['L&T Heavy Engineering', 'lt-heavy-engineering', $industry],
+            ['ASDC', 'asdc', $industry],
+            ['ICICI Foundation', 'icici-foundation', $industry],
+            ['Rockwell Automation', 'rockwell-automation', $industry],
+            ['Analog Devices', 'analog-devices', $industry],
+            ['FANUC', 'fanuc', $industry],
+            ['Hi-Tech Pipes', 'hitech-pipes', $industry],
+            ['Surya Roshni', 'surya-roshni', $industry],
+            ['KPMG in India', 'kpmg', $industry],
+            ['NTPC', 'ntpc', $industry],
         ];
-        // Partner stories from the client's homepage copy ("NAMTECHs Homepage_DTEdit_vF_090926.docx").
+        // Partner stories from the client's copy
         $stories = [
             'mit' => ['In collaboration with MIT’s Department of Mechanical Engineering, NAMTECH brings the renowned MIT 2.008 Manufacturing course to India — combining core manufacturing principles with hands-on application, from product design and process planning to production systems and optimization.', $this->pdfImage('p043', 'Engineer building a robotics assembly'), null],
             'carnegie-mellon-university' => ['Through its collaboration with Carnegie Mellon University, NAMTECH leverages CMU’s expertise in learning science, digital education, and technology-enabled learning to develop and share advanced learning resources and methodologies with ITIs, strengthening the quality and reach of technical education. The collaboration also supports faculty training and learning science research.', $this->pdfImage('p102', 'Analyst reviewing data dashboards'), null],
@@ -255,8 +284,26 @@ class ContentSeeder extends Seeder
             'abb' => ['In collaboration with ABB, NAMTECH advances robotics education and supports India’s transition towards automation. The collaboration bridges the skills gap through industry-grade equipment, experiential learning, knowledge sharing via ABB’s experts, applied research, and immersive industry exposure, equipping learners with practical expertise in robotics and automation.', $this->pdfImage('p131', 'Orange industrial robot arm'), null],
             'schneider-electric' => ['Through its partnership with Schneider Electric, NAMTECH advances smart manufacturing education through industry-grade infrastructure, advanced training labs, and experiential learning.', $this->pdfImage('p120', 'Student working on an automation rig'), null],
         ];
-        // Full partner write-ups from the Corporate Partners copy are used as each partner's story.
-        $profileSlugs = ['Siemens' => 'siemens', 'ABB' => 'abb', 'AM/NS India' => 'amns-india', 'Schneider Electric, Global / India' => 'schneider-electric', 'Festo' => 'festo', 'Micron' => 'micron', 'Cisco' => 'cisco', 'L&T Heavy Engineering' => 'lt-heavy-engineering'];
+        // Full partner write-ups from the Corporate Partners copy
+        $profileSlugs = [
+            'Siemens' => 'siemens',
+            'ABB' => 'abb',
+            'AM/NS India' => 'amns-india',
+            'Schneider Electric, Global / India' => 'schneider-electric',
+            'Festo' => 'festo',
+            'Micron' => 'micron',
+            'Cisco' => 'cisco',
+            'L&T Heavy Engineering' => 'lt-heavy-engineering',
+            'ASDC' => 'asdc',
+            'ICICI Foundation' => 'icici-foundation',
+            'Rockwell Automation' => 'rockwell-automation',
+            'Analog Devices' => 'analog-devices',
+            'FANUC' => 'fanuc',
+            'Hi-Tech Pipes' => 'hitech-pipes',
+            'Surya Roshni' => 'surya-roshni',
+            'KPMG in India' => 'kpmg',
+            'NTPC' => 'ntpc',
+        ];
         $profiles = [];
         foreach ($this->corporatePartnerProfiles() as [$profileName, $paragraphs]) {
             if (isset($profileSlugs[$profileName])) {
@@ -273,7 +320,7 @@ class ContentSeeder extends Seeder
                 'image_id' => $image,
                 'summary' => $summary,
                 'highlight' => $highlight,
-                'story' => isset($profiles[$slug]) ? implode('', array_map(fn (string $paragraph) => '<p>'.e($paragraph).'</p>', $profiles[$slug])) : ($summary ? '<p>'.e($summary).'</p><p>Through this strategic alliance, NAMTECH and our partner collaborate on curriculum co-development, industry-grade experiential learning facilities, faculty training, and direct recruitment pipelines to accelerate India’s manufacturing competitiveness.</p>' : null),
+                'story' => isset($profiles[$slug]) ? implode('', array_map(fn (string $paragraph) => '<p>'.e($paragraph).'</p>', $profiles[$slug])) : ($summary ? '<p>'.self::Tbc.'</p>' : null),
                 'is_featured' => $summary !== null,
                 'sort_order' => $i,
             ]));
@@ -285,7 +332,7 @@ class ContentSeeder extends Seeder
      */
     private function pdfImage(string $file, string $alt): int
     {
-        return $this->media['pdf-'.$file] ??= $this->uploader->storePath(__DIR__.'/assets/pdf/'.$file.'.jpg', $file.'.jpg', ['alt' => $alt, 'credit' => 'Image from the supplied design – confirm licence'], sync: false)->id;
+        return $this->media['pdf-'.$file] ??= $this->uploader->storePath(__DIR__.'/assets/pdf/'.$file.'.jpg', $file.'.jpg', ['alt' => $alt, 'credit' => 'Image from the supplied design – confirm licence'], sync: true)->id;
     }
 
     /**
@@ -305,32 +352,6 @@ class ContentSeeder extends Seeder
             'Dr. Ibrahim Hafeezur Rehman' => ['p086', 'Portrait of Dr. Ibrahim Hafeezur Rehman'],
             'Dr. Andallib Tariq' => ['p099', 'Portrait of Dr. Andallib Tariq'],
             'Dr. Ekta Singla' => ['p087', 'Portrait of Dr. Ekta Singla'],
-            'Rakesh Tiwari' => ['p018', 'Portrait of Rakesh Tiwari'],
-            'Dr. Velagapudi Vasu' => ['p025', 'Portrait of Dr. Velagapudi Vasu'],
-            'Dr. Kamalkishore C. Vora' => ['p051', 'Portrait of Dr. Kamalkishore C. Vora'],
-            'Dr. Anupam Kumar Singh' => ['p075', 'Portrait of Dr. Anupam Kumar Singh'],
-            'Dr. Sunil Pathak' => ['p080', 'Portrait of Dr. Sunil Pathak'],
-            'Dr. Shailesh Sharma' => ['p088', 'Portrait of Dr. Shailesh Sharma'],
-            'Dr. P. Rajagopalan' => ['p091', 'Portrait of Dr. P. Rajagopalan'],
-            'Dr. Ashish Kumar Shukla' => ['p101', 'Portrait of Dr. Ashish Kumar Shukla'],
-            'Dr. Litton Bhandari' => ['p104', 'Portrait of Dr. Litton Bhandari'],
-            'Dr. Ankit Gaurav' => ['p108', 'Portrait of Dr. Ankit Gaurav'],
-            'Mr. Sankata Tiwari' => ['p128', 'Portrait of Mr. Sankata Tiwari'],
-            'Mr. Mukesh Kumar' => ['p142', 'Portrait of Mr. Mukesh Kumar'],
-            'Mr. Lalit Kumar' => ['p145', 'Portrait of Mr. Lalit Kumar'],
-            'Dr. Anubhav Mishra' => ['p015', 'Portrait of Dr. Anubhav Mishra'],
-            'Dr. Umangi Mehta' => ['p026', 'Portrait of Dr. Umangi Mehta'],
-            'Mr. Rajkumar Sharma' => ['p039', 'Portrait of Mr. Rajkumar Sharma'],
-            'Dr. Srishti Paliwal' => ['p062', 'Portrait of Dr. Srishti Paliwal'],
-            'Dr. Rishi Parvanda' => ['p065', 'Portrait of Dr. Rishi Parvanda'],
-            'Ms. Soumya Sangita Nayak' => ['p079', 'Portrait of Ms. Soumya Sangita Nayak'],
-            'Dr. Hardik Patel' => ['p094', 'Portrait of Dr. Hardik Patel'],
-            'Dr. Ajit Kumar Sharma' => ['p096', 'Portrait of Dr. Ajit Kumar Sharma'],
-            'Dr. Preeti Lata Mahapatra' => ['p111', 'Portrait of Dr. Preeti Lata Mahapatra'],
-            'Dr. Siddhartha Suman' => ['p126', 'Portrait of Dr. Siddhartha Suman'],
-            'Dr. Gavax Joshi' => ['p053', 'Portrait of Dr. Gavax Joshi'],
-            'Dr. Shuchi Sharma' => ['p042', 'Portrait of Dr. Shuchi Sharma'],
-            'Dr. Abhisek Parida' => ['p077', 'Portrait of Dr. Abhisek Parida'],
         ];
 
         // Profiles from the faculty listing and faculty detail designs.
@@ -348,12 +369,12 @@ class ContentSeeder extends Seeder
             $this->live(Faculty::create([
                 'name' => $name, 'slug' => Str::slug($name), 'designation' => $designation, 'category' => $category,
                 'school_id' => $school, 'photo_id' => $photo, 'research_interests' => $interests,
-                'qualifications' => $education, 'bio' => '<p>Distinguished academic and industry expert with decades of experience in engineering education, advanced automation, and manufacturing technology. Actively involved in pioneering applied research, mentoring cohorts, and driving industry collaborations at NAMTECH.</p>',
+                'qualifications' => $education, 'bio' => '<p>'.self::Tbc.'</p>',
                 'is_featured' => isset($homepage[$name]), 'sort_order' => $homepage[$name] ?? 5 + $i,
             ]));
         }
 
-        // Faculty list from the School Landing Page design with full profiles.
+        // Faculty list from the School Landing Page design (names and designations as supplied; photos to be supplied).
         $list = [
             ['Rakesh Tiwari', 'Dean - Academics', null],
             ['Dr. Ibrahim Hafeezur Rehman', 'Director General & CEO; Dean – Academic Advancement, R&D & Consultancy; Director – School of Sustainability', $sus],
@@ -361,37 +382,23 @@ class ContentSeeder extends Seeder
             ['Dr. Velagapudi Vasu', 'Program Director, School of Manufacturing', $mt],
             ['Dr. Ekta Singla', 'Associate Director, School of Robotics', $rob],
             ['Dr. Kamalkishore C. Vora', 'Director, Centre of Excellence Automotive', null],
-            ['Dr. Anupam Kumar Singh', 'Professor, Sustainable Energy & Circularity', $sus],
-            ['Dr. Sunil Pathak', 'Associate Professor, Precision Engineering', null],
-            ['Dr. Shailesh Sharma', 'Associate Professor, Smart Manufacturing', $mt],
-            ['Dr. P. Rajagopalan', 'Professor, Mechanical & Automotive Systems', $mt],
-            ['Dr. Ashish Kumar Shukla', 'Assistant Professor, Robotics & Control', $rob],
-            ['Dr. Litton Bhandari', 'Assistant Professor, Digital Manufacturing', $mt],
-            ['Dr. Ankit Gaurav', 'Senior Lecturer, Industrial Automation', $mt],
-            ['Mr. Sankata Tiwari', 'Senior Technical Instructor, Automation & PLC', $mt],
-            ['Mr. Mukesh Kumar', 'Technical Officer, Living Labs', $mt],
-            ['Mr. Lalit Kumar', 'Laboratory Technologist, Precision Machining', $mt],
-            ['Dr. Anubhav Mishra', 'Assistant Professor, Artificial Intelligence', $dai],
-            ['Dr. Umangi Mehta', 'Assistant Professor, Circular Economy', $sus],
-            ['Mr. Rajkumar Sharma', 'Senior Instructor, CNC & Additive Manufacturing', $mt],
-            ['Dr. Srishti Paliwal', 'Assistant Professor, Clean Energy Systems', $sus],
-            ['Dr. Rishi Parvanda', 'Assistant Professor, Mechatronics & Sensors', $rob],
-            ['Ms. Soumya Sangita Nayak', 'Lecturer, Semiconductor Technologies', $dai],
-            ['Dr. Hardik Patel', 'Assistant Professor, Industrial IoT & Edge Computing', $dai],
-            ['Dr. Ajit Kumar Sharma', 'Associate Professor, Cyber-Physical Systems', $mt],
-            ['Dr. Preeti Lata Mahapatra', 'Assistant Professor, Materials Engineering', $mt],
-            ['Dr. Siddhartha Suman', 'Assistant Professor, Thermal & Fluid Systems', $mt],
-            ['Dr. Gavax Joshi', 'Senior Lecturer, Electrical & Power Electronics', $mt],
-            ['Dr. Shuchi Sharma', 'Assistant Professor, Environmental Engineering', $sus],
-            ['Dr. Abhisek Parida', 'Assistant Professor, Energy Systems', $sus],
+            ['Dr. Anupam Kumar Singh', 'Professor', $sus],
+            ['Dr. Sunil Pathak', 'Associate Professor', null],
+            ['Dr. Shailesh Sharma', null, null], ['Dr. P. Rajagopalan', null, null], ['Dr. Ashish Kumar Shukla', null, null],
+            ['Dr. Litton Bhandari', 'Assistant Professor', null],
+            ['Dr. Ankit Gaurav', 'Senior Lecturer', null],
+            ['Mr. Sankata Tiwari', null, null], ['Mr. Mukesh Kumar', null, null], ['Mr. Lalit Kumar', null, null],
+            ['Dr. Anubhav Mishra', null, null], ['Dr. Umangi Mehta', 'Assistant Professor', $sus], ['Mr. Rajkumar Sharma', null, null],
+            ['Dr. Srishti Paliwal', null, null], ['Dr. Rishi Parvanda', null, null], ['Ms. Soumya Sangita Nayak', null, null],
+            ['Dr. Hardik Patel', null, null], ['Dr. Ajit Kumar Sharma', null, null], ['Dr. Preeti Lata Mahapatra', null, null],
+            ['Dr. Siddhartha Suman', null, null], ['Dr. Gavax Joshi', null, null], ['Dr. Shuchi Sharma', 'Assistant Professor', $sus], ['Dr. Abhisek Parida', 'Assistant Professor', $sus],
         ];
         foreach ($list as $i => [$name, $designation, $school]) {
             $this->live(Faculty::create([
                 'name' => $name, 'slug' => Str::slug($name), 'designation' => $designation, 'category' => 'residential',
                 'school_id' => $school, 'sort_order' => $homepage[$name] ?? 10 + $i,
                 'is_featured' => isset($homepage[$name]),
-                'photo_id' => isset($photos[$name]) ? $this->pdfImage(...$photos[$name]) : $this->pdfImage('p029', 'Faculty portrait'),
-                'bio' => '<p>Experienced faculty member contributing to NAMTECH’s experiential, industry-co-created curriculum. Dedicated to mentoring students in modern engineering laboratories and driving applied research across advanced manufacturing sectors.</p>',
+                'photo_id' => isset($photos[$name]) ? $this->pdfImage(...$photos[$name]) : null,
             ]));
         }
     }
@@ -426,7 +433,7 @@ class ContentSeeder extends Seeder
                     'group' => $group, 'name' => $name, 'slug' => Str::slug($name), 'designation' => $designation,
                     'organisation' => $group === 'advisory' ? 'Advisory Council, NAMTECH' : null,
                     'photo_id' => $this->pdfImage($photo, 'Portrait of '.$name),
-                    'bio' => '<p>Distinguished leader guiding NAMTECH’s strategic vision, institutional partnerships, and curriculum alignment with national priorities. Committed to creating world-class educational pathways that position India as a global manufacturing powerhouse.</p>', 'achievements' => ['Advisor to National Skill Development Initiatives', 'Pioneered Industry 4.0 Transformation Programs'], 'sort_order' => $i,
+                    'bio' => '<p>'.self::Tbc.'</p>', 'achievements' => [], 'sort_order' => $i,
                 ]));
             }
         }
@@ -443,13 +450,9 @@ class ContentSeeder extends Seeder
             'title' => 'Sustainable Manufacturing Summit 2026', 'slug' => 'sustainable-manufacturing-summit-2026',
             'subtitle' => 'Masterclass by Prof. Daniel Philip, MIT',
             'summary' => 'Experience learning with real industry equipment and state-of-the-art infrastructure designed for the future of manufacturing.',
-            'overview' => '<p>Join global leaders, faculty, and industry pioneers for an intensive masterclass exploring the future of sustainable manufacturing, decarbonization technologies, and circular economy practices. Experience hands-on sessions in state-of-the-art labs and network with leading academicians from MIT and TUM Asia.</p>',
-            'outcomes' => [
-                ['text' => 'Understand the core principles of Industry 5.0 and sustainable factory design.'],
-                ['text' => 'Hands-on exposure to decarbonization frameworks, digital twins, and resource efficiency tools.'],
-                ['text' => 'Direct networking with leaders from MIT, TUM Asia, and global manufacturing giants.']
-            ],
-            'speaker' => ['name' => 'Prof. Daniel Philip', 'role' => 'Dean of Research, MIT', 'photo' => $this->pdfImage('p133', 'Portrait of Prof. Daniel Philip'), 'quote' => 'Sustainability in manufacturing is no longer an optional initiative—it is the engineering discipline that will define industrial competitiveness for the next century.', 'bio' => '<p>Prof. Daniel Philip is the Dean of Research at MIT, specializing in advanced manufacturing systems, precision engineering, and sustainable industrial ecosystems. He has authored over 120 peer-reviewed papers and advises governments and Fortune 500 manufacturers globally.</p>'],
+            'overview' => '<p>'.self::Tbc.'</p>',
+            'outcomes' => [['text' => self::Tbc]],
+            'speaker' => ['name' => 'Prof. Daniel Philip', 'role' => 'Dean of Research, MIT', 'photo' => $this->pdfImage('p133', 'Portrait of Prof. Daniel Philip'), 'quote' => null, 'bio' => '<p>'.self::Tbc.'</p>'],
             'starts_at' => '2027-04-15 09:00:00', 'ends_at' => '2027-04-15 17:00:00',
             'venue' => 'NAMTECH Auditorium 3', 'registration_url' => '/contact',
             'image_id' => $this->pdfImage('p016', 'Audience at a conference session'),
@@ -468,9 +471,7 @@ class ContentSeeder extends Seeder
                 'title' => $title, 'slug' => Str::slug($title), 'category' => $category, 'department' => $department, 'mode' => $mode,
                 // The design shows "Last date May 15, 2026", which has passed; set the real closing date before publishing.
                 'closes_on' => null,
-                'summary' => 'Join our faculty and leadership team to shape the future of manufacturing education in India.',
-                'description' => '<p>We are seeking high-caliber professionals to lead curriculum delivery, student mentorship, and applied research in manufacturing technology, robotics, and industrial leadership. Candidates should have a proven track record of academic or industrial excellence and a passion for hands-on, experiential learning.</p><h3>Key Responsibilities</h3><ul><li>Design and deliver state-of-the-art experiential coursework and lab modules.</li><li>Engage in industry-collaborative research and student capstone projects.</li><li>Mentor students for career advancement and global industry placement.</li></ul>',
-                'sort_order' => $i,
+                'summary' => null, 'description' => '<p>'.self::Tbc.'</p>', 'sort_order' => $i,
             ]));
         }
     }
@@ -492,29 +493,14 @@ class ContentSeeder extends Seeder
             ]), now()->subDays($daysAgo));
         };
 
-        $post('news', 'AM/NS India Leadership Visits NAMTECH', $visits, $this->media['news-indiaskills'], 2,
-            'Senior executive leadership from ArcelorMittal Nippon Steel India visited NAMTECH’s living laboratories, reviewing student capstones in automated defect detection and advanced robotics cells.',
-            '<p>A high-level executive delegation from ArcelorMittal Nippon Steel India (AM/NS India) toured NAMTECH’s advanced manufacturing campus to evaluate student-led innovations and review ongoing co-created curriculum initiatives.</p><p>The leadership team interacted with undergraduate and postgraduate cohorts working on live industrial capstone challenges, including real-time machine vision inspection systems, robotic welding cells, and industrial IoT monitoring rigs.</p><p>AM/NS India reiterated its long-term commitment to nurturing world-class technical talent in India and expanding industry residency opportunities for NAMTECH graduates across its national manufacturing assets.</p>',
-            true);
+        $post('news', 'AM/NS India Leadership Visits NAMTECH', $visits, $this->media['news-indiaskills'], 2, null, null, true);
+        $post('news', 'Dr. Bobby Mitra, CIO & President of Tata Electronics, Engages with NAMTECH', $visits, $this->media['news-tata-electronics'], 3);
+        $post('news', 'NAMTECH Strengthens Automotive Engineering Capabilities', $corporate, $this->media['news-automotive'], 4);
 
-        $post('news', 'Dr. Bobby Mitra, CIO & President of Tata Electronics, Engages with NAMTECH', $visits, $this->media['news-tata-electronics'], 3,
-            'Dr. Bobby Mitra engaged with faculty and students on semiconductor ecosystem scaling, packaging innovations, and India’s growing semiconductor workforce requirements.',
-            '<p>Dr. Bobby Mitra, CIO & President of Tata Electronics, delivered a distinguished keynote address to the NAMTECH community, highlighting the transformative potential of India’s semiconductor mission and precision electronics manufacturing.</p><p>During the interactive session, Dr. Mitra emphasized the urgent need for skilled technologists proficient in cleanroom operations, advanced lithography, chip packaging, and automated test methodologies.</p><p>Tata Electronics and NAMTECH leadership explored collaborative avenues for specialized talent incubation, curriculum benchmarking, and student internships aligned with next-generation semiconductor fabrication lines.</p>');
-
-        $post('news', 'NAMTECH Strengthens Automotive Engineering Capabilities', $corporate, $this->media['news-automotive'], 4,
-            'NAMTECH expanded its Center of Excellence in Automotive Engineering with specialized testbeds for electric vehicle powertrains and autonomous driving simulation.',
-            '<p>NAMTECH announced a major expansion of its Center of Excellence in Automotive Engineering, integrating state-of-the-art battery testbenches, electric motor dynos, and hardware-in-the-loop (HIL) simulation stations.</p><p>Developed in close consultation with leading automotive OEMs, the facility enables students and industry researchers to design, calibrate, and validate electric vehicle powertrains, battery management systems (BMS), and ADAS safety controllers.</p><p>This initiative directly supports India’s accelerating transition to sustainable e-mobility and provides engineering graduates with Day-Zero readiness for global automotive careers.</p>');
-
-        // Blog from the blog detail design: comprehensive Industry 4.0 to 5.0 analysis.
-        $blogContent = [
-            'Understanding Industry 4.0' => 'Industry 4.0 represents the ongoing digital transformation of traditional manufacturing and industrial practices. By integrating large-scale cyber-physical systems, IoT sensors, cloud computing, and real-time machine telemetry, modern production lines achieve unprecedented levels of automation, predictive maintenance, and operational visibility.',
-            'India’s Industry 4.0 Journey' => 'India’s manufacturing landscape is witnessing rapid acceleration under national initiatives like Make in India and Viksit Bharat 2047. Leading enterprises are upgrading legacy infrastructure with intelligent edge devices, AI-driven quality inspection, and automated guided vehicles (AGVs) to compete effectively on the global stage.',
-            'The Requirement of Industry 5.0' => 'While Industry 4.0 focused intensely on automated efficiency and connectivity, Industry 5.0 re-centers the human element. It pairs human creativity, problem-solving, and cognitive nuance with the repetitive precision and physical strength of collaborative robots (cobots) to deliver bespoke, sustainable products.',
-            'Unlocking Limitless Potential' => 'Realizing the full promise of advanced manufacturing demands a new breed of engineering professionals who move comfortably between mechanical shop floors and advanced digital systems. Immersive educational models that emphasize hands-on experimentation are vital to closing this capability divide.',
-            'Manufacturing as India’s Global Game-Changer' => 'Sustainable, digitally empowered manufacturing is set to be the primary engine of India’s economic growth in the 21st century. By cultivating skilled talent equipped for Industry 5.0, India can pioneer resilient industrial ecosystems that balance high productivity with environmental stewardship.',
-        ];
-        $body = collect($blogContent)->map(fn (string $text, string $heading) => '<h2>'.e($heading).'</h2><p>'.e($text).'</p>')->implode('');
-        $post('blog', 'From Industry 4.0 to 5.0: India’s Stride Towards Human–Tech Synergy', $cat('Research'), $this->pdfImage('p084', 'Two researchers examining plant samples in a laboratory'), 5, 'An in-depth perspective on the technological and human convergence reshaping modern factories across India and global supply chains.', $body, true);
+        // Blog from the blog detail design: the section headings are supplied, the text is not.
+        $sections = ['Understanding Industry 4.0', 'India’s Industry 4.0 Journey', 'The Requirement of Industry 5.0', 'Unlocking Limitless Potential', 'Manufacturing as India’s Global Game-Changer'];
+        $body = collect($sections)->map(fn (string $h) => '<h2>'.e($h).'</h2><p>'.self::Tbc.'</p>')->implode('');
+        $post('blog', 'From Industry 4.0 to 5.0: India’s Stride Towards Human–Tech Synergy', $cat('Research'), $this->pdfImage('p084', 'Two researchers examining plant samples in a laboratory'), 5, null, $body, true);
 
         // Impact stories.
         $journey = $cat('Student Journey & Innovations');
@@ -522,15 +508,9 @@ class ContentSeeder extends Seeder
             $cat($name);
         }
         $post('story', 'iPTP Graduate → Smart Manufacturing Engineer, Germany', $journey, $this->pdfImage('p039', 'Group of smiling students'), 6,
-            'Aruna Kumari, an iPTP student from a Tier-3 town, joined NAMTECH without experience. She became a manufacturing engineer at a global automotive supplier in Germany, focusing on production optimization.',
-            '<p>Coming from a humble background in a Tier-3 town, Aruna Kumari joined NAMTECH’s International Professional Technologist Program with an aspiration to master industrial automation. Through intensive hands-on training on Siemens PLC systems, ABB robotics cells, and digital simulation tools, she developed deep technical fluency.</p><p>Following an outstanding industry residency, Aruna was recruited by a premier tier-1 German automotive manufacturing enterprise, where she now oversees automated assembly line optimization and predictive maintenance architectures.</p><p>“NAMTECH didn’t just teach me theory—it gave me real machines, industrial mentors, and the confidence to operate at global standards,” says Aruna.</p>',
-            true);
-        $post('story', 'NAMTECH Graduate Experiences Nearly 90% Increase in Salary', $journey, $this->pdfImage('p000', 'Graduate shaking hands at a job interview'), 7,
-            'Rohan Patel transitioned from entry-level plant maintenance to a high-growth Industrial AI Lead role with an 88% compensation increase post-graduation.',
-            '<p>After working for two years in conventional mechanical maintenance, Rohan Patel sought to future-proof his career by enrolling in NAMTECH’s Master in Smart Manufacturing Technology & Management.</p><p>Equipped with specialized capabilities in cyber-physical systems, digital twin simulation, and machine vision analytics, Rohan received multiple competitive job offers during campus placements, ultimately accepting an Industrial AI Lead position at ₹18 LPA—an 88% leap over his prior CTC.</p><p>“The experiential labs at NAMTECH bridge the exact gap between traditional engineering and modern Industry 4.0 factories,” Rohan remarked.</p>');
-        $post('story', 'NAMTECH Students Revolutionize Prosthetics Design using 3D Printing', $cat('Research Breakthroughs'), $this->pdfImage('p062', 'Prosthetic hand against a blue background'), 8,
-            'A multidisciplinary student team deployed advanced additive manufacturing technologies to produce low-cost, patient-customized prosthetic limbs.',
-            '<p>A student research team from the School of Manufacturing Technologies and School of Robotics successfully engineered a patient-customized, 3D-printed bionic prosthetic hand capable of multi-grip adaptability.</p><p>Leveraging NAMTECH’s Additive Manufacturing & Precision Engineering Lab, the team utilized SLA resin printing and biocompatible carbon-reinforced polymers, reducing fabrication costs by 80% compared to conventional prosthetics while maintaining exceptional structural durability.</p><p>The project received top recognition at the National Smart Manufacturing Hackathon and is currently undergoing clinical trials with partner healthcare institutions.</p>');
+            'Aruna Kumari, an iPTP student from a Tier-3 town, joined NAMTECH without experience. She became a manufacturing engineer at a global automotive supplier in Germany, focusing on production optimization.', null, true);
+        $post('story', 'NAMTECH Graduate Experiences Nearly 90% Increase in Salary', $journey, $this->pdfImage('p000', 'Graduate shaking hands at a job interview'), 7);
+        $post('story', 'NAMTECH Students Revolutionize Prosthetics Design using 3D Printing', $cat('Research Breakthroughs'), $this->pdfImage('p062', 'Prosthetic hand against a blue background'), 8);
     }
 
     /**
@@ -542,11 +522,7 @@ class ContentSeeder extends Seeder
     {
         $school = $schools['school-of-sustainability'];
         $img = fn (string $file, string $alt) => $this->pdfImage($file, $alt);
-        $program = fn (string $title) => Program::query()
-            ->where('title', $title)
-            ->orWhere('title', str_replace('Program in ', '', $title))
-            ->orWhere('title', 'like', '%'.str_replace('Program in ', '', $title).'%')
-            ->first()?->publicPath() ?? '#';
+        $program = fn (string $title) => Program::query()->where('title', $title)->firstOrFail()->publicPath();
         $school->update(['summary' => 'NAMTECH’s School of Sustainability prepares the next generation to engineer a cleaner, more resilient, and resource-efficient industrial future.']);
 
         // Client copy "NAMTECH School of Sustainability Copy_DTEdit_051026.docx".
@@ -578,11 +554,7 @@ class ContentSeeder extends Seeder
             // Upcoming Events and News & Insights are "Content to be updated" in the copy; these listings fill from the CMS.
             ['events_carousel', ['eyebrow' => null, 'heading' => 'Upcoming Events', 'body' => null, 'cta_label' => 'View all events', 'cta_url' => '/events', 'school' => 'school-of-sustainability']],
             // Awards and Achievements has no content yet, so it is added hidden for editors to fill in.
-            ['achievements', ['eyebrow' => null, 'heading' => 'Awards and Achievements', 'layout' => 'awards', 'items' => [
-                ['title' => 'Excellence in Sustainable Engineering Education 2025', 'organization' => 'National Clean Energy Council', 'year' => '2025', 'text' => 'Recognized for innovative experiential curriculum in industrial sustainability and decarbonization.'],
-                ['title' => 'Pioneering Industry-Academia Collaborative Lab 2024', 'organization' => 'India Manufacturing Summit', 'year' => '2024', 'text' => 'Awarded for state-of-the-art living labs established in partnership with global clean-tech leaders.'],
-                ['title' => 'Best Green Campus & Clean Energy Initiative 2024', 'organization' => 'CII Green Business Centre', 'year' => '2024', 'text' => 'Honored for comprehensive circular economy practices and energy-efficient campus operations.'],
-            ]], 'awards', true],
+            ['achievements', ['eyebrow' => null, 'heading' => 'Awards and Achievements', 'layout' => 'awards', 'items' => []], 'awards', false],
             ['news_carousel', ['heading' => 'News & Insights', 'post_type' => 'news', 'limit' => 8, 'cta_label' => 'View all insights', 'cta_url' => '/media']],
         ]);
     }
@@ -619,32 +591,28 @@ class ContentSeeder extends Seeder
     {
         $school = $schools['school-of-manufacturing-technologies'];
         $img = fn (string $file, string $alt) => $this->pdfImage($file, $alt);
-        $program = fn (string $title) => Program::query()
-            ->where('title', $title)
-            ->orWhere('title', str_replace('Program in ', '', $title))
-            ->orWhere('title', 'like', '%'.str_replace('Program in ', '', $title).'%')
-            ->first()?->publicPath() ?? '#';
+        $program = fn (string $title) => Program::query()->where('title', $title)->firstOrFail()->publicPath();
         $school->update(['summary' => 'NAMTECH empowers the next-generation of engineers to build, code, and operate the intelligent, connected factories of tomorrow.']);
 
         // Centers, Training and Development, Upcoming Events and Awards and Achievements are "No" / "Hide this section" in the copy.
         $this->attachSections($school, [
             ['page_hero', ['eyebrow' => 'Schools', 'title' => 'School of Manufacturing Technologies', 'body' => 'NAMTECH empowers the next-generation of engineers to build, code, and operate the intelligent, connected factories of tomorrow.', 'image' => $img('p053', 'Students working on industrial equipment with an engineer'), 'cta_label' => 'Explore Programs', 'cta_url' => '#programs']],
-            ['intro', ['eyebrow' => null, 'heading' => 'About the School of Manufacturing Technologies', 'icon' => 'factory', 'body' => '<p>The School of Manufacturing Technologies at NAMTECH develops engineers who can become leaders across the two forces shaping India’s industrial future: the rise of intelligent, connected manufacturing and the scaling of the heavy industries that anchor the economy. As steel plants, ports, and mines become as data-driven as a smart factory, India’s Industry 4.0 revolution requires engineers capable of integrating digital precision with large-scale industrial operations.</p>']],
+            ['intro', ['eyebrow' => null, 'heading' => null, 'icon' => null, 'body' => '<p>The School of Manufacturing Technologies at NAMTECH develops engineers who can become leaders across the two forces shaping India’s industrial future: the rise of intelligent, connected manufacturing and the scaling of the heavy industries that anchor the economy. As steel plants, ports, and mines become as data-driven as a smart factory, India’s Industry 4.0 revolution requires engineers capable of integrating digital precision with large-scale industrial operations.</p>']],
             ['pillars', ['eyebrow' => null, 'heading' => 'Core Pillars', 'items' => [
-                ['title' => 'Smart and Digital Manufacturing', 'text' => 'From digital intelligence to physical making. Master the technologies that connect machines, systems, and people on the factory floor.', 'image' => $img('p131', 'Orange industrial robot arm')],
-                ['title' => 'Heavy Industry Engineering', 'text' => 'Technology creates value when it works at scale. Build the heavy-industry mastery needed to apply smart technologies to the complex industrial assets driving the country.', 'image' => $img('p028', 'Technician in a hard hat operating equipment')],
-                ['title' => 'Capital Projects and Operations Management', 'text' => 'From blueprint to reality, execution is the differentiator. Build the engineering and management discipline to deliver complex industrial projects seamlessly at scale.', 'image' => $img('p078', 'Engineer with a tablet on site stairs')],
-                ['title' => 'Industrial Sustainability and Decarbonization', 'text' => 'The next industrial revolution must be sustainable by design. Master the technologies and practices that make manufacturing cleaner, leaner, and future-ready.', 'image' => $img('p030', 'Wind turbines on a snowy hillside')],
+                ['title' => 'Smart and Digital Manufacturing', 'text' => 'From digital intelligence to physical making, NAMTECH focuses on mastering the technologies that connect machines, systems, and people on the factory floor.', 'image' => $img('p131', 'Orange industrial robot arm')],
+                ['title' => 'Heavy Industry Engineering', 'text' => "Technology creates value when it works at scale. NAMTECH's focus on heavy-industries enables application of  smart technologies to the complex industrial assets, for national growth.", 'image' => $img('p028', 'Technician in a hard hat operating equipment')],
+                ['title' => 'Capital Projects and Operations Management', 'text' => 'From blueprint to reality, execution is the differentiator. NAMTECH focuses on engineering and management discipline to ensure learners are able to deliver complex industrial projects seamlessly at scale.', 'image' => $img('p078', 'Engineer with a tablet on site stairs')],
+                ['title' => 'Industrial Sustainability and Decarbonization', 'text' => "The next industrial revolution must be sustainable by design. NAMTECH's focus on sustainability empowers  manufacturing that is cleaner, leaner, and future-ready.", 'image' => $img('p030', 'Wind turbines on a snowy hillside')],
             ]]],
             ['media_cards', ['eyebrow' => 'Programs', 'heading' => 'Programs Built for Impact', 'layout' => 'tall', 'card_link_label' => 'Explore program', 'items' => [
                 ['image' => $this->media['program-student-hardware'], 'tag' => 'UG', 'title' => 'B.Tech. Mechanical Engineering (Smart Manufacturing)', 'body' => 'From engineering fundamentals to intelligent manufacturing. Build, experiment, and solve through hands-on learning across mechanical engineering, robotics, automation, advanced manufacturing, and digital technologies – developing the technical depth and maker mindset to lead the factories of tomorrow.', 'link_url' => $program('B.Tech. Mechanical Engineering (Smart Manufacturing)')],
-                ['image' => $this->media['experiential-learning-robotics'], 'tag' => 'PG', 'title' => 'Master in Smart Manufacturing Technology and Management', 'body' => 'Prepares engineers to build and lead the intelligent, connected factory through a maker-first approach. Students work hands-on from day one across additive manufacturing, mechatronics, industrial robotics, smart automation, and digital twins, while building management depth in supply chain, operational excellence, quality, reliability, and product lifecycle management.', 'link_url' => $program('Master in Smart Manufacturing Technology & Management')],
-                ['image' => $img('p028', 'Technician in a hard hat operating equipment'), 'tag' => 'PG', 'title' => 'Master in Heavy Industry Engineering and Management', 'body' => 'Developed in collaboration with the ArcelorMittal Design and Engineering Center (AMDEC), this program prepares engineers for heavy industries like steel manufacturing, mining and mineral processing, ports, and capital infrastructure. It combines a rigorous engineering foundation with three specialization tracks and an extended paid industry residency at AMDEC.', 'link_url' => $program('Master in Heavy Industry Engineering & Management')],
+                ['image' => $this->media['experiential-learning-robotics'], 'tag' => 'POST GRADUATE', 'title' => 'Master in Smart Manufacturing Technology and Management', 'body' => 'Prepares engineers to build and lead the intelligent, connected factory through a maker-first approach. Students work hands-on from day one across additive manufacturing, mechatronics, industrial robotics, smart automation, and digital twins, while building management depth in supply chain, operational excellence, quality, reliability, and product lifecycle management.', 'link_url' => $program('Master in Smart Manufacturing Technology & Management')],
+                ['image' => $img('p028', 'Technician in a hard hat operating equipment'), 'tag' => 'POST GRADUATE', 'title' => 'Master in Heavy Industry Engineering and Management', 'body' => 'Developed in collaboration with the ArcelorMittal Design and Engineering Center (AMDEC), this program prepares engineers for heavy industries like steel manufacturing, mining and mineral processing, ports, and capital infrastructure. It combines a rigorous engineering foundation with three specialization tracks and an extended paid industry residency at AMDEC.', 'link_url' => $program('Master in Heavy Industry Engineering & Management')],
                 ['image' => $this->media['precision-machining'], 'tag' => 'Executive', 'title' => 'iPMPX (Smart Manufacturing)', 'body' => 'Develop the strategic perspective and technological depth to harness smart manufacturing, AI, automation, and connected systems to lead industrial transformation at scale.', 'link_url' => $program('iPMPX Smart Manufacturing')],
             ]], 'programs'],
-            ['video_feature', ['layout' => 'split', 'eyebrow' => null, 'heading' => 'From the Director’s Desk', 'body' => '“India aims to lift manufacturing from around 16 percent of GDP toward 30 percent by 2047. That ambition rests on two pillars: the intelligent, connected factory, where data, automation, and AI redefine how things are made, and heavy industry; the steel plants, mines, ports, and capital projects on which everything else is built. That is why this School exists. The School is built for students who learn by making, getting hands-on with the robotics, digital twins, and AI systems that define the modern factory. Our mission is to create engineers and industry leaders who merge technology with sustainability, innovation with purpose, and productivity with resilience, and who will help carry India toward a globally competitive, self-reliant, and intelligent manufacturing future.”', 'name' => 'Dr. Sanjeev Gupta', 'role' => 'Dean – Quality Assurance & Rankings; Director – School of Manufacturing Technologies', 'image' => $img('p058', 'Portrait of Dr. Sanjeev Gupta')]],
+            ['video_feature', ['layout' => 'split', 'eyebrow' => null, 'heading' => 'From the Director’s Desk', 'body' => '“India aims to lift manufacturing from around 16% of GDP to 30% by 2047. The School of Manufacturing Technologies is built for students who learn by making, getting hands-on with robotics, digital twins, and AI systems that define the modern factory, and help realize this national ambition.”', 'name' => 'Dr. Sanjeev Gupta', 'role' => 'Dean – Quality Assurance & Rankings; Director – School of Manufacturing Technologies', 'image' => $img('p058', 'Portrait of Dr. Sanjeev Gupta')]],
             ['people', ['eyebrow' => 'Faculty', 'heading' => 'The Experts Driving Your Learning', 'body' => 'The School’s residential & visiting faculty brings together global research credentials, deep technical grounding, and elite academic backgrounds to guide the next generation of industrial leaders.', 'school' => 'school-of-manufacturing-technologies', 'layout' => 'carousel', 'limit' => 16]],
-            ['card_grid', ['eyebrow' => 'Labs & Infrastructure', 'heading' => 'WorldSkills-Aligned Industry 4.0 Laboratories', 'body' => 'Our advanced laboratories give students hands-on experience with globally benchmarked platforms across the full manufacturing lifecycle.', 'style' => 'joined', 'columns' => '3', 'tone' => 'white', 'cards' => array_map(fn (array $lab) => ['icon' => $lab[2], 'title' => $lab[0], 'body' => $lab[1]], [
+            ['card_grid', ['eyebrow' => 'Labs & Infrastructure', 'heading' => 'WorldSkills-Aligned Experiential Laboratories', 'body' => 'Our advanced laboratories give students hands-on experience with globally benchmarked platforms across the full manufacturing lifecycle.', 'style' => 'joined', 'columns' => '3', 'tone' => 'white', 'cards' => array_map(fn (array $lab) => ['icon' => $lab[2], 'title' => $lab[0], 'body' => $lab[1]], [
                 ['Precision Engineering Lab', 'Precision machining, metrology, and dimensional inspection on industry-grade equipment.', 'gear'],
                 ['CAD/CAM Lab', 'Computer-aided design and manufacturing, digital modeling, and toolpath generation.', 'code'],
                 ['Industrial Automation Lab', 'PLC, SCADA, sensors, and control systems for discrete and process automation.', 'factory'],
@@ -710,12 +678,7 @@ class ContentSeeder extends Seeder
                 ['icon' => 'rupee', 'title' => 'Scholarships and Financial Support', 'body' => 'Access merit-based scholarships of up to 100% on tuition, plus education loan support from leading banks, making our advanced programs accessible to aspiring engineers.'],
                 ['icon' => 'handshake', 'title' => 'Co-Designed with Industry Giants', 'body' => 'Developed and delivered collaboratively with industry leaders and academic experts to ensure that graduates are industry-ready from day one.'],
             ]]],
-            ['stat_cards', ['eyebrow' => 'Student Profile Mix', 'heading' => 'Class of 2026', 'body' => 'Our diverse cohort brings together high-caliber engineering talent from across India, preparing them for leadership in Industry 4.0.', 'tone' => 'lavender', 'items' => [
-                ['icon' => 'trend', 'value' => '96%', 'label' => 'Placement Rate', 'description' => 'Within 6 months of programme completion'],
-                ['icon' => 'rupee', 'value' => '₹12L', 'label' => 'Average Salary', 'description' => 'Highest up to ₹24L per annum'],
-                ['icon' => 'handshake', 'value' => '14+', 'label' => 'Hiring Partners', 'description' => 'Leading manufacturing & tech organizations'],
-                ['icon' => 'award', 'value' => '100%', 'label' => 'Experiential Learning', 'description' => 'Hands-on practical industry projects']
-            ]], 'class-of-2026', true],
+            ['stat_cards', ['eyebrow' => null, 'heading' => 'Class of 2026', 'body' => null, 'tone' => 'lavender', 'items' => []], 'class-of-2026', false],
             ['value_list', ['eyebrow' => null, 'heading' => 'Program Partners', 'body' => null, 'items' => [
                 ['icon' => 'graduation', 'title' => 'Academic Partner: Technical University of Munich (TUM Asia, Singapore)', 'text' => 'A globally top-ranked technical university, TUM Asia has co-designed the curriculum with NAMTECH and offers deep academic collaboration, embedding world-class German technical education standards into NAMTECH.'],
                 ['icon' => 'graduation', 'title' => 'Academic Partner: Department of Mechanical Engineering, Massachusetts Institute of Technology (USA)', 'text' => 'Blending rigorous theory with intensive hands-on making, MIT’s Department of Mechanical Engineering provides the foundational 2.008 Design & Manufacturing II framework, customized for NAMTECH (2.008N) that guides NAMTECH’s “experiential learning” ethos.'],
@@ -747,7 +710,7 @@ class ContentSeeder extends Seeder
                 ['Digital Twin and Immersive Lab', 'Digital twins, AR/VR/XR simulation and connected operations.', 'sparkle'],
                 ['AI and Data Analytics Lab', 'Manufacturing data analytics, cloud computing and AI applications.', 'chart'],
             ])]],
-            ['post_list', ['heading' => 'Student Innovations', 'post_type' => 'story', 'limit' => 3, 'layout' => 'carousel', 'cta_label' => 'All stories', 'cta_url' => '/impact/stories'], 'innovations', true],
+            ['post_list', ['heading' => 'Student Innovations', 'post_type' => 'story', 'limit' => 3, 'layout' => 'carousel', 'cta_label' => 'All stories', 'cta_url' => '/impact/stories'], 'innovations', false],
             ['steps', ['eyebrow' => null, 'heading' => 'Admission Process', 'body' => null, 'layout' => 'panel', 'panel_title' => 'Steps', 'image' => $img('p096', 'Applicant meeting the admissions team'), 'items' => [
                 ['title' => 'Apply online at admissions.namtech.ac & pay ₹1000/- application fee.'],
                 ['title' => 'Complete your application and submit all required documents.'],
@@ -781,23 +744,7 @@ class ContentSeeder extends Seeder
                 ['icon' => 'check', 'title' => 'Smart Operations and Quality Lead', 'body' => 'Drive operational excellence, quality and reliability using lean and data-driven methods.'],
                 ['icon' => 'chart', 'title' => 'Industrial Data and AI Analyst', 'body' => 'Turn machine and process data into insight that improves productivity and uptime.'],
             ]]],
-            ['testimonials', ['eyebrow' => null, 'heading' => 'Hear from Recruiters', 'layout' => 'quotes', 'items' => [
-                [
-                    'author_name' => 'Rajesh Sharma',
-                    'author_title' => 'Head of Talent Acquisition, AM/NS India',
-                    'body' => 'NAMTECH graduates bring a rare blend of theoretical mastery and day-one shop-floor readiness. Their hands-on experience in smart factory environments makes them immediately productive in complex manufacturing settings.',
-                ],
-                [
-                    'author_name' => 'Vikram Patel',
-                    'author_title' => 'Director of Manufacturing Operations, Global OEM',
-                    'body' => 'The experiential curriculum at NAMTECH ensures engineers understand interconnected Industry 4.0 systems, robotics, and industrial IoT from day one. They are exactly the talent modern industry requires.',
-                ],
-                [
-                    'author_name' => 'Ananya Sen',
-                    'author_title' => 'VP Technology & Automation, Schneider Electric',
-                    'body' => 'What stands out about NAMTECH learners is their ability to solve complex, multi-disciplinary manufacturing challenges using modern digital tools and sustainable practices.',
-                ],
-            ]], 'recruiters', true],
+            ['testimonials', ['eyebrow' => null, 'heading' => 'Hear from Recruiters', 'layout' => 'quotes', 'items' => []], 'recruiters', false],
             ['fees', ['eyebrow' => null, 'heading' => 'Fees and Scholarships', 'body' => null, 'fee_label' => 'Course Fee', 'fee_amount' => null,
                 'rows' => [
                     ['label' => 'Tuition (Inclusive of 18% GST) – Course Fee', 'value' => '₹10,00,000/-'],
@@ -827,10 +774,7 @@ class ContentSeeder extends Seeder
             ]]]]],
             // "Same across, pick from Sustainability Page" in the copy.
             $this->studentLifeSection(),
-            ['testimonials', ['eyebrow' => 'Student Stories', 'heading' => 'Hear From Our Students & Alumni', 'layout' => 'portrait', 'items' => [
-                ['name' => 'Shanti Priya', 'role' => 'Smart Manufacturing Engineer, Germany', 'text' => 'Studying at NAMTECH transformed my engineering mindset. The hands-on work with real robotics and digital twin systems gave me the confidence to step directly into a global role.', 'image' => $img('p117', 'Shanti Priya portrait')],
-                ['name' => 'Rahul Sharma', 'role' => 'Automation & Robotics Specialist', 'text' => 'The MIT-developed 2.008 curriculum and live factory simulations provided a learning experience that textbooks simply cannot match.', 'image' => $img('p142', 'Rahul Sharma portrait')]
-            ]], 'testimonials', true],
+            ['testimonials', ['eyebrow' => null, 'heading' => 'Student Testimonials', 'layout' => 'portrait', 'items' => []], 'testimonials', false],
             ['faq', ['heading' => 'Frequently Asked Questions', 'body' => null, 'layout' => 'centered', 'items' => array_map(fn (array $qa) => ['question' => $qa[0], 'answer' => '<p>'.e($qa[1]).'</p>'], [
                 ['What is the NAMTECH Master Program in Smart Manufacturing Technology & Management?', 'A two-year residential program preparing engineers as techno-managers in smart manufacturing, integrating MIT’s 2.008 hands-on design and manufacturing approach customized for NAMTECH (2.008N) with management depth.'],
                 ['What is the eligibility?', 'B.E./ B.Tech. with minimum 60% in 10th, 12th and graduation, no active backlog. CAT, XAT, GMAT, GRE, or GATE preferred.'],
@@ -927,7 +871,7 @@ class ContentSeeder extends Seeder
             ['media_cards', ['eyebrow' => null, 'heading' => 'Labs & Infrastructure', 'layout' => 'tall', 'cta_label' => 'Explore Labs', 'cta_url' => '/academics/labs-and-infrastructure', 'items' => $this->sustainabilityLabs()]],
             // Sections 8, 12 and 17 of the copy are still to be sourced ("To be confirmed"), so they are added hidden;
             // editors fill them in and switch them on in the admin.
-            ['post_list', ['heading' => 'Student Innovations', 'post_type' => 'story', 'limit' => 3, 'layout' => 'carousel', 'cta_label' => 'All stories', 'cta_url' => '/impact/stories'], 'innovations', true],
+            ['post_list', ['heading' => 'Student Innovations', 'post_type' => 'story', 'limit' => 3, 'layout' => 'carousel', 'cta_label' => 'All stories', 'cta_url' => '/impact/stories'], 'innovations', false],
             ['steps', ['eyebrow' => null, 'heading' => 'Admission Process', 'body' => null, 'layout' => 'panel', 'panel_title' => 'Steps', 'image' => $img('p096', 'Applicant meeting the admissions team'), 'items' => [
                 ['title' => 'Apply online at admissions.namtech.ac & pay ₹1,000/- application fee.'],
                 ['title' => 'Complete your application and submit all required documents.'],
@@ -966,23 +910,7 @@ class ContentSeeder extends Seeder
                 ['icon' => 'building', 'title' => 'Urban Planner', 'body' => 'Design smart, climate-resilient and energy-optimized cities for sustainable modern living.'],
                 ['icon' => 'graduation', 'title' => 'Sustainability Educator', 'body' => 'Educate and guide the next generation of green leaders through cutting-edge environmental research.'],
             ]]],
-            ['testimonials', ['eyebrow' => null, 'heading' => 'Hear from Recruiters', 'layout' => 'quotes', 'items' => [
-                [
-                    'author_name' => 'Rajesh Sharma',
-                    'author_title' => 'Head of Talent Acquisition, AM/NS India',
-                    'body' => 'NAMTECH graduates bring a rare blend of theoretical mastery and day-one shop-floor readiness. Their hands-on experience in smart factory environments makes them immediately productive in complex manufacturing settings.',
-                ],
-                [
-                    'author_name' => 'Vikram Patel',
-                    'author_title' => 'Director of Manufacturing Operations, Global OEM',
-                    'body' => 'The experiential curriculum at NAMTECH ensures engineers understand interconnected Industry 4.0 systems, robotics, and industrial IoT from day one. They are exactly the talent modern industry requires.',
-                ],
-                [
-                    'author_name' => 'Ananya Sen',
-                    'author_title' => 'VP Technology & Automation, Schneider Electric',
-                    'body' => 'What stands out about NAMTECH learners is their ability to solve complex, multi-disciplinary manufacturing challenges using modern digital tools and sustainable practices.',
-                ],
-            ]], 'recruiters', true],
+            ['testimonials', ['eyebrow' => null, 'heading' => 'Hear from Recruiters', 'layout' => 'quotes', 'items' => []], 'recruiters', false],
             ['fees', ['eyebrow' => null, 'heading' => 'Fees and Scholarships', 'body' => null, 'fee_label' => 'Course Fee', 'fee_amount' => null,
                 'rows' => [
                     ['label' => 'Tuition (Inclusive of 18% GST) – Course Fee', 'value' => '₹10,00,000/-'],
@@ -1012,10 +940,7 @@ class ContentSeeder extends Seeder
                 ['icon' => 'people', 'text' => 'Dedicated admissions guidance to help students through the loan application process'],
             ]]]]],
             $this->studentLifeSection(),
-            ['testimonials', ['eyebrow' => 'Student Stories', 'heading' => 'Hear From Our Students & Alumni', 'layout' => 'portrait', 'items' => [
-                ['name' => 'Shanti Priya', 'role' => 'Smart Manufacturing Engineer, Germany', 'text' => 'Studying at NAMTECH transformed my engineering mindset. The hands-on work with real robotics and digital twin systems gave me the confidence to step directly into a global role.', 'image' => $img('p117', 'Shanti Priya portrait')],
-                ['name' => 'Rahul Sharma', 'role' => 'Automation & Robotics Specialist', 'text' => 'The MIT-developed 2.008 curriculum and live factory simulations provided a learning experience that textbooks simply cannot match.', 'image' => $img('p142', 'Rahul Sharma portrait')]
-            ]], 'testimonials', true],
+            ['testimonials', ['eyebrow' => null, 'heading' => 'Student Testimonials', 'layout' => 'portrait', 'items' => []], 'testimonials', false],
             ['faq', ['heading' => 'Frequently Asked Questions', 'body' => null, 'layout' => 'centered', 'items' => array_map(fn (array $qa) => ['question' => $qa[0], 'answer' => '<p>'.e($qa[1]).'</p>'], [
                 ['Who should enroll in the program?', 'Engineering, B.Arch., B.Des., or M.Sc. graduates, with or without work experience, as well as MBA graduates who meet the eligibility criteria and are seeking expertise in sustainable manufacturing and ESG leadership, are welcome to apply.'],
                 ['Is this program suitable for working professionals?', 'Yes. Its residential structure is designed to accommodate both fresh graduates and working professionals.'],
@@ -1198,11 +1123,7 @@ class ContentSeeder extends Seeder
             $aboutNav,
             ['image_statement', ['eyebrow' => null, 'heading' => 'Our Purpose', 'body' => $purpose, 'image' => $img('p005', 'Students talking outside a campus building'), 'position' => 'right']],
             ['image_statement', ['eyebrow' => null, 'heading' => 'Our Vision', 'body' => $purpose, 'image' => $img('p059', 'Students relaxing on a campus lawn'), 'position' => 'left']],
-            ['value_list', ['eyebrow' => null, 'heading' => 'Our Core Values', 'body' => 'An integrated approach combining Manufacturing excellence with cutting-edge digital technologies.', 'items' => [
-                ['icon' => 'people', 'title' => 'Inclusivity & Opportunity', 'text' => 'Creating accessible, transformative technical education pathways for youth from all socio-economic backgrounds across India.'],
-                ['icon' => 'gear', 'title' => 'Hands-On Applied Learning', 'text' => 'Embedding learners directly in living factory simulations and cutting-edge labs where real industry problems are solved.'],
-                ['icon' => 'lightbulb', 'title' => 'Industry-Driven Curriculum', 'text' => 'Co-designing, co-delivering, and continuously iterating programs in lockstep with the world’s leading industrial enterprises.'],
-            ]]],
+            ['value_list', ['eyebrow' => null, 'heading' => 'Our Core Values', 'body' => self::Tbc, 'items' => [['icon' => 'people', 'title' => self::Tbc, 'text' => null]]]],
             ['card_grid', ['eyebrow' => 'What We Do', 'heading' => 'Cultivating Talent for India’s Manufacturing Dominance', 'style' => 'joined', 'columns' => '4', 'tone' => 'white', 'cards' => [
                 ['icon' => 'people', 'title' => 'Transforming India’s Technician Workforce'],
                 ['icon' => 'robot', 'title' => 'Experiential Learning Through Advanced Technology'],
@@ -1211,13 +1132,13 @@ class ContentSeeder extends Seeder
             ]]],
             ['timeline', ['eyebrow' => null, 'heading' => 'Our Story', 'body' => null, 'items' => [
                 ['year' => '2022', 'title' => 'June, 2022', 'text' => 'NAMTECH received the Letter of Intent from the University Grants Commission, marking a key step towards recognition as a Deemed-to-be-University.', 'image' => $img('p010', 'NAMTECH team photograph in a lab')],
-                ['year' => '2023', 'title' => '2023', 'text' => 'Inaugural cohort of International Professional Technologist Program (iPTP) commenced with 100% placement track record.', 'image' => $img('p134', 'Visitors being shown student-built hardware')],
-                ['year' => '2024', 'title' => '2024', 'text' => 'Launched the School of Smart Manufacturing and state-of-the-art experiential learning labs in collaboration with global industry partners.', 'image' => $img('p116', 'Prize winners at the IndiaSkills regional competition')],
-                ['year' => '2025', 'title' => '2025', 'text' => 'Expanded academic and research partnerships with world-renowned technical institutes including TUM Asia and IIT Roorkee.', 'image' => $img('p113', 'Lecture theatre')],
-                ['year' => '2026', 'title' => '2026', 'text' => 'Pioneering the future of manufacturing education with next-generation living labs and comprehensive industry co-creation.', 'image' => $img('p142', 'Students sitting together on campus steps')],
+                ['year' => '2023', 'title' => '2023', 'text' => self::Tbc, 'image' => $img('p134', 'Visitors being shown student-built hardware')],
+                ['year' => '2024', 'title' => '2024', 'text' => self::Tbc, 'image' => $img('p116', 'Prize winners at the IndiaSkills regional competition')],
+                ['year' => '2025', 'title' => '2025', 'text' => self::Tbc, 'image' => $img('p113', 'Lecture theatre')],
+                ['year' => '2026', 'title' => '2026', 'text' => self::Tbc, 'image' => $img('p142', 'Students sitting together on campus steps')],
             ]]],
             ['video_feature', ['layout' => 'split', 'heading' => 'Created to aid India’s growth and development.', 'body' => 'New Age Makers’ Institute of Technology (NAMTECH), by ArcelorMittal Nippon Steel India, is India’s first Manufacturing Engineering & Technology institute. It supports ‘Make in India’ and ‘Viksit Bharat 2047’ by offering advanced engineering programs and promoting responsible technology. NAMTECH prepares young professionals with Industry 4.0 skills and training.', 'image' => $img('p134', 'Visitors being shown student-built hardware')]],
-            ['intro', ['eyebrow' => 'About the Founder', 'heading' => 'About the Founder: AM/NS India', 'body' => '<p>ArcelorMittal Nippon Steel India (AM/NS India) is an integrated flat carbon steel manufacturer with an ambition to drive modern industrial growth. As the founding partner of NAMTECH, AM/NS India is committed to building a world-class manufacturing ecosystem in India through education, cutting-edge technology, and skilled talent. Created to aid India\'s growth and development, this partnership ensures education is aligned directly with industrial excellence.</p>']],
+            ['intro', ['eyebrow' => 'About the Founder', 'heading' => 'About the Founder: AM/NS India', 'body' => $tbc]],
             $contactCta,
         ]);
         $groupPage = fn (string $title, string $slug, string $group, string $image, string $alt) => $this->page($title, $slug, $pages['about'], [
@@ -1238,7 +1159,7 @@ class ContentSeeder extends Seeder
         $this->page('Ranks & Accreditations', 'ranks-and-accreditations', $pages['about'], [
             $hero('Ranks & Accreditations', $img('p056', 'Students raising their thumbs together'), 'About us'),
             $aboutNav,
-            ['intro', ['heading' => 'Ranks & Accreditations', 'body' => '<p>NAMTECH is recognized by premier regulatory and academic bodies in India and globally, holding Letters of Intent, university affiliations, and global certifications that attest to our world-class educational standards. Our programs and platforms are benchmarked against international standards from MIT, TUM Asia, and WorldSkills.</p>', 'icon' => 'award']],
+            ['intro', ['heading' => 'Ranks & Accreditations', 'body' => $tbc, 'icon' => 'award']],
         ]);
 
         // ---------------------------------------------------------------- Academics
@@ -1259,14 +1180,14 @@ class ContentSeeder extends Seeder
 
         $pages['academics'] = $this->page('Academics', 'academics', null, [
             $hero('Transforming Education Through Innovation & Industry Integration', $img('p085', 'Teacher presenting at a whiteboard'), 'Academics'),
-            ['intro', ['heading' => 'Our Educational Philosophy', 'body' => '<p>We believe engineering education must be rooted in active practice. Our problem-led pedagogy places learners directly in simulated factory environments and state-of-the-art labs, ensuring they build, test, and iterate with real industry machines rather than passive textbook learning.</p>', 'icon' => 'lightbulb']],
+            ['intro', ['heading' => 'Our Educational Philosophy', 'body' => $tbc, 'icon' => 'lightbulb']],
             $learningModel,
             ['academics_tabs', ['eyebrow' => 'Schools, Centres, and Programs', 'heading' => 'NAMTECH’s Innovation Schools for the Future of Manufacturing', 'schools_label' => 'Schools', 'centres_label' => 'Centres', 'programs_label' => 'Programs', 'default_tab' => 'schools', 'featured_only' => false]],
             $ready,
         ]);
         $this->page('Pedagogy', 'pedagogy', $pages['academics'], [
             $hero('Transforming Education Through Innovation & Industry Integration', $img('p085', 'Teacher presenting at a whiteboard'), 'Pedagogy'),
-            ['intro', ['heading' => 'Our Educational Philosophy', 'body' => '<p>We believe engineering education must be rooted in active practice. Our problem-led pedagogy places learners directly in simulated factory environments and state-of-the-art labs, ensuring they build, test, and iterate with real industry machines rather than passive textbook learning.</p>', 'icon' => 'lightbulb']],
+            ['intro', ['heading' => 'Our Educational Philosophy', 'body' => $tbc, 'icon' => 'lightbulb']],
             $learningModel, $outcomes, $labCards,
             ['cta_band', ['heading' => 'Ready to Transform Your Future?', 'body' => null, 'cta_label' => 'Apply Now', 'cta_url' => '/admissions']],
         ]);
@@ -1276,15 +1197,15 @@ class ContentSeeder extends Seeder
                 ['image' => $img('p054', 'Modular machine model on a workbench'), 'title' => 'Additive Manufacturing & Precision Engineering Lab', 'link_url' => '/academics/labs-and-infrastructure/additive-manufacturing-and-precision-engineering-lab'],
             ], $this->livingLabs())]],
             ['tabs', ['eyebrow' => null, 'heading' => 'Campus & Facilities', 'layout' => 'standard', 'tabs' => [
-                ['label' => 'Campus', 'title' => 'Campus', 'body' => '<p>Our world-class campus combines modern architecture with state-of-the-art experiential learning facilities. Designed for active collaboration, students interact with advanced machinery, collaborative robots, and high-performance computing clusters in an environment that mirrors premier global factories.</p>', 'image' => $img('p059', 'Students relaxing on a campus lawn')],
-                ['label' => 'Classrooms', 'title' => 'Classrooms', 'body' => '<p>Our interactive lecture theatres and smart classrooms feature collaborative seating, high-definition digital smart boards, and live simulation capabilities, allowing faculty and industry experts to seamlessly blend conceptual teaching with real-time digital factory demonstrations.</p>', 'image' => $img('p113', 'Lecture theatre')],
-                ['label' => 'Hostel', 'title' => 'Hostel', 'body' => '<p>Well-appointed student residences offer modern amenities, high-speed connectivity, communal recreation spaces, and round-the-clock security, fostering a vibrant residential learning community where ideas and peer collaboration thrive.</p>', 'image' => $img('p142', 'Students sitting together on campus steps')],
-                ['label' => 'Library', 'title' => 'Library', 'body' => '<p>The NAMTECH Knowledge Centre provides extensive physical collections and 24/7 digital access to global technical publications, research journals, standard engineering codes, and international manufacturing case studies.</p>', 'image' => $img('p045', 'Curved library bookshelves')],
+                ['label' => 'Campus', 'title' => 'Campus', 'body' => $tbc, 'image' => $img('p059', 'Students relaxing on a campus lawn')],
+                ['label' => 'Classrooms', 'title' => 'Classrooms', 'body' => $tbc, 'image' => $img('p113', 'Lecture theatre')],
+                ['label' => 'Hostel', 'title' => 'Hostel', 'body' => $tbc, 'image' => $img('p142', 'Students sitting together on campus steps')],
+                ['label' => 'Library', 'title' => 'Library', 'body' => $tbc, 'image' => $img('p045', 'Curved library bookshelves')],
             ]]],
             ['cta_band', ['heading' => 'Experience NAMTECH Campus', 'body' => null, 'cta_label' => 'Take the 360° tour', 'cta_url' => '/campus/virtual-tour']],
         ]);
         $this->page('Additive Manufacturing & Precision Engineering Lab', 'additive-manufacturing-and-precision-engineering-lab', $labs, [
-            $hero('Additive Manufacturing & Precision Engineering Lab', $img('p054', 'Modular machine model on a workbench'), 'Labs & Infrastructure', 'NAMTECH’s Additive Manufacturing & Precision Engineering Lab features industrial-grade 3D printers, SLA technologies, and metal additive manufacturing systems, enabling students and industry partners to rapidly prototype, test, and manufacture complex industrial components with micrometer precision.', ['layout' => 'plain']),
+            $hero('Additive Manufacturing & Precision Engineering Lab', $img('p054', 'Modular machine model on a workbench'), 'Labs & Infrastructure', self::Tbc, ['layout' => 'plain']),
             ['media_cards', ['eyebrow' => null, 'heading' => 'Our State-of-the-Art Facilities', 'layout' => 'showcase', 'items' => [
                 ['image' => $img('p131', 'Orange industrial robot arm'), 'title' => 'FDM Technologies'],
                 ['image' => $img('p054', 'Modular machine model on a workbench'), 'title' => 'SLA (Stereolithography Apparatus)'],
@@ -1301,100 +1222,11 @@ class ContentSeeder extends Seeder
             ['media_cards', ['heading' => 'Explore More Labs', 'layout' => 'tall', 'items' => $this->livingLabs()]],
         ]);
 
-        $pages['programs'] = $this->page('All Programs', 'programs', null, [
-            $hero('Building India’s Next Manufacturing & Technology Leaders', $this->media['program-student-hardware'], 'Academics', 'Aligned with national manufacturing priorities, NAMTECH delivers world-class, industry-integrated undergraduate, postgraduate, and technical programs designed to build tomorrow’s engineering visionaries.'),
-            ['programs_list', ['eyebrow' => 'Undergraduate', 'heading' => 'Bachelors Programmes', 'level' => 'undergraduate', 'school' => null]],
-            ['programs_list', ['eyebrow' => 'Postgraduate', 'heading' => 'Masters Programmes', 'level' => 'postgraduate', 'school' => null]],
-            ['programs_list', ['eyebrow' => 'Technical & Executive', 'heading' => 'Executive & Technical Programmes', 'level' => 'technical', 'school' => null]],
-            ['media_cards', ['eyebrow' => 'Living Labs', 'heading' => 'World-Class Labs & Infrastructure', 'body' => 'With state-of-the-art infrastructure and experiential labs, students gain hands-on experience on real-industry equipment designed for the future of manufacturing.', 'layout' => 'tall', 'cta_label' => 'Explore Labs', 'cta_url' => '/academics/labs-and-infrastructure', 'items' => $this->livingLabs()]],
-            ['faq', ['heading' => 'Frequently Asked Questions', 'body' => 'Find answers to common questions about our academic programs, admissions process, and career pathways.', 'layout' => 'centered', 'items' => [
-                ['question' => 'What makes NAMTECH’s undergraduate programs different from traditional B.Tech degrees?', 'answer' => '<p>NAMTECH’s B.Tech programs are built on an experiential, 100% applied learning model. Instead of passive lecture-based instruction, learners spend extensive hours in living factories, collaborative robotics cells, and simulation environments solving real industry challenges.</p>'],
-                ['question' => 'How does the industry co-creation model work?', 'answer' => '<p>Our curricula are co-designed and co-delivered with global manufacturing giants including ArcelorMittal Nippon Steel India, Siemens, Cisco, and Schneider Electric, ensuring skills match exact operational requirements.</p>'],
-                ['question' => 'Are scholarships available for undergraduate and master programs?', 'answer' => '<p>Yes. The India MET Scholarship program offers up to 75% fee waivers for women candidates, GATE/INI qualifiers, and merit-cum-means applicants across all eligible degree tracks.</p>'],
-                ['question' => 'What is the placement record of NAMTECH graduates?', 'answer' => '<p>NAMTECH maintains a 100% placement track record with an average CTC of ₹12 LPA and highest offers reaching ₹24 LPA from top multinational industrial leaders.</p>'],
-            ]]],
-            $contactCta,
-        ]);
-
-        $pages['schools'] = $this->page('Schools & Centres', 'schools', null, [
-            $hero('NAMTECH’s Innovation Schools for the Future of Manufacturing', $this->media['labs-research'], 'Schools, Centres, and Programs', 'Interdisciplinary, industry-led academic units designed to accelerate India’s industrial transformation through experiential learning, applied research, and cutting-edge technology.'),
-            ['academics_tabs', ['eyebrow' => 'Schools, Centres, and Programs', 'heading' => 'Explore Academic Disciplines', 'schools_label' => 'Innovation Schools', 'centres_label' => 'Innovation Centres', 'programs_label' => 'Programs', 'default_tab' => 'schools', 'featured_only' => false]],
-            ['media_cards', ['eyebrow' => 'Academic Schools', 'heading' => 'MET Innovation Schools', 'body' => 'Each school converges core engineering disciplines with smart technologies, offering hands-on learning inside state-of-the-art labs.', 'layout' => 'tall', 'card_link_label' => 'Explore School', 'items' => [
-                ['image' => $this->media['program-student-hardware'], 'title' => 'School of Manufacturing Technologies (SoMT)', 'body' => 'Equips engineers to operate, optimize, and revolutionize modern production environments across CNC machining, lean manufacturing, IoT, and digital manufacturing.', 'link_url' => '/schools/school-of-manufacturing-technologies'],
-                ['image' => $this->media['experiential-learning-robotics'], 'title' => 'School of Manufacturing Design & AI (SoMDAI)', 'body' => 'Converges product innovation, digital engineering, and intelligent manufacturing across generative design, simulation, and semiconductor tech.', 'link_url' => '/schools/school-of-manufacturing-design-ai'],
-                ['image' => $this->media['labs-soldering'], 'title' => 'School of Robotics (SoR)', 'body' => 'Designs, programs, and deploys intelligent automation systems, cobots, and mechatronics in industry-grade automation cells.', 'link_url' => '/schools/school-of-robotics'],
-                ['image' => $this->media['labs-research'], 'title' => 'School of Sustainability (SoS)', 'body' => 'Accelerates India’s transition to clean energy, circular economy models, and sustainable industrial growth through living labs.', 'link_url' => '/schools/school-of-sustainability'],
-            ]]],
-            ['media_cards', ['eyebrow' => 'Centers of Excellence', 'heading' => 'MET Innovation Centres', 'layout' => 'tall', 'tone' => 'light', 'card_link_label' => 'Explore Centre', 'items' => [
-                ['image' => $this->media['specialized-labs-vehicle'], 'title' => 'Center of Excellence in Automotive Engineering', 'body' => 'Focal point for research and skill-building across electric vehicles, alternate fuels, ADAS, and vehicle electrification.', 'link_url' => '/centres/coe-in-automotive-engineering'],
-                ['image' => $this->media['precision-machining'], 'title' => 'Center of Advanced Computing & AI (CoACAI)', 'body' => 'Hub for innovation and research in data science, generative AI, computer vision, and AI-driven industrial robotics.', 'link_url' => '/centres/centre-of-advanced-computing-ai'],
-                ['image' => $this->media['turbine-engineer'], 'title' => 'Experiential Learning Center for Sustainable Energy & Circularity', 'body' => 'Joint initiative of NTPC, IIT Roorkee, and NAMTECH pioneering clean energy transition and sustainable manufacturing.', 'link_url' => '/centres/experiential-learning-center-for-sustainable-energy-circularity'],
-            ]]],
-            ['media_cards', ['eyebrow' => 'Living Labs', 'heading' => 'Next-Gen Labs & Facilities', 'body' => 'Students gain hands-on experience on real-industry equipment designed for the future of manufacturing.', 'layout' => 'tall', 'cta_label' => 'View all labs', 'cta_url' => '/academics/labs-and-infrastructure', 'items' => $this->livingLabs()]],
-            $contactCta,
-        ]);
-
-        $pages['faculty'] = $this->page('Faculty', 'faculty', null, [
-            $hero('Learn from Global Experts & Industrial Visionaries', $img('p126', 'Smiling faculty member'), 'Faculty', 'Our world-class faculty includes leading academicians, industry practitioners, and technology leaders who bring decades of real-world insights into the classroom to shape technically rigorous, industry-ready professionals.'),
-            ['card_grid', ['eyebrow' => 'Academic Excellence', 'heading' => 'Why Learn with NAMTECH Faculty', 'style' => 'joined', 'columns' => '3', 'tone' => 'lavender', 'cards' => [
-                ['icon' => 'globe', 'title' => 'Global Academic Backgrounds', 'body' => 'Faculty trained at institutions like MIT, TUM, IITs, and Carnegie Mellon co-designing world-class learning modules.'],
-                ['icon' => 'factory', 'title' => 'Hands-On Industrial Mastery', 'body' => 'Educators with extensive shop-floor experience guiding students on industrial-scale CNC machines and robotics cells.'],
-                ['icon' => 'lightbulb', 'title' => 'Active Applied Research', 'body' => 'Mentorship on live corporate capstone projects, patents, and innovations in smart manufacturing and clean energy.'],
-            ]]],
-            ['people', ['eyebrow' => 'Academic Community', 'heading' => 'Featured Faculty', 'layout' => 'grid', 'limit' => 24]],
-            $contactCta,
-        ]);
-
-        $pages['awards'] = $this->page('Awards & Recognitions', 'awards', null, [
-            $hero('Awards & Institutional Recognitions', $img('p056', 'Students raising their thumbs together'), 'Recognition', 'Celebrating excellence in manufacturing education, innovative experiential pedagogy, and transformative industry impact.'),
-            ['achievements', ['eyebrow' => 'Honors', 'heading' => 'National & Institutional Accolades', 'layout' => 'awards', 'items' => [
-                ['title' => 'Excellence in Sustainable Engineering Education 2025', 'organization' => 'National Clean Energy Council', 'year' => '2025', 'text' => 'Recognized for innovative experiential curriculum in industrial sustainability and decarbonization.'],
-                ['title' => 'Pioneering Industry-Academia Collaborative Lab 2024', 'organization' => 'India Manufacturing Summit', 'year' => '2024', 'text' => 'Awarded for state-of-the-art living labs established in partnership with global clean-tech leaders.'],
-                ['title' => 'Best Green Campus & Clean Energy Initiative 2024', 'organization' => 'CII Green Business Centre', 'year' => '2024', 'text' => 'Honored for comprehensive circular economy practices and energy-efficient campus operations.'],
-                ['title' => 'Deemed-to-be-University Letter of Intent', 'organization' => 'University Grants Commission (UGC)', 'year' => '2022', 'text' => 'Received official Letter of Intent from the UGC, recognizing NAMTECH as a premier specialized technical institution.'],
-            ]]],
-            ['card_grid', ['eyebrow' => 'Student Innovations', 'heading' => 'Student Accolades & Competitions', 'style' => 'joined', 'columns' => '3', 'tone' => 'white', 'cards' => [
-                ['icon' => 'award', 'title' => 'IndiaSkills Regional Champions 2025', 'body' => 'NAMTECH student technologists secured top podium finishes in CNC Machining, Industrial Robotics, and Mechatronics.'],
-                ['icon' => 'lightbulb', 'title' => 'National Smart Manufacturing Hackathon', 'body' => 'First prize awarded to student teams for deploying an AI-driven digital twin reducing machine downtime by 24%.'],
-                ['icon' => 'globe', 'title' => 'WorldSkills International Participation', 'body' => 'Student representatives selected to train alongside global technical competitors in precision automation.'],
-            ]]],
-            $contactCta,
-        ]);
+        $this->page('Programs', 'programs', null, [$hero('Programs', $this->media['program-student-hardware'], 'Academics')]);
+        $this->page('Schools & Centres', 'schools', null, [$hero('NAMTECH’s Innovation Schools for the Future of Manufacturing', $this->media['labs-research'], 'Schools, Centres, and Programs')]);
+        $this->page('Faculty', 'faculty', null, [$hero('Meet our Faculty', $img('p126', 'Smiling faculty member'), 'Faculty', 'Our faculty comprises accomplished academicians, industry leaders, and global experts shaping the future of manufacturing and technology.')]);
 
         // ---------------------------------------------------------------- Admissions
-                $pages['scholarship'] = $this->page('India MET Scholarship Program', 'scholarship', null, [
-            $hero('India MET Scholarship Program', $img('p111', 'Graduate in cap and gown'), 'Scholarships', 'The world is being rebuilt by smart factories, intelligent machines, and the makers who drive them. India intends to lead that world. The NAMTECH India MET Scholarship program exists to enable you to access world-class education and become the driving force behind the future of manufacturing and technology.', ['cta_label' => 'Apply for Scholarship', 'cta_url' => '/admissions#enquire']),
-            ['stat_cards', ['eyebrow' => 'Scholarship Criteria', 'heading' => 'Comprehensive Financial Aid & Merit Awards', 'tone' => 'white', 'items' => [
-                ['icon' => 'people', 'value' => '75%', 'label' => 'All Women Candidates'],
-                ['icon' => 'award', 'value' => '75%', 'label' => 'GATE-Qualified Candidates'],
-                ['icon' => 'globe', 'value' => '75%', 'label' => 'Northern & North-Eastern States'],
-                ['icon' => 'graduation', 'value' => 'Up to 75%', 'label' => 'INI-Qualified Candidates (IITs, NITs, IIITs)'],
-                ['icon' => 'trend', 'value' => '50–75%', 'label' => 'Merit-cum-Means for All Eligible Candidates'],
-            ]]],
-            ['card_grid', ['eyebrow' => 'Eligible Programs', 'heading' => 'Scholarships Available Across All Master Programs', 'style' => 'joined', 'columns' => '3', 'tone' => 'lavender', 'cards' => [
-                ['icon' => 'factory', 'title' => 'Smart Manufacturing Technology & Management'],
-                ['icon' => 'chip', 'title' => 'Semiconductor Manufacturing Technology & Management'],
-                ['icon' => 'leaf', 'title' => 'Sustainability Engineering & Management'],
-                ['icon' => 'robot', 'title' => 'Robotics Engineering & Management'],
-                ['icon' => 'gear', 'title' => 'Automotive Technology & Management'],
-                ['icon' => 'chart', 'title' => 'Data Analytics & Artificial Intelligence'],
-            ]]],
-            ['eligibility', ['eyebrow' => null, 'heading' => 'Eligibility Criteria', 'criteria' => [
-                ['text' => 'Currently pursuing or completed B.Tech, B.E., or M.Tech from a recognized university.'],
-                ['text' => 'Minimum 60% aggregate marks in 10th standard, 12th standard, and graduation.'],
-                ['text' => 'Shortlisted candidates must clear the NAMTECH Design & Aptitude Interview.'],
-            ]]],
-            ['feature_list', ['eyebrow' => null, 'heading' => 'Education Loan Assistance', 'body' => 'Loan partners: EduAID, Axis Bank, Credila, and ICICI Bank.', 'tabs' => [['label' => null, 'items' => [
-                ['icon' => 'bank', 'text' => 'Multi-bank education loan aggregator and facilitation support'],
-                ['icon' => 'rupee', 'text' => 'Up to 100% coverage of tuition, hostel, and total education cost'],
-                ['icon' => 'clock', 'text' => 'Flexible repayment tenure up to 15 years, with interest rates starting at 9.8%'],
-                ['icon' => 'arrow-right', 'text' => 'Direct disbursement to university (as per admission letter)'],
-                ['icon' => 'document', 'text' => 'Tax benefits on interest paid under Section 80(E)'],
-                ['icon' => 'check', 'text' => 'Collateral-free loan options available'],
-            ]]]]],
-            $contactCta,
-        ]);
-
         $pages['admissions'] = $this->page('Admissions', 'admissions', null, [
             $hero('Admissions: Undergraduate', $img('p111', 'Graduate in cap and gown'), 'Admissions', 'NAMTECH’s School of Sustainability drives Energy and Circularity to accelerate the MET sector toward clean, decarbonized futures. Blending modern science with India’s resourceful ethos, it delivers hands-on learning that creates real-world impact.', ['cta_label' => 'Apply Now', 'cta_url' => '#enquire', 'secondary_label' => 'Contact Us', 'secondary_url' => '/contact']),
             ['program_finder', ['heading' => 'Explore Admissions by UG Program', 'level' => 'undergraduate', 'tone' => 'lavender']],
@@ -1454,16 +1286,11 @@ class ContentSeeder extends Seeder
             ['contact_cards', ['eyebrow' => null, 'heading' => 'Meet the NAMTECH Team in Your City', 'items' => [
                 ['region' => 'Bihar, Jharkhand, Odisha, West Bengal and Karnataka', 'name' => 'Rakesh Tiwari', 'email' => 'rakesh.tiwari@namtech.ac'],
             ]]],
-            ['faq', ['heading' => 'Frequently Asked Questions', 'body' => 'Find answers to common questions about the Program, admissions, and student life.', 'layout' => 'centered', 'items' => [
-                ['question' => 'What are the eligibility criteria for admission?', 'answer' => '<p>Candidates with a B.E./B.Tech. degree in relevant engineering disciplines with a minimum of 60% marks or equivalent CGPA are eligible to apply. Final year engineering students awaiting results are also eligible to apply conditionally.</p>'],
-                ['question' => 'Is work experience required for this program?', 'answer' => '<p>Work experience is not mandatory. Both fresh engineering graduates and working professionals with up to 3 years of industry experience are encouraged to apply.</p>'],
-                ['question' => 'What is the placement record?', 'answer' => '<p>NAMTECH has achieved a 100% placement track record for its cohorts, with an average salary package of ₹12 LPA and highest offers up to ₹24 LPA from top industrial recruiters like AM/NS India, Siemens, Schneider Electric, and global manufacturing OEMs.</p>'],
-                ['question' => 'Are there opportunities for international exposure?', 'answer' => '<p>Yes, through our academic collaborations with premier institutions like TUM Asia (Technical University of Munich) and global industry partners, students gain international curriculum exposure, guest lectures, and opportunities for global industry residencies.</p>'],
-                ['question' => 'What kind of projects will I work on?', 'answer' => '<p>Students engage in hands-on industry capstone projects, living lab simulations, robotics automation cells, digital twin deployments, and real problem briefs sourced directly from manufacturing partners.</p>'],
-                ['question' => 'How are scholarships awarded?', 'answer' => '<p>Merit-based scholarships of up to 30% to 75% fee waivers are available for high-achieving applicants, women in manufacturing (WiM), and graduates from Institutes of National Importance (INIs).</p>'],
-                ['question' => 'What support is available for accommodation?', 'answer' => '<p>NAMTECH provides comprehensive residential housing facilities with modern amenities, study areas, dining, Wi-Fi, and dedicated campus shuttle connectivity in Gandhinagar.</p>'],
-                ['question' => 'Can I pursue specializations within the program?', 'answer' => '<p>Yes, learners can select electives and specialization tracks in cutting-edge domains such as Smart Automation, Robotics & AI, Additive Manufacturing, and Sustainable Energy Systems.</p>'],
-            ]], 'faq'],
+            ['faq', ['heading' => 'Frequently Asked Questions', 'body' => 'Find answers to common questions about the Program, admissions, and student life.', 'layout' => 'centered', 'items' => array_map(fn (string $q) => ['question' => $q, 'answer' => $tbc], [
+                'What are the eligibility criteria for admission?', 'Is work experience required for this program?', 'What is the placement record?',
+                'Are there opportunities for international exposure?', 'What kind of projects will I work on?', 'How are scholarships awarded?',
+                'What support is available for accommodation?', 'Can I pursue specializations within the program?',
+            ])], 'faq'],
             ['enquiry_form', ['heading' => 'Program enquiry', 'body' => 'Tell us which program you are interested in and our admissions team will get back to you.', 'form_type' => 'program', 'show_contact_details' => true], 'enquire'],
         ]);
 
@@ -1491,15 +1318,16 @@ class ContentSeeder extends Seeder
             'question' => $partner[0],
             'answer' => implode('', array_map(fn (string $paragraph) => '<p>'.e($paragraph).'</p>', $partner[1])),
         ], $this->corporatePartnerProfiles())], 'industry-partners'];
-        $leaderQuotes = ['testimonials', ['eyebrow' => null, 'heading' => 'Hear from our Leaders', 'body' => 'Hear from industrial pioneers, visionaries and institutional heads who have experienced the approach, progress and success of the NAMTECH model.', 'layout' => 'quotes', 'items' => [
+        $leaderQuotes = ['testimonials', ['eyebrow' => null, 'heading' => 'A Vision Endorsed by Industry Leaders', 'body' => 'Hear from industrial pioneers, visionaries and institutional heads who have experienced the approach, progress and success of the NAMTECH model.', 'layout' => 'quotes', 'items' => [
             ['quote' => 'The progress NAMTECH has achieved is nothing short of remarkable. We are happy to partner with NAMTECH – a beacon of technical education in India.', 'name' => 'Mr. Bruce Poh', 'role' => 'CEO, ITEES Singapore'],
             ['quote' => 'NAMTECH has a visionary approach… focus on skilling at high scales for manufacturing… Posterity will acknowledge this impactful initiative and its institutional model that would bring up a future-ready high-tech workforce for India and the world.', 'name' => 'Dr. Koppillil Radhakrishnan', 'role' => 'Former Chairman – ISRO also led Mangalyaan (India’s Mars mission)'],
             ['quote' => 'I commend the founders and faculty of NAMTECH for creating a unique institution that is not just a center of academic excellence but also a beacon of hope for the future of engineering in India.', 'name' => 'Dr. Kamlesh Nilkanth Vyas', 'role' => 'Former Chairman – Indian Atomic Energy Commission, Distinguished Homi Bhabha Chair Professor at the Department of Atomic Energy'],
         ]]];
 
         $corporate = $this->page('Corporate Partnerships', 'corporate', $pages['partnerships'], [
-            $hero('A Collaborative Platform for Industry Leaders Powering Manufacturing Innovation', $img('p096', 'Colleagues discussing work at a laptop'), 'Corporate Partnerships', 'India’s leadership in Manufacturing Engineering Technology (MET) is being driven by next generation professionals who are industry-ready and globally competitive. As a first-of-its-kind industry-academia institution, NAMTECH is bringing together industry pioneers and policymakers to build talent through co-created curricula, world-class infrastructure and industry-first learning. This mission is made possible by partners with a shared belief that the future of engineering education is built through collaboration.', $corporateCta),
-            ['stat_cards', ['eyebrow' => null, 'heading' => 'Here’s Why Leading Corporates Build with NAMTECH', 'body' => 'India stands at a defining moment in its manufacturing journey. NAMTECH offers industry partners a structured ecosystem to capitalize on this shift across three industrial opportunity areas.', 'tone' => 'lavender', 'items' => [
+            $hero('A Collaborative Platform for Industry Leaders', $img('p096', 'Colleagues discussing work at a laptop'), 'Corporate Partnerships', 'As a first-of-its-kind industry-academia institution, NAMTECH is bringing together industry pioneers and policymakers to build talent through co-created curricula, world-class infrastructure and industry-first learning.', $corporateCta),
+            ['logo_strip', ['heading' => null, 'category' => 'industry', 'layout' => 'band']],
+            ['stat_cards', ['eyebrow' => null, 'heading' => "The Forces Powering India's Manufacturing Leadership", 'body' => 'India stands at a defining moment in its manufacturing journey. backed by strong policy momentum, a growing industrial ecosystem, global supply chain shifts and technological advances. NAMTECH offers industry partners a structured ecosystem to capitalize on this shift across three industrial opportunity areas.', 'tone' => 'lavender', 'items' => [
                 ['icon' => 'trend', 'value' => '25%', 'label' => 'Manufacturing Contribution to India’s GDP (GDP Acceleration)', 'text' => 'The national drive to scale manufacturing from 17% to 25% of GDP requires unprecedented demand for advanced manufacturing talent, innovation and industry-academia collaboration.'],
                 ['icon' => 'people', 'value' => '65%', 'label' => 'Of India’s Population is Below 35 Years of Age (Demographic Edge)', 'text' => 'Harnessing the world’s largest demographic needs future-ready engineering education designed to empower modern manufacturing workforces with cutting-edge technical and digital skills.'],
                 ['icon' => 'leaf', 'value' => '$10 Trillion', 'label' => 'Opportunity in India’s Green Transition (Sustainable Development)', 'text' => 'The shift toward sustainable growth and net-zero manufacturing produces new pathways for industrial innovation and clean energy leadership and presents a new model of development.'],
@@ -1547,10 +1375,8 @@ class ContentSeeder extends Seeder
             ]]],
             // "Labs Partnership – Equipment, Full Lab, Training" has a "Get Info" comment in the copy, so it is added hidden.
             ['card_grid', ['eyebrow' => null, 'heading' => 'Labs Partnership', 'style' => 'joined', 'columns' => '3', 'tone' => 'white', 'cards' => [
-                ['icon' => 'gear', 'title' => 'Equipment Partnership', 'body' => 'Deploy cutting-edge machinery, tooling, and diagnostic hardware in our living labs, training the next generation directly on your industrial technology.'],
-                ['icon' => 'flask', 'title' => 'Full Lab Co-Branding', 'body' => 'Establish branded, dedicated Centers of Excellence and specialized laboratories addressing sector-specific manufacturing challenges.'],
-                ['icon' => 'graduation', 'title' => 'Training & Workforce Development', 'body' => 'Co-create customized skilling and upskilling programs for your current workforce and recruit pre-trained, job-ready technologists.'],
-            ]], 'labs-partnership', true],
+                ['icon' => 'gear', 'title' => 'Equipment'], ['icon' => 'flask', 'title' => 'Full Lab'], ['icon' => 'graduation', 'title' => 'Training'],
+            ]], 'labs-partnership', false],
             ['card_grid', ['eyebrow' => null, 'heading' => 'Co-Building the Ecosystem', 'body' => 'NAMTECH’s Center of Excellence (CoE) and Lab partnerships are designed as collaborative ecosystems for industry leaders, researchers and government bodies to converge, solve complex industrial challenges and build shared capability.', 'style' => 'joined', 'columns' => '3', 'tone' => 'white', 'cards' => [
                 ['icon' => 'book', 'title' => 'Joint Curriculum Development', 'body' => 'Co-author course modules, design project briefs and embed your organizational experience and technical expertise directly into learning modules. NAMTECH graduates enter the workforce aligned with your operational environment and industrial know-how.'],
                 ['icon' => 'people', 'title' => 'Faculty & Researcher Engagement', 'body' => 'Your technical experts become part of NAMTECH’s academic community. Serving as visiting faculty, research co-supervisors and capstone mentors, this ensures your experts are at the frontier of research innovation while our faculty focuses on industrial application.'],
@@ -1576,16 +1402,16 @@ class ContentSeeder extends Seeder
             ['feature_list', ['eyebrow' => null, 'heading' => 'Our Academic Partners', 'tabs' => [['label' => null, 'items' => [
                 ['icon' => 'graduation', 'text' => 'Massachusetts Institute of Technology Department of Mechanical Engineering, United States'],
                 ['icon' => 'graduation', 'text' => 'Carnegie Mellon University, United States'],
-                ['icon' => 'graduation', 'text' => 'Technical University of Munich (TUM ASIA), Singapore'],
+                ['icon' => 'graduation', 'text' => 'Indian Institute of Technology (IIT), Roorkee'],
                 ['icon' => 'graduation', 'text' => 'Purdue University Northwest, United States'],
                 ['icon' => 'graduation', 'text' => 'ITEES, Singapore'],
             ]]]]],
             ['media_cards', ['eyebrow' => null, 'heading' => 'Global Academic Collaborations In Action', 'layout' => 'logo', 'items' => [
-                ['image' => $img('p043', 'Engineer building a robotics assembly'), 'title' => 'Massachusetts Institute of Technology Department of Mechanical Engineering, United States', 'body' => 'An 18-month pilot initiative designed to adapt, scale and implement MIT MechE’s renowned curriculum. By integrating advanced AR/VR architectures and phygital labs, we’re setting a new standard for engineering execution.'],
-                ['image' => $img('p102', 'Analyst reviewing data dashboards'), 'title' => 'Carnegie Mellon University, United States', 'body' => 'Our collaboration with Carnegie Mellon includes their Simon Initiative and Open Learning Initiative (OLI). NAMTECH and OLI are co-designing STEM courses, comprehensive faculty upskilling via the Learning Engineering Fellows program and upskilling ITI students. With the impact already visible, this valuable collaboration with Carnegie Mellon University will also lead to the establishment of a Learning Science Research Center on the NAMTECH campus.'],
-                ['image' => $this->media['global-collaboration-student'], 'logo' => $this->media['logo-tum-asia'], 'title' => 'Technical University of Munich (TUM ASIA), Singapore', 'body' => 'A continuous curriculum enhancement initiative in collaboration with TUM Asia is designed to anchor NAMTECH’s iPMP programs within changing Industry 4.0 standards, integrating innovative teaching methodologies and global academic practices. TUM Asia regularly conducts specialized training programs for NAMTECH faculty and students, while NAMTECH’s elite faculty members conduct specialized training programs in Singapore. Students completing iPMP programs receive joint certification from NAMTECH and TUM Asia.'],
-                ['image' => $img('p085', 'Teacher presenting at a whiteboard'), 'title' => 'Purdue University Northwest (PNW), United States', 'body' => 'The objective of this collaboration is to deliver customized, experiential and smart manufacturing-focused engineering programs that have helped close the gap between foundational studies and advanced research. Highly experienced PNW visiting faculty members assist NAMTECH faculty in delivering specialized modules in its programs. Additionally, NAMTECH and PNW’s 1+1 Pathway Program provides iPMP-SMG students with an exclusive opportunity to seamlessly transition into PNW’s Master of Science in Mechanical Engineering program in Indiana.'],
-                ['image' => $img('p116', 'Prize winners at the IndiaSkills regional competition'), 'title' => 'ITEES, Singapore', 'body' => 'A co-designed curriculum that integrates Indian technologists with Industry 4.0 standards and moulds them through Singapore’s elite postgraduate discipline. This partnership has enabled NAMTECH to build a strong trainer ecosystem. Over the last two years, NAMTECH has trained more than 100 trainers and impacted over 3,600 learners through its programs.'],
+                ['image' => $img('p043', 'Engineer building a robotics assembly'), 'logo' => $this->media['logo-mit'], 'title' => 'Massachusetts Institute of Technology Department of Mechanical Engineering, United States', 'body' => 'An 18-month pilot initiative designed to adapt, scale and implement MIT MechE’s renowned curriculum. By integrating advanced AR/VR architectures and phygital labs, we’re setting a new standard for engineering execution.'],
+                ['image' => $img('p102', 'Analyst reviewing data dashboards'), 'logo' => $this->media['logo-carnegie-mellon-university'], 'title' => 'Carnegie Mellon University, United States', 'body' => 'Our collaboration with Carnegie Mellon includes their Simon Initiative and Open Learning Initiative (OLI). NAMTECH and OLI are co-designing STEM courses, comprehensive faculty upskilling via the Learning Engineering Fellows program and upskilling ITI students. With the impact already visible, this valuable collaboration with Carnegie Mellon University will also lead to the establishment of a Learning Science Research Center on the NAMTECH campus.'],
+                ['image' => $img('p030', 'Wind turbines on a snowy hillside'), 'logo' => $this->media['logo-iit-roorkee'], 'title' => 'Indian Institute of Technology (IIT), Roorkee', 'body' => 'Together with IIT Roorkee, and supported by National Thermal Power Corporation (NTPC), NAMTECH has established the Experiential Learning Center for Sustainable Energy & Circularity (ELC:SEC) to advance applied research, industry-focused learning, and technology-led solutions for a more energy-efficient and resource-resilient industrial future.'],
+                ['image' => $img('p085', 'Teacher presenting at a whiteboard'), 'logo' => $this->media['logo-purdue-university-northwest'], 'title' => 'Purdue University Northwest (PNW), United States', 'body' => 'The objective of this collaboration is to deliver customized, experiential and smart manufacturing-focused engineering programs that have helped close the gap between foundational studies and advanced research. Highly experienced PNW visiting faculty members assist NAMTECH faculty in delivering specialized modules in its programs. Additionally, NAMTECH and PNW’s 1+1 Pathway Program provides iPMP-SMG students with an exclusive opportunity to seamlessly transition into PNW’s Master of Science in Mechanical Engineering program in Indiana.'],
+                ['image' => $img('p116', 'Prize winners at the IndiaSkills regional competition'), 'logo' => $this->media['logo-itees'], 'title' => 'ITEES, Singapore', 'body' => 'A co-designed curriculum that integrates Indian technologists with Industry 4.0 standards and moulds them through Singapore’s elite postgraduate discipline. This partnership has enabled NAMTECH to build a strong trainer ecosystem. Over the last two years, NAMTECH has trained more than 100 trainers and impacted over 3,600 learners through its programs.'],
             ]]],
             ['card_grid', ['eyebrow' => null, 'heading' => 'Here’s Why Leading Academic Institutions Partner With NAMTECH', 'style' => 'joined', 'columns' => '3', 'tone' => 'white', 'cards' => [
                 ['icon' => 'handshake', 'title' => 'Curriculum Co-Designed with Industry', 'body' => 'Our curriculum is designed and delivered in direct collaboration with industry leaders, ensuring students learn the skills, technologies and practices that are relevant to the evolving demands of the workplace.'],
@@ -1635,15 +1461,8 @@ class ContentSeeder extends Seeder
                 ['icon' => 'factory', 'title' => 'Tailored to the sector and businesses'], ['icon' => 'chart', 'title' => 'Built on deep critical evaluation'],
                 ['icon' => 'handshake', 'title' => 'Co-created for practical implementations'], ['icon' => 'trend', 'title' => 'Long term approach'],
             ]]],
-            ['tabs', ['eyebrow' => null, 'heading' => 'Industrial Sectors we serve', 'layout' => 'centered', 'tone' => 'light', 'tabs' => [
-                ['label' => 'Energy & Resources', 'title' => 'Energy & Resources', 'body' => '<p>Accelerating decarbonization, renewable energy grid integration, and circular resource management across mining, metallurgy, and utility sectors.</p>'],
-                ['label' => 'Industrials & Mobility', 'title' => 'Industrials & Mobility', 'body' => '<p>Engineering connected factory environments, EV powertrain optimization, collaborative robotics deployment, and lean production workflows for modern manufacturing.</p>'],
-                ['label' => 'Financial Services', 'title' => 'Financial Services', 'body' => '<p>Enabling ESG compliance frameworks, green capital financing assessments, and data-driven risk modeling for industrial assets.</p>'],
-                ['label' => 'MET Sector', 'title' => 'MET Sector', 'body' => '<p>Pioneering manufacturing engineering & technology breakthroughs, heavy industry automation, digital twins, and advanced materials engineering.</p>'],
-                ['label' => 'Health & Life Sciences', 'title' => 'Health & Life Sciences', 'body' => '<p>Consulting on precision cleanroom automation, medical device rapid prototyping, and pharmaceutical manufacturing supply chain resilience.</p>'],
-                ['label' => 'Infrastructure & Built Environment', 'title' => 'Infrastructure & Built Environment', 'body' => '<p>Advising on smart city infrastructure, sustainable building materials, low-carbon construction methods, and industrial estate optimization.</p>'],
-            ]]],
-            ['intro', ['heading' => 'Our Consulting Services', 'body' => '<p>NAMTECH’s Consultancy division partners with industrial enterprises to drive operational excellence, digital transformation, AI adoption, and sustainable green manufacturing practices. Leveraging state-of-the-art labs and distinguished faculty, we help organizations accelerate productivity and engineer tomorrow\'s industrial capabilities.</p>']],
+            ['tabs', ['eyebrow' => null, 'heading' => 'Industrial Sectors we serve', 'layout' => 'centered', 'tone' => 'light', 'tabs' => array_map(fn (string $t) => ['label' => $t, 'title' => $t, 'body' => $tbc], ['Energy & Resources', 'Industrials & Mobility', 'Financial Services', 'MET Sector', 'Health & Life Sciences', 'Infrastructure & Built Environment'])]],
+            ['intro', ['heading' => 'Our Consulting Services', 'body' => $tbc]],
             ['contact_cards', ['heading' => 'Leadership Team', 'items' => [['name' => 'Rakesh Tiwari', 'email' => 'rakesh.tiwari@namtech.ac']]]],
             $contactCta,
         ]);
@@ -1658,13 +1477,13 @@ class ContentSeeder extends Seeder
         ]]];
         $pages['ste'] = $this->page('School of Technical Education', 'school-of-technical-education', null, [
             $hero('School of Technical Education: Building Industry 4.0–Ready Technologists', $img('p028', 'Technician in a hard hat operating equipment'), 'School of Technical Education', null, ['cta_label' => 'Explore Programs', 'cta_url' => '#programs']),
-            ['intro', ['heading' => 'Overview', 'body' => '<p>The School of Technical Education (STE) is dedicated to preparing technician-engineers for the demanding realities of Industry 4.0. Through intensive hands-on curricula, simulation labs, and industry co-delivered modules, STE transforms diploma holders and technical learners into world-class automation and robotics technologists.</p>', 'icon' => 'cap']],
+            ['intro', ['heading' => 'Overview', 'body' => $tbc, 'icon' => 'cap']],
             ['card_grid', ['eyebrow' => 'Talking Points', 'heading' => 'Transforming India’s technical workforce', 'style' => 'joined', 'columns' => '4', 'tone' => 'white', 'cards' => [
                 ['icon' => 'people', 'title' => 'Transforming India’s Technician Workforce'], ['icon' => 'robot', 'title' => 'Experiential Learning Through Advanced Technology'],
                 ['icon' => 'factory', 'title' => 'Industry-integrated, applied learning models'], ['icon' => 'globe', 'title' => 'Scaling Skills Access Across India'],
             ]]],
             ['programs_list', ['eyebrow' => null, 'heading' => 'Explore Programs @ School of Technical Education', 'level' => 'technical', 'school' => null], 'programs'],
-            ['video_feature', ['layout' => 'overlay', 'heading' => 'Here’s What the Dean Says', 'body' => 'At the School of Technical Education, our focus is squarely on transforming India’s technical workforce through immersive, shop-floor learning. We don’t just teach theory—we empower technicians and engineers with the exact hands-on skills global manufacturers are looking for.', 'name' => 'Mr. Sandeep Achantani', 'role' => 'Director, School of Technical Education', 'image' => $img('p031', 'Portrait of the dean in a library')]],
+            ['video_feature', ['layout' => 'overlay', 'heading' => 'Here’s What the Dean Says', 'body' => self::Tbc, 'name' => 'Mr. Sandeep Achantani', 'role' => 'Director, School of Technical Education', 'image' => $img('p031', 'Portrait of the dean in a library')]],
             ['people', ['eyebrow' => 'Faculty', 'heading' => 'Featured Faculty', 'layout' => 'carousel', 'limit' => 8]],
             ['media_cards', ['eyebrow' => null, 'heading' => 'Labs & Infrastructure', 'layout' => 'tall', 'cta_label' => 'View All', 'cta_url' => '/academics/labs-and-infrastructure', 'items' => [
                 ['image' => $img('p120', 'Student working on an automation rig'), 'title' => 'Advanced Manufacturing Labs'],
@@ -1696,18 +1515,9 @@ class ContentSeeder extends Seeder
             ['accordion_media', ['eyebrow' => null, 'heading' => 'Current Gaps in Tech-Vocational Education', 'items' => array_map(fn (array $g) => ['title' => $g[0], 'text' => $g[1], 'image' => $img($g[2], $g[3])], $gaps)]],
             ['card_tabs', ['eyebrow' => null, 'heading' => 'NAMTECH’s Hubs and Spokes Model', 'body' => null, 'cta_label' => 'Read Case Study', 'cta_url' => '/impact/stories', 'tone' => 'lavender', 'tabs' => [
                 ['label' => 'Overview', 'cards' => [['icon' => 'building', 'title' => 'Infrastructure of the hubs'], ['icon' => 'globe', 'title' => 'Spokes’ ITI Network'], ['icon' => 'code', 'title' => 'Learning Delivery Model'], ['icon' => 'trend', 'title' => 'Student Impact & Career Pathways']]],
-                ['label' => 'Infrastructure', 'cards' => [
-                    ['icon' => 'building', 'title' => 'State-of-the-Art Training Hubs', 'text' => 'Equipped with mobile training units, specialized robotic work cells, and cloud-connected phygital simulation stations deployed across regional centers.'],
-                    ['icon' => 'gear', 'title' => 'Mobile Campuses & Labs on Wheels', 'text' => 'Bringing high-technology manufacturing equipment and certified training directly to remote ITIs and technical institutions.']
-                ]],
-                ['label' => 'Locations', 'cards' => [
-                    ['icon' => 'pin', 'title' => 'Key Industrial Clusters', 'text' => 'Expanding across major manufacturing corridors in Gujarat, Maharashtra, Tamil Nadu, Andhra Pradesh, and Northern industrial hubs.'],
-                    ['icon' => 'globe', 'title' => 'Pan-India Reach', 'text' => 'Partnering with state technical boards and central agencies to scale reach to over 500 partner polytechnics and ITIs.']
-                ]],
-                ['label' => 'Impact Stories', 'cards' => [
-                    ['icon' => 'trend', 'title' => 'Social Upliftment & Employability', 'text' => 'Empowering youth from tier-2 and tier-3 towns with immediate placement pathways in high-growth automation roles.'],
-                    ['icon' => 'award', 'title' => 'Career Acceleration', 'text' => 'Over 90% of certified technicians report a 2x increase in starting salaries upon completing the phygital skill pathways.']
-                ]],
+                ['label' => 'Infrastructure', 'cards' => [['icon' => 'building', 'title' => 'Infrastructure of the hubs', 'text' => self::Tbc]]],
+                ['label' => 'Locations', 'cards' => [['icon' => 'pin', 'title' => 'Locations', 'text' => self::Tbc]]],
+                ['label' => 'Impact Stories', 'cards' => [['icon' => 'trend', 'title' => 'Student Impact & Career Pathways', 'text' => self::Tbc]]],
             ]]],
             ['numbered_list', ['eyebrow' => null, 'heading' => 'NAMTECH’s Scaling Strategies', 'body' => 'NAMTECH is scaling its Hub-and-Spoke Model by partnering with Central & State Departments, Government ITIs and institutions for large-scale program implementation and with Industry to upskill their existing workforce.', 'list_label' => 'Our expansion focuses on:', 'items' => [
                 ['text' => 'Collaborating with Central & State Government for effective program implementation across technical institutions'],
@@ -1724,33 +1534,7 @@ class ContentSeeder extends Seeder
             ]]]]],
             $steContacts,
         ]);
-        $pages['iptp'] = $this->page('International Professional Technologist Program (iPTP)', 'iptp', $pages['ste'], [
-            $hero('International Professional Technologist Program (iPTP)', $img('p028', 'Technician in a hard hat operating equipment'), 'School of Technical Education', 'An intensive 1-year immersion program bridging technical diplomas and high-demand Industry 4.0 shop-floor careers, co-designed with ITE Education Services (ITEES), Singapore.', ['cta_label' => 'Apply for iPTP', 'cta_url' => '/admissions#enquire']),
-            ['stat_cards', ['eyebrow' => 'Outcomes', 'heading' => 'Why Choose iPTP?', 'tone' => 'lavender', 'items' => [
-                ['icon' => 'check', 'value' => '100%', 'label' => 'Placement Track Record'],
-                ['icon' => 'people', 'value' => '500+', 'label' => 'Certified Technologists'],
-                ['icon' => 'globe', 'value' => 'ITEES', 'label' => 'Singapore Co-Certification'],
-                ['icon' => 'rupee', 'value' => '2.5x', 'label' => 'Average Salary Uplift'],
-            ]]],
-            ['intro', ['heading' => 'Program Overview', 'icon' => 'cap', 'body' => '<p>The International Professional Technologist Program (iPTP) transforms ITI and polytechnic diploma holders into high-productivity shop-floor engineers. Through 1,200+ hours of hands-on training on industrial-grade CNC machines, mechatronics stations, and collaborative robotics cells, graduates enter the workforce Day-Zero Ready.</p>']],
-            ['timeline', ['eyebrow' => 'Curriculum Pathway', 'heading' => 'Program Structure', 'body' => 'Four progressive terms of rigorous technical training and industry immersion.', 'items' => [
-                ['year' => 'Term 1', 'title' => 'Foundations of Advanced Manufacturing', 'text' => 'Core mechanical, electrical, and pneumatic systems, safety standards, and engineering precision.'],
-                ['year' => 'Term 2', 'title' => 'Automation, CNC & PLC Systems', 'text' => 'Programming and operation of modern industrial automation rigs, PLC ladders, and CNC machining centers.'],
-                ['year' => 'Term 3', 'title' => 'Robotics & Industry 4.0 Integration', 'text' => 'Cobot deployment, sensor integration, IoT telemetry, and digital maintenance practices.'],
-                ['year' => 'Term 4', 'title' => 'Paid Industry Internship & Capstone', 'text' => 'Full-time immersion inside top partner manufacturing facilities with guaranteed placement transition.'],
-            ]]],
-            ['eligibility', ['eyebrow' => 'Admission', 'heading' => 'Eligibility & Selection', 'criteria' => [
-                ['text' => 'Diploma in Mechanical, Electrical, Mechatronics, or Automobile Engineering, or ITI certificate.'],
-                ['text' => 'Minimum 55% marks in qualifying technical examination.'],
-                ['text' => 'Candidate must pass NAMTECH Technical Aptitude & Practical Hands-on Assessment.'],
-            ]]],
-            ['faq', ['heading' => 'Frequently Asked Questions', 'layout' => 'centered', 'items' => [
-                ['question' => 'Who is eligible for the iPTP program?', 'answer' => '<p>Candidates holding a diploma in engineering or ITI certificate in relevant mechanical, electrical, or automation disciplines are eligible.</p>'],
-                ['question' => 'Is placement guaranteed after completing iPTP?', 'answer' => '<p>NAMTECH provides comprehensive placement support, with a 100% placement track record across our previous cohorts in leading manufacturing plants.</p>'],
-                ['question' => 'What certificate do graduates receive?', 'answer' => '<p>Graduates receive a joint certification from NAMTECH and ITE Education Services (ITEES), Singapore.</p>'],
-            ]]],
-            $contactCta,
-        ]);
+        $this->page('iPTP', 'iptp', $pages['ste'], [$hero('International Professional Technologist Program (iPTP)', $img('p028', 'Technician in a hard hat operating equipment'), 'School of Technical Education'), ['intro', ['heading' => 'About iPTP', 'body' => $tbc]]]);
 
         // ---------------------------------------------------------------- Impact
         $pages['impact'] = $this->page('Impact & Initiatives', 'impact', null, [
@@ -1769,24 +1553,6 @@ class ContentSeeder extends Seeder
             ['cta_band', ['heading' => 'Explore More Impact Stories', 'body' => null, 'cta_label' => 'View all', 'cta_url' => '/impact/stories']],
         ]);
         $this->page('Impact Stories', 'stories', $pages['impact'], [$hero('Impact Stories', $img('p039', 'Group of smiling students'), 'Impact')]);
-        $this->page('Support the Cause', 'support-the-cause', null, [
-            $hero('Creating Social Impact Together', $img('p039', 'Group of smiling students'), 'Support the Cause', 'At NAMTECH, social impact is embedded in how we design education, engage with industry, and prepare the next generation of skilled professionals. We invite corporates, foundations, and CSR partners to support initiatives that deliver measurable outcomes in education, employability, gender equity, and workforce readiness.', ['cta_label' => 'Partner With Us', 'cta_url' => '/contact']),
-            ['card_grid', ['eyebrow' => 'Key Initiative', 'heading' => 'Women in Manufacturing (WiM) Initiative', 'style' => 'joined', 'columns' => '4', 'tone' => 'lavender', 'cards' => [
-                ['icon' => 'graduation', 'title' => 'Advanced MET Education', 'body' => 'Enable women from across India to pursue advanced manufacturing & technology education through dedicated scholarships.'],
-                ['icon' => 'trend', 'title' => 'High-Growth Tech Roles', 'body' => 'Increase female participation in high-growth robotics, automation, and semiconductor engineering careers.'],
-                ['icon' => 'people', 'title' => 'Diverse Talent Pipeline', 'body' => 'Build an inclusive, future-ready manufacturing workforce that reflects modern India.'],
-                ['icon' => 'award', 'title' => 'Long-Term Independence', 'body' => 'Support long-term employability, leadership development, and economic independence for female technologists.'],
-            ]]],
-            ['card_grid', ['eyebrow' => 'How You Can Support', 'heading' => 'CSR & Impact Focus Areas', 'style' => 'outlined', 'columns' => '3', 'tone' => 'white', 'cards' => [
-                ['icon' => 'graduation', 'title' => 'Scholarships & Financial Aid', 'body' => 'Fund merit-cum-means scholarships and living stipends for talented students from underserved communities.'],
-                ['icon' => 'certificate', 'title' => 'Training & Certification Delivery', 'body' => 'Sponsor cohorts through NAMTECH’s Phygital Training Program and advanced Industry 4.0 certifications.'],
-                ['icon' => 'people', 'title' => 'Faculty & Curriculum Development', 'body' => 'Empower vocational trainers and government ITI faculty with modern pedagogical tools and industry immersion.'],
-                ['icon' => 'truck', 'title' => 'Mobility Outreach & Lab on Wheels', 'body' => 'Support mobile training campuses bringing specialized robotics and CNC machinery directly to rural ITIs.'],
-                ['icon' => 'briefcase', 'title' => 'Placement & Career Facilitation', 'body' => 'Bridge the last-mile gap from technical training to high-productivity shop-floor employment.'],
-                ['icon' => 'heart', 'title' => 'Trusted Giving Channels', 'body' => 'Partner with transparent governance, quantifiable social metrics, and comprehensive CSR compliance reporting.'],
-            ]]],
-            $contactCta,
-        ]);
 
         // ---------------------------------------------------------------- Placements
         $this->page('Placements', 'placements', null, [
@@ -1817,20 +1583,17 @@ class ContentSeeder extends Seeder
         $this->page('Life @ NAMTECH', 'life-at-namtech', null, [
             $hero('A day in the life of a NAMTECH Student', $img('p142', 'Students sitting together on campus steps'), 'Life @ NAMTECH'),
             ['tabs', ['eyebrow' => null, 'heading' => 'What You’ll Find On NAMTECH Campus', 'layout' => 'standard', 'tabs' => [
-                ['label' => 'Campus', 'title' => 'Campus', 'body' => '<p>NAMTECH’s modern campus at GIFT City, Gandhinagar is designed to inspire innovation and collaboration. Equipped with cutting-edge laboratories, open collaborative spaces, and modern recreational zones, the campus provides an energizing atmosphere where academic rigor meets real-world industry practice.</p>', 'image' => $img('p059', 'Students relaxing on a campus lawn')],
-                ['label' => 'Housing', 'title' => 'Housing', 'body' => '<p>Comfortable and secure on-campus and partnered student housing facilities provide a home away from home. Equipped with high-speed Wi-Fi, study lounges, dining options, and 24/7 security, our residences ensure learners can focus on their studies and build lifelong friendships.</p>', 'image' => $img('p088', 'Students on a campus walkway')],
-                ['label' => 'Health and Services', 'title' => 'Health and Services', 'body' => '<p>Comprehensive wellness support is available to all students, including on-campus medical consultation, dedicated counseling and mental health services, fitness centers, and emergency response partnerships with premier local hospitals.</p>', 'image' => $img('p117', 'Two women talking at a table')],
-                ['label' => 'Transport and Accessibility', 'title' => 'Transport and Accessibility', 'body' => '<p>Strategically situated in Gandhinagar, the campus is easily accessible via dedicated shuttle services connecting student housing, major transit hubs, Ahmedabad Airport, and local railway stations. Our campus facilities are fully barrier-free and accessible.</p>', 'image' => $this->media['inclusive-cohort']],
-                ['label' => 'Library', 'title' => 'Library', 'body' => '<p>Our hybrid digital and physical resource center houses thousands of technical journals, research publications, industrial standards, and access to leading engineering databases like IEEE Xplore, ScienceDirect, and digital manufacturing repositories.</p>', 'image' => $img('p045', 'Curved library bookshelves')],
+                ['label' => 'Campus', 'title' => 'Campus', 'body' => $tbc, 'image' => $img('p059', 'Students relaxing on a campus lawn')],
+                ['label' => 'Housing', 'title' => 'Housing', 'body' => $tbc, 'image' => $img('p088', 'Students on a campus walkway')],
+                ['label' => 'Health and Services', 'title' => 'Health and Services', 'body' => $tbc, 'image' => $img('p117', 'Two women talking at a table')],
+                ['label' => 'Transport and Accessibility', 'title' => 'Transport and Accessibility', 'body' => $tbc, 'image' => $this->media['inclusive-cohort']],
+                ['label' => 'Library', 'title' => 'Library', 'body' => $tbc, 'image' => $img('p045', 'Curved library bookshelves')],
             ]]],
             ['image_mosaic', ['heading' => 'Life @ NAMTECH', 'body' => null, 'images' => [['image' => $img('p142', 'Students sitting together on campus steps')], ['image' => $img('p088', 'Students on a campus walkway')], ['image' => $img('p067', 'Students applauding in a classroom')], ['image' => $img('p144', 'Students working together at a laptop')]]]],
-            ['faq', ['heading' => 'Frequently Asked Questions', 'layout' => 'centered', 'items' => [
-                ['question' => 'What clubs, events, and extracurricular activities can students participate in?', 'answer' => '<p>Students can join diverse student-led clubs ranging from Robotics and Coding to Sports, Cultural, and Sustainability initiatives. Regular hackathons, industry guest lectures, and cultural fests keep campus life lively and enriching.</p>'],
-                ['question' => 'What makes the campus experience at NAMTECH unique?', 'answer' => '<p>At NAMTECH, learning extends far beyond traditional classrooms into living labs, smart factory setups, and collaborative MakerSpaces where students work on real-world industry challenges alongside faculty and corporate mentors.</p>'],
-                ['question' => 'How does NAMTECH support student wellbeing and personal growth?', 'answer' => '<p>We take a holistic approach to student development through dedicated wellness counselors, sports facilities, peer mentorship programs, and structured workshops on communication, leadership, and emotional intelligence.</p>'],
-                ['question' => 'What support systems are available for students?', 'answer' => '<p>Learners have access to academic advising, career coaching, resume workshops, mock interviews with hiring partners, 24/7 health assistance, and faculty office hours for personalized academic guidance.</p>'],
-                ['question' => 'How does NAMTECH foster a vibrant campus community?', 'answer' => '<p>With learners joining from across India and diverse backgrounds, NAMTECH fosters an inclusive, collaborative community through cross-disciplinary hackathons, cultural festivals, sports tournaments, and community engagement projects.</p>'],
-            ]]],
+            ['faq', ['heading' => 'Frequently Asked Questions', 'layout' => 'centered', 'items' => array_map(fn (string $q) => ['question' => $q, 'answer' => $tbc], [
+                'What clubs, events, and extracurricular activities can students participate in?', 'What makes the campus experience at NAMTECH unique?',
+                'How does NAMTECH support student wellbeing and personal growth?', 'What support systems are available for students?', 'How does NAMTECH foster a vibrant campus community?',
+            ])]],
             ['cta_band', ['heading' => 'Experience NAMTECH Campus', 'body' => null, 'cta_label' => 'Take a Virtual 360° Tour', 'cta_url' => '/campus/virtual-tour']],
         ]);
         $pages['campus'] = $this->page('Campus', 'campus', null, [
@@ -1844,50 +1607,19 @@ class ContentSeeder extends Seeder
         ]);
 
         // ---------------------------------------------------------------- Media, events, careers
-        $pages['media'] = $this->page('NAMTECH in the Media', 'media', null, [
-            $hero('NAMTECH in the Media', $img('p060', 'Two colleagues walking and talking outdoors'), 'Media', 'Discover our latest institutional milestones, press features, industry partnerships, and public announcements.'),
-            ['post_list', ['heading' => 'Latest Press & News', 'post_type' => 'news', 'limit' => 6, 'layout' => 'grid']],
-            ['media_cards', ['eyebrow' => 'Highlights', 'heading' => 'Press Features & Announcements', 'layout' => 'horizontal', 'items' => [
-                ['image' => $this->media['news-indiaskills'], 'title' => 'NAMTECH Hosts Regional IndiaSkills Competition', 'body' => 'Showcasing future-ready engineering talent across advanced robotics, CNC machining, and mechatronics.'],
-                ['image' => $this->media['news-tata-electronics'], 'title' => 'Strategic Collaboration with Tata Electronics', 'body' => 'Expanding technician and engineer skilling pathways in semiconductor manufacturing.'],
-            ]]],
-            $contactCta,
-        ]);
-
-        $pages['news'] = $this->page('News & Insights', 'news', null, [
-            $hero('News & Insights', $this->media['news-automotive'], 'Media', 'Stay informed with the latest updates, achievements, and announcements from NAMTECH.'),
-            ['post_list', ['heading' => 'All News', 'post_type' => 'news', 'limit' => 12, 'layout' => 'grid']],
-            $contactCta,
-        ]);
-
-        $pages['blogs'] = $this->page('Voices of NAMTECH', 'blogs', null, [
-            $hero('Voices of NAMTECH', $img('p107', 'Group of colleagues gathered around a laptop'), 'Blogs', 'Insights, articles, and thought leadership on the future of manufacturing, technology, and engineering education from our faculty, students, and leadership.'),
-            ['post_list', ['heading' => 'Featured Articles & Insights', 'post_type' => 'blog', 'limit' => 12, 'layout' => 'grid']],
-            $contactCta,
-        ]);
-
-        $pages['events'] = $this->page('Events & Masterclasses', 'events', null, [
-            $hero('Events & Masterclasses', $img('p088', 'Students on a campus walkway'), 'Events', 'Conferences, technical masterclasses, workshops, and industry networking events at NAMTECH.'),
-            ['events_carousel', ['heading' => 'Upcoming Events', 'body' => 'Join global leaders, faculty, and industry pioneers for upcoming conferences and masterclasses.', 'cta_label' => 'View Details', 'cta_url' => '/events']],
-            ['card_grid', ['eyebrow' => 'Highlights', 'heading' => 'Signature NAMTECH Event Formats', 'style' => 'joined', 'columns' => '3', 'tone' => 'lavender', 'cards' => [
-                ['icon' => 'graduation', 'title' => 'Global Faculty Masterclasses', 'body' => 'Intensive technical sessions led by international visiting professors from MIT, TUM Asia, and leading institutes.'],
-                ['icon' => 'factory', 'title' => 'Industry 4.0 Summits', 'body' => 'Annual gatherings of manufacturing CEOs, policymakers, and engineering innovators discussing national priorities.'],
-                ['icon' => 'robot', 'title' => 'Student Hackathons & Competitions', 'body' => 'High-stakes design and prototyping challenges addressing live industrial problem statements.'],
-            ]]],
-            $contactCta,
-        ]);
+        $this->page('NAMTECH in the Media', 'media', null, [$hero('NAMTECH in the Media', $img('p060', 'Two colleagues walking and talking outdoors'), 'Media')]);
+        $this->page('News', 'news', null, [$hero('News & Insights', $this->media['news-automotive'], 'Media')]);
+        $this->page('Voices of NAMTECH', 'blogs', null, [$hero('Voices of NAMTECH', $img('p107', 'Group of colleagues gathered around a laptop'), 'Blogs')]);
+        $this->page('Events', 'events', null, [$hero('Events', $img('p088', 'Students on a campus walkway'), 'Events', 'Conferences, lectures, masterclasses and outreach programmes at NAMTECH.')]);
         $this->page('Careers', 'careers', null, [
             $hero('Join Us to Shape the Future of MET Education', $img('p034', 'Smiling colleagues around a table'), 'Careers', null, ['cta_label' => 'View Open Positions', 'cta_url' => '#open-positions']),
             ['card_grid', ['eyebrow' => null, 'heading' => 'Why Build Your Career @ NAMTECH', 'style' => 'joined', 'columns' => '3', 'tone' => 'white', 'cards' => [
                 ['icon' => 'factory', 'title' => 'Learning by building', 'body' => 'Learning happens by building. At NAMTECH, classrooms don’t have desks but machines used in the industry.'],
                 ['icon' => 'globe', 'title' => 'Global collaboration', 'body' => 'Our curriculum is co-designed and co-delivered with academicians from global universities.'],
-                ['icon' => 'people', 'title' => 'People-First Culture', 'body' => 'We foster an inclusive, merit-driven environment where educators, engineers, and researchers innovate together to transform manufacturing.'],
+                ['icon' => 'people', 'title' => self::Tbc],
             ]]],
             ['job_listings', ['heading' => 'See Open Positions']],
-            ['image_list', ['heading' => 'Life @ NAMTECH', 'image' => $img('p145', 'Colleagues talking in a meeting'), 'items' => [
-                ['title' => 'Collaborative & Purpose-Driven Workspace', 'text' => 'Join a high-energy team dedicated to revolutionizing manufacturing education and empowering 3 million youth across India.'],
-                ['title' => 'Continuous Professional Development', 'text' => 'Access international faculty exchanges, research grants, and direct exposure to cutting-edge Industry 4.0 innovations.']
-            ]]],
+            ['image_list', ['heading' => 'Life @ NAMTECH', 'image' => $img('p145', 'Colleagues talking in a meeting'), 'items' => [['title' => self::Tbc, 'text' => null]]]],
         ]);
 
         $pages['contact'] = $this->page('Contact', 'contact', null, [
@@ -1896,8 +1628,8 @@ class ContentSeeder extends Seeder
         ]);
 
         // Legal pages need approved text before publication, so they are seeded as drafts.
-        $pages['privacy'] = $this->page('Privacy Policy', 'privacy-policy', null, [['rich_text', ['heading' => 'Privacy Policy', 'body' => '<p>NAMTECH is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website or interact with our educational services.</p><h3>Information We Collect</h3><p>We may collect personal details such as your name, email address, phone number, academic records, and resume when you submit an enquiry, apply for admissions, register for events, or subscribe to our newsletters.</p><h3>How We Use Your Information</h3><p>We use your information to process admissions applications, respond to inquiries, send administrative updates, and provide academic notifications. We do not sell or rent your personal data to third parties.</p><h3>Data Security</h3><p>We implement strict administrative, technical, and physical security measures to safeguard your personal data against unauthorized access, disclosure, or misuse.</p>']]], template: 'legal', publish: true);
-        $pages['terms'] = $this->page('Terms of Use', 'terms-of-use', null, [['rich_text', ['heading' => 'Terms of Use', 'body' => '<p>Welcome to the official website of NAMTECH. By accessing or using this website, you agree to be bound by these Terms of Use and all applicable laws and regulations.</p><h3>Intellectual Property</h3><p>All content, branding, trademarks, logos, and materials published on this website are the property of NAMTECH or its academic and industry partners. You may not reproduce, distribute, or modify any materials without prior written consent.</p><h3>User Conduct</h3><p>You agree to use the site only for lawful educational purposes and in a manner that does not infringe on the rights of others or restrict their use and enjoyment of the website.</p>']]], template: 'legal', publish: true);
+        $pages['privacy'] = $this->page('Privacy Policy', 'privacy-policy', null, [['rich_text', ['heading' => null, 'body' => '<p>'.self::Tbc.' The approved privacy policy must be added before launch.</p>']]], template: 'legal', publish: false);
+        $pages['terms'] = $this->page('Terms of Use', 'terms-of-use', null, [['rich_text', ['heading' => null, 'body' => $tbc]]], template: 'legal', publish: false);
         $pages['sitemap'] = $this->page('Sitemap', 'sitemap', null, [['rich_text', ['heading' => 'Sitemap', 'body' => '<p>Browse the main sections of the website using the links below.</p><ul><li><a href="/about">About NAMTECH</a></li><li><a href="/academics">Academics</a></li><li><a href="/programs">Programs</a></li><li><a href="/schools">Schools &amp; Centres</a></li><li><a href="/admissions">Admissions</a></li><li><a href="/faculty">Faculty</a></li><li><a href="/partnerships">Partnerships</a></li><li><a href="/research-and-consultancy">Research &amp; Consultancy</a></li><li><a href="/school-of-technical-education">School of Technical Education</a></li><li><a href="/impact">Impact</a></li><li><a href="/placements">Placements</a></li><li><a href="/life-at-namtech">Life @ NAMTECH</a></li><li><a href="/campus">Campus</a></li><li><a href="/media">Media</a></li><li><a href="/events">Events</a></li><li><a href="/blogs">Blogs</a></li><li><a href="/careers">Careers</a></li><li><a href="/contact">Contact</a></li></ul>']]], template: 'legal');
 
         return $pages;
@@ -1918,11 +1650,12 @@ class ContentSeeder extends Seeder
 
     private function seedMission(): void
     {
-        // "The 3 Million Mission" cards matching the approved Figma handoff design.
+        // "The 3 Million Mission" cards from the client's homepage copy. "X++" is the client's placeholder for the learner count.
         $initiatives = [
-            ['Bridging Education and Industry', 'By 2035, we aim to empower 3 million youth with MET skills through education and partnerships to build India’s manufacturing workforce.', 'graduate'],
-            ['Expanding Access Without Diluting Quality', 'Students graduate with real-world MET skills from smart factory labs, automation tools, AR/VR, and precision engineering.', 'book'],
-            ['Building The Future Manufacturing Workforce', 'A scalable hub-and-spoke model with high-tech centres, connected ITIs, digital learning, and live industry exposure.', 'people'],
+            ['The Core Infrastructure', 'NAMTECH’s synchronized Hub-and-Spoke model is engineered to bring world-class technical education directly to the field. The model has been piloted in Mehsana, Gujarat, through 5 Hubs & 10 Spoke ITIs.', 'building'],
+            ['The Mobile Campus', 'One of our most innovative solutions, NAMTECH’s mobile campus delivers advanced training and labs directly to students and technicians in the field. Equipped with computing systems, simulation software and training modules, it enables specialized, cutting-edge upskilling at various hub & spoke ITIs.', 'pin'],
+            ['The Impact', 'NAMTECH’s Sharing Technology initiative has proven its merit in the form of upgraded labs, empowered trainers, and stronger success outcomes for learners. In just two years, we have empowered X++ learners, each of whom has evolved from a technician to a technologist.', 'trend'],
+            ['The Scale-Up', 'Having demonstrated the success of its model, NAMTECH is now tasked with empowerment of ITIs in Surat, Gujarat, and Visakhapatnam, Andhra Pradesh, with anchor partner AM/NS India, under the PM-SETU scheme.', 'globe'],
         ];
         foreach ($initiatives as $i => [$title, $body, $icon]) {
             Initiative::create(['title' => $title, 'body' => $body, 'icon' => $icon, 'is_active' => true, 'sort_order' => $i]);
@@ -1936,10 +1669,10 @@ class ContentSeeder extends Seeder
     {
         return $this->page('Home', 'home', null, [
             ['home_hero', [
-                'badges' => [['text' => 'Make in India'], ['text' => 'Industry 4.0'], ['text' => 'Viksit Bharat 2047']],
+                'badges' => [['text' => "India's First Manufacturing Engineering Technology (MET) Institute"]],
                 'slides' => [[
                     'title' => 'Powering India’s Next Manufacturing Revolution',
-                    'body' => 'NAMTECH prepares the next generation of innovators who are shaping the future of manufacturing in India.',
+                    'body' => "NAMTECH is preparing the workforce that will drive India's next phase of manufacturing growth and global competitiveness.",
                     'image' => $this->media['hero-electronics-inspection'],
                     'cta_label' => null, 'cta_url' => null,
                 ]],
@@ -1952,20 +1685,20 @@ class ContentSeeder extends Seeder
                     ['title' => 'Experiential Learning', 'body' => 'Learning at NAMTECH is deeply experiential. Through a problem-led approach, students apply concepts in real-world contexts to solve complex problems in modern manufacturing and engineering. Students learn by doing, building, and making.', 'image' => $this->media['experiential-learning-robotics'], 'link_url' => '/academics/pedagogy'],
                     ['title' => 'Integrated Industry Partnerships', 'body' => 'Industry partnerships are the cornerstone of our education model, which goes far beyond textbook scenarios. At NAMTECH, students work on active industrial projects and gain expertise in real manufacturing processes and challenges.', 'image' => $this->pdfImage('p053', 'Students working on industrial equipment with an engineer'), 'link_url' => '/partnerships/corporate'],
                     ['title' => 'Industry-Driven Placements', 'body' => 'Our placements are aligned with the future of industry, not just the jobs of today. With NAMTECH’s strong industry partnerships, students gain access to elusive career opportunities in advanced manufacturing and technology at leading organizations.', 'image' => $this->media['industry-placements-team'], 'link_url' => '/placements'],
-                    ['title' => 'Global Academic Collaboration', 'body' => 'At NAMTECH, students are taught by the minds shaping modern manufacturing education. Co-created with global academic institutions and leading industry practitioners, the curriculum is built around real industry scenarios, ensuring graduates are prepared to lead from day one.', 'image' => $this->media['global-collaboration-student'], 'link_url' => '/partnerships/academic'],
+                    ['title' => 'Global Academic Collaborations', 'body' => 'At NAMTECH, students are taught by the minds shaping modern manufacturing education. Co-created with global academic institutions and leading industry practitioners, the curriculum is built around real industry scenarios, ensuring graduates are prepared to lead from day one.', 'image' => $this->media['global-collaboration-student'], 'link_url' => '/partnerships/academic'],
                     ['title' => 'Inclusivity', 'body' => 'At NAMTECH, world-class manufacturing education is designed to reach talent across every level. Through specialized learning pathways and dedicated programs for undergraduate & postgraduate engineering students, ITI & Diploma holders, faculty, and executives, we cultivate talent that can be deployed across levels of the organization.', 'image' => $this->media['inclusive-cohort'], 'link_url' => '/school-of-technical-education'],
                 ],
             ]],
             ['academics_tabs', [
                 'eyebrow' => 'Schools, Centres & Programs',
-                'heading' => 'MET Innovation Schools: Engineering Education for Industry 5.0',
+                'heading' => 'Manufacturing Engineering Technology (MET) Innovation Schools: Engineering Education for Industry 5.0',
                 'schools_label' => 'MET Innovation Schools', 'centres_label' => 'MET Innovation Centers', 'programs_label' => 'MET Programs',
                 // The heading and introduction change with the selected tab.
-                'schools_heading' => 'MET Innovation Schools: Engineering Education for Industry 5.0',
-                'schools_body' => 'The Manufacturing Engineering Technology (MET) Innovation Schools at NAMTECH prepare graduates to become next-generation industrial and technology leaders. Through an industry-integrated approach, experiential learning, highly practical and specialized education, and applied innovation, each school builds deep expertise in critical domains shaping the future of manufacturing.',
-                'centres_heading' => 'MET Innovation Centers - Shaping Innovation for Industry 5.0',
+                'schools_heading' => 'Manufacturing Engineering Technology (MET) Innovation Schools: Engineering Education for Industry 5.0',
+                'schools_body' => 'MET Innovation Schools at NAMTECH prepare graduates to become next-generation industrial and technology leaders. Through an industry-integrated approach, experiential learning, highly practical and specialized education, and applied innovation, each school builds deep expertise in critical domains shaping the future of manufacturing.',
+                'centres_heading' => 'Manufacturing Engineering Technology (MET) Innovation Centers: Shaping Innovation for Industry 5.0',
                 'centres_body' => 'MET Innovation Centers at NAMTECH are built around a simple principle: innovation is best learned by doing. Students work alongside faculty and industry to explore emerging technologies, tackle real-world challenges, and develop practical solutions through applied research, experimentation, and domain-specific programs co-created and co-delivered with industry.',
-                'programs_heading' => 'MET Programs',
+                'programs_heading' => 'Manufacturing Engineering Technology (MET) Programs',
                 'programs_body' => "At NAMTECH, we understand that running the industries of the future will require deep technical and engineering expertise alongside strong leadership capabilities.\n\nThe programs are built in collaboration with industry experts and globally leading institutions, as well as are deeply experiential. This immersive approach helps NAMTECH graduates develop the hands-on expertise and decisive strategic thinking needed to lead tomorrow’s industries and contribute to India’s industrial transformation.",
                 'default_tab' => 'schools', 'featured_only' => false,
             ]],
@@ -1973,14 +1706,11 @@ class ContentSeeder extends Seeder
                 'eyebrow' => 'Partnerships',
                 'heading' => 'Learning with Leading Global Universities & Industries',
                 'body' => 'Through strategic partnerships with global industry leaders and premier academic institutions, NAMTECH delivers education shaped by real-world insights and advanced technologies. We integrate advanced technologies, experiential learning on industry-grade equipment, and actual industry practices to offer an unparalleled learning experience.',
-                'cta2_label' => 'Corporate Partnership', 'cta2_url' => '/partnerships/corporate',
-                'cta3_label' => 'Academic Partnership', 'cta3_url' => '/partnerships/academic',
-                'show_stories' => true,
-                'stories_cta_label' => 'Read all stories', 'stories_cta_url' => '/partnerships',
+                'show_stories' => false, 'stories_layout' => 'text',
             ]],
             ['faculty_showcase', [
                 'eyebrow' => 'Faculty',
-                'heading' => "Learn from\nGlobal Experts",
+                'heading' => "The Minds Behind Tomorrow's Makers",
                 'body' => 'NAMTECH’s world-class faculty includes leading academicians, industry leaders, and technology experts who bring decades of rich experience and real-world insights into the classroom to shape technically rigorous, industry-ready professionals.',
                 'cta_label' => 'Explore Faculty', 'cta_url' => '/faculty',
             ]],
@@ -1999,20 +1729,14 @@ class ContentSeeder extends Seeder
                 'eyebrow' => 'Campus',
                 'heading' => 'A World-Class Industry-Integrated Campus',
                 'body' => 'Built to replicate the smart manufacturing ecosystems shaping today’s industrial landscape, the NAMTECH campus houses advanced labs, industry-grade equipment, and AI-enabled phygital learning experiences that simulate real industrial environments. The NAMTECH campus embodies MET philosophy — enabling convergence of technology, academic experience, and industry to make learning deeply applied and relevant.',
-                'feature_title' => 'Advanced Manufacturing Labs & Facilities',
-                'feature_body' => 'This immersive approach enables students to develop hands-on expertise, adapt to evolving technologies and be industry-ready from day one.',
                 'gallery' => 'campus',
                 'cta_label' => 'Explore Campus', 'cta_url' => '/campus',
                 'tour_label' => 'Virtual tour',
             ]],
             ['mission', [
-                'heading' => 'Built to Build India - The 3 Million Mission',
-                'body' => 'NAMTECH is on a movement to work with ITIs across India to prepare a future-ready workforce for the era of advanced manufacturing. We hold a vision to empower 3 million young Indians in Industry 4.0 & 5.0 technologies as well as sustainability imperatives. Through this initiative, we are upgrading ITIs with advanced infrastructure, industry-aligned curricula, and training-the-trainer programs. Combined with mentorship and placement pathways, it is creating a new generation of industry-ready and globally competitive talent.',
-                'limit' => 3, 'statistics_group' => null, 'cta_label' => 'Join Our Mission', 'cta_url' => '/school-of-technical-education/outreach',
-            ]],
-            ['news_carousel', [
-                'heading' => 'News & Insights', 'post_type' => 'news', 'limit' => 8,
-                'cta_label' => 'View all insights', 'cta_url' => '/media',
+                'heading' => 'The 3 Million Mission',
+                'body' => 'Through its Sharing Technology initiative, NAMTECH is on a mission to empower 3 million youth in India with future-ready Industry 4.0 and Industry 5.0 skills through smart labs, industry mentorship, mobile campuses, and advanced technology training.',
+                'limit' => 4, 'statistics_group' => null, 'cta_label' => 'Join Our Mission', 'cta_url' => '/school-of-technical-education/outreach',
             ]],
         ], template: 'home', meta: 'NAMTECH prepares the next generation of innovators who are shaping the future of manufacturing in India.');
     }
@@ -2032,16 +1756,15 @@ class ContentSeeder extends Seeder
             ['About us', '/about', [
                 ['About Us', '/about'], ['Board of Directors', '/about/board-of-directors'], ['Advisory Council', '/about/advisory-council'],
                 ['Management Team', '/about/management-team'], ['Mandatory Disclosures', '/about/mandatory-disclosures'], ['Ranks & Accreditations', '/about/ranks-and-accreditations'],
-                ['Awards & Recognitions', '/awards'],
             ]],
             ['Partnerships', '/partnerships', [['Corporate Partnerships', '/partnerships/corporate'], ['Academic Partnerships', '/partnerships/academic']]],
             ['Research & Consultancy', '/research-and-consultancy', [['Research & Publications @ NAMTECH', '/research-and-consultancy/research'], ['Consultancy', '/research-and-consultancy/consultancy'], ['Publications', '/research-and-consultancy/publications']]],
-            ['School of technical education', '/school-of-technical-education', [
-                ['STE', '/school-of-technical-education'],
-                ['iPTP', '/school-of-technical-education/iptp'],
+            ['School of Technical Education', '/school-of-technical-education', [
+                ['Overview', '/school-of-technical-education'],
+                ['International Professional Technologist Program (iPTP)', '/school-of-technical-education/iptp'],
                 ['Outreach', '/school-of-technical-education/outreach'],
             ]],
-            ['Impact', '/impact', [['Impact & Initiatives', '/impact'], ['Impact Stories', '/impact/stories'], ['Support the Cause', '/support-the-cause']]],
+            ['Impact', '/impact', [['Impact & Initiatives', '/impact'], ['Impact Stories', '/impact/stories']]],
             ['Media', '/media', [['News, Press & Announcements', '/media'], ['Events', '/events'], ['Blogs', '/blogs']]],
         ]);
 
@@ -2054,14 +1777,14 @@ class ContentSeeder extends Seeder
                 ['Schools and Centers', '/schools', collect($schools)->map(fn (School $s) => [$s->name, $schoolPath($s)])
                     ->concat(collect($centres)->map(fn (Centre $c) => [$c->menu_label ?? $c->name, $c->publicPath()]))->values()->all()],
                 ['Pedagogy', '/academics/pedagogy'],
-                ['Admission', '/admissions'],
+                ['Labs & Infrastructure', '/academics/labs-and-infrastructure'],
             ]],
             ['Programs', '/programs', [
                 ['UG Programs', '/programs?level=undergraduate', $programLinks('undergraduate')],
-                ['PG Programs', '/programs?level=postgraduate', $programLinks('postgraduate')],
+                ['Master Programs', '/programs?level=postgraduate', $programLinks('postgraduate')],
                 ['Executive Programs', '/programs?level=executive', $programLinks('executive')],
             ]],
-            ['Admissions', '/admissions', [['Admissions Overview', '/admissions'], ['India MET Scholarships', '/scholarship']]],
+            ['Admissions', '/admissions'],
             ['Faculty', '/faculty'],
             ['Placements', '/placements'],
             ['Life @ NAMTECH', '/life-at-namtech'],
@@ -2073,7 +1796,7 @@ class ContentSeeder extends Seeder
             ->concat(collect($centres)->map(fn (Centre $c) => [$c->name, $c->publicPath()]))->values()->all());
         $menu('footer_partnerships', 'Footer – partnerships', [['Academic Partnerships', '/partnerships/academic'], ['Corporate Partnerships', '/partnerships/corporate']]);
         $menu('footer_quick_links', 'Footer – quick links', [
-            ['Media Center', '/media'], ['Scholarships', '/scholarship'], ['Support the Cause', '/support-the-cause'], ['Awards', '/awards'], ['Student Portal', null], ['Staff Portal', null], ['Career Development Services', '/placements'], ['Careers', '/careers'], ['Events', '/events'], ['Sitemap', '/sitemap'],
+            ['Media Center', '/media'], ['Student Portal', null], ['Staff Portal', null], ['Career Development Services', '/placements'], ['Careers', '/careers'], ['Events', '/events'], ['Sitemap', '/sitemap'],
         ]);
         $menu('legal', 'Footer – legal', [['Privacy Policy', $pages['privacy']], ['Terms of Use', $pages['terms']]]);
     }

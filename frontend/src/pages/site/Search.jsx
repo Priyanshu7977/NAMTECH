@@ -13,7 +13,7 @@ export default function Search({ query, results }) {
                     <h1>Search</h1>
                 </div>
             </header>
-            <section className="nt-section pt-5">
+            <section className="nt-section">
                 <div className="container" style={{ maxWidth: '52rem' }}>
                     <form role="search" className="d-flex gap-3 nt-form mb-5" onSubmit={(e) => {
                         e.preventDefault();

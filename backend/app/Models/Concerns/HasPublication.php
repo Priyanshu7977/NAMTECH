@@ -10,15 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-/**
- * Draft / review / schedule / publish workflow with revision history.
- *
- * Live content lives on the model itself. Edits made to already-published content are
- * stored as a "working" revision until a publisher publishes them, so editors can never
- * change the live site without review.
- *
- * @property ContentStatus $status
- */
 trait HasPublication
 {
     use FlushesPublicCache;
@@ -50,9 +41,6 @@ trait HasPublication
         ]);
     }
 
-    /**
-     * Content visible to the public right now.
-     */
     public function scopePublished(Builder $query): Builder
     {
         return $query->where($this->qualifyColumn('status'), ContentStatus::Published->value)
@@ -86,49 +74,20 @@ trait HasPublication
         return $this->morphOne(ContentRevision::class, 'revisionable')->where('kind', ContentRevision::KindWorking);
     }
 
-    /**
-     * Attribute names captured in revisions and editable through the CMS.
-     *
-     * @return array<int, string>
-     */
     public function revisionableAttributes(): array
     {
         return array_values(array_diff($this->getFillable(), ['status', 'review_state', 'published_at', 'scheduled_for']));
     }
 
-    /**
-     * Related data captured in revisions (sections, tags, ...). Override per model.
-     *
-     * @return array<string, mixed>
-     */
     public function snapshotRelations(): array
     {
         return [];
     }
 
-    /**
-     * Persist related data from a snapshot. Override per model.
-     *
-     * @param  array<string, mixed>  $relations
-     */
-    public function restoreRelations(array $relations): void
-    {
-        //
-    }
+    public function restoreRelations(array $relations): void {}
 
-    /**
-     * Hydrate in-memory relations from a snapshot for previews (nothing is saved).
-     *
-     * @param  array<string, mixed>  $relations
-     */
-    public function previewRelations(array $relations): void
-    {
-        //
-    }
+    public function previewRelations(array $relations): void {}
 
-    /**
-     * @return array{attributes: array<string, mixed>, relations: array<string, mixed>}
-     */
     public function toSnapshot(): array
     {
         $attributes = [];
@@ -140,14 +99,8 @@ trait HasPublication
         return ['attributes' => $attributes, 'relations' => $this->snapshotRelations()];
     }
 
-    /**
-     * Relative public URL path, or null when the content type has no detail page.
-     */
     abstract public function publicPath(): ?string;
 
-    /**
-     * Human-readable title for admin lists and audit logs.
-     */
     public function displayTitle(): string
     {
         $attributes = $this->getAttributes();

@@ -20,6 +20,7 @@ class Page extends Model
         'default' => 'Standard page',
         'home' => 'Homepage',
         'legal' => 'Legal / policy page',
+        'landing' => 'School / centre landing page',
     ];
 
     protected $fillable = [

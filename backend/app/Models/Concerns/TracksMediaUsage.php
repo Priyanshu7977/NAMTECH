@@ -5,10 +5,6 @@ namespace App\Models\Concerns;
 use App\Models\MediaUsage;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-/**
- * Records which media items a record references so the media library can block
- * deletion of in-use assets and show where an asset is used.
- */
 trait TracksMediaUsage
 {
     public static function bootTracksMediaUsage(): void
@@ -22,11 +18,6 @@ trait TracksMediaUsage
         return $this->morphMany(MediaUsage::class, 'usable');
     }
 
-    /**
-     * Media foreign-key columns on this model.
-     *
-     * @return array<int, string>
-     */
     public function mediaColumns(): array
     {
         return array_values(array_filter(
@@ -35,11 +26,6 @@ trait TracksMediaUsage
         ));
     }
 
-    /**
-     * Additional media references (e.g. inside sections or related items), keyed by field name.
-     *
-     * @return array<string, array<int, int>>
-     */
     public function additionalMediaReferences(): array
     {
         return [];

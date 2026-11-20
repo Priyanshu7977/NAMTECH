@@ -4,10 +4,6 @@ namespace Tests;
 
 use Illuminate\Testing\TestResponse;
 
-/**
- * Fluent checks on an Inertia page ({component, props}) returned for an Inertia visit.
- * Paths are relative to "props", e.g. where('sections.0.type', 'pillars').
- */
 class PageAssert
 {
     public function __construct(private TestResponse $response) {}
@@ -37,9 +33,6 @@ class PageAssert
         return $this;
     }
 
-    /**
-     * @return array<int|string, mixed>
-     */
     private function structure(string $path): array
     {
         $segments = explode('.', $path);

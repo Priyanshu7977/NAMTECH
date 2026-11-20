@@ -3,7 +3,6 @@ import Icon from '../../Icon';
 import { Media } from '../../ResponsiveImage';
 import { toEmbedUrl } from '../../../lib/embed';
 
-/** Link to the virtual tour; external tours open in a new tab. */
 export function TourButton({ gallery, label }) {
     const url = gallery?.virtual_tour_url;
     if (!url) {
@@ -21,7 +20,6 @@ export function TourButton({ gallery, label }) {
     );
 }
 
-/** Deferred iframe: nothing third-party loads until the visitor asks for it. */
 export function TourEmbed({ gallery }) {
     const [active, setActive] = useState(false);
     if (!gallery?.virtual_tour_url) {
@@ -95,7 +93,6 @@ export function VideoEmbed({ url, poster, title }) {
     );
 }
 
-/** Image grid with an accessible <dialog> lightbox (Escape closes, arrow keys navigate). */
 export function GalleryGrid({ items }) {
     const dialog = useRef(null);
     const [index, setIndex] = useState(null);
@@ -129,7 +126,7 @@ export function GalleryGrid({ items }) {
                 {current ? (
                     <>
                         <figure>
-                            <img src={current.image.src} srcSet={current.image.sources?.webp} sizes="92vw" alt={current.image.alt} />
+                            <img src={current.image.src} srcSet={current.image.srcset} sizes="92vw" alt={current.image.alt} />
                             {current.caption ? <figcaption className="mt-2">{current.caption}</figcaption> : null}
                         </figure>
                         <div className="nt-lightbox__nav">

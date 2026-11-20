@@ -8,7 +8,7 @@ there is no separate API. All routes live in
 - Public pages are server-rendered by Inertia SSR (Node.js) and hydrated in the browser.
 - The CMS (`/admin/…`) uses Laravel's session and Fortify for sign-in, password reset and two-factor
   authentication; its screens render in the browser.
-- Data: MySQL. Cache, sessions and queues: Redis in production (database driver locally).
+- Data: MySQL. Cache, sessions and queues use the database driver.
 
 
 ---
@@ -19,7 +19,6 @@ there is no separate API. All routes live in
 |---|---|---|
 | Runtime | PHP | 8.5 |
 | | MySQL | 8.0+ |
-| | Redis | 7+ (production cache, sessions and queues) |
 | Framework | laravel/framework | 13.38 |
 | | inertiajs/inertia-laravel (page bridge, SSR) | 3.5 |
 | | laravel/fortify (login, password reset, 2FA) | 1.41 |
@@ -149,15 +148,12 @@ Permissions are checked server-side on every action. There is no public registra
 
 ## 5. Production deployment
 
-`deploy/` in the project root builds the EC2 package and sets up the server (PHP 8.3); see the root `README.md`.
-The steps below are what it automates.
+`deploy/` in the project root builds the Bluehost package (PHP 8.3); see the root `README.md`.
 
-1. Server: Nginx + PHP-FPM 8.5, MySQL 8, Redis, Node.js 22+ for the front end.
-2. `.env`: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://…` (the public website), database,
-   `CACHE_STORE=redis`, `SESSION_DRIVER=redis`, `QUEUE_CONNECTION=redis`, `SESSION_SECURE_COOKIE=true`, `ADMIN_ENFORCE_2FA=true`,
-   `SANCTUM_STATEFUL_DOMAINS` (the website host), mail settings, `NAMTECH_ENQUIRY_RECIPIENTS`, `TRUSTED_PROXIES`.
-3. Build the front end (`cd ../frontend && npm ci && npm run build`), then in `backend/` run `composer install --no-dev`, `php artisan migrate --force` and `php artisan optimize`.
-4. Supervisor keeps `queue:work` and the Node front end running; cron runs the scheduler every minute.
+Shared hosting runs PHP 8.3 and MySQL with no background processes, so the package sets `QUEUE_CONNECTION=sync`,
+`CACHE_STORE=database`, `SESSION_DRIVER=database` and `INERTIA_SSR_ENABLED=false` (pages are rendered in the browser).
+The settings live in `backend/.env` inside the package, built from `deploy/bluehost.env`. Scheduled publishing needs a
+cPanel cron job running `php artisan schedule:run` every minute (see `deploy/bluehost/README.md`).
 
 ### Transactional email
 
@@ -173,9 +169,7 @@ keep copies off-site, and test a restore into a separate database regularly.
 - `php artisan content:launch-check` – lists placeholder copy, empty sections, unpublished legal pages, unconfigured settings, hidden menu items, images without alt text and unapproved statistics.
 - `php artisan content:publish-scheduled` – publishes due scheduled content (runs every minute via the scheduler).
 - Failed jobs: `php artisan queue:failed`, `php artisan queue:retry all`.
-- Logs: `storage/logs/laravel.log`; Inertia SSR server errors are in the Supervisor log `ssr.log`. If the SSR
-  server is down, pages still work (rendered in the browser) and are not stored in the page cache.
-- `php artisan inertia:check-ssr` reports whether the SSR server is running.
+- Logs: `storage/logs/laravel.log`; release problems are in `storage/logs/deploy.log`.
 
 ## 7. Not included
 

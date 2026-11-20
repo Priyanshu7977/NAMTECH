@@ -9,9 +9,6 @@ use App\Models\Concerns\TracksMediaUsage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * Governance and leadership profiles (Board of Directors, Advisory Council, Management Team…).
- */
 class Leader extends Model
 {
     use CreatesSlugRedirects, HasPublication, HasSeo, TracksMediaUsage;

@@ -5,10 +5,6 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-/**
- * Accepts site-relative paths ("/admissions", "#apply"), http(s) URLs, mailto: and tel: links.
- * Rejects javascript:, data: and other schemes that could execute code.
- */
 class SafeUrl implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void

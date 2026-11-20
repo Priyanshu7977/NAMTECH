@@ -9,13 +9,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Vite;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Full-response cache for anonymous visitors. Keys include the content version, so any
- * publish/unpublish invalidates every cached page. Never caches admin, authenticated,
- * flash-message or non-200 responses. Cookies (session, XSRF) are added by outer
- * middleware per request and are never stored in the cache. Skipped in local development
- * while the Vite dev server runs, whose asset URLs change with each restart.
- */
 class CachePublicPages
 {
     public function handle(Request $request, Closure $next): Response
@@ -24,8 +17,6 @@ class CachePublicPages
             return $next($request);
         }
 
-        // Inertia visits (JSON) and first loads (HTML) of the same URL are cached separately.
-        // The build hash means a deployment never serves HTML that points at removed assets.
         $key = ContentCache::key('page:'.sha1(implode('|', [
             $request->getSchemeAndHttpHost(),
             $request->getRequestUri(),
@@ -67,10 +58,6 @@ class CachePublicPages
             && $this->isStillCacheable($request);
     }
 
-    /**
-     * A first-load HTML page is only cached once it has been server-rendered, so a page
-     * produced while the SSR server was unavailable is never served to search engines.
-     */
     private function isComplete(Request $request, Response $response): bool
     {
         return $request->header('X-Inertia') !== null || str_contains((string) $response->getContent(), 'data-server-rendered');

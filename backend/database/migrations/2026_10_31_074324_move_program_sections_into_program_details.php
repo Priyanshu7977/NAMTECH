@@ -7,10 +7,6 @@ use App\Support\ProgramDetails;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Str;
 
-/**
- * Programs that were built from CMS sections move onto the program page template: the section content is
- * copied into the template's modules and the sections are hidden (kept, so nothing is lost).
- */
 return new class extends Migration
 {
     public function up(): void
@@ -61,15 +57,8 @@ return new class extends Migration
         });
     }
 
-    public function down(): void
-    {
-        // Content stays in both places; nothing to undo.
-    }
+    public function down(): void {}
 
-    /**
-     * @param  array<int, array<string, mixed>>  $items
-     * @return array<string, string|null>
-     */
     private function snapshot(array $items): array
     {
         $eligibility = collect($items)->first(fn ($item) => str_starts_with((string) ($item['text'] ?? ''), 'Eligibility:'))['text'] ?? '';
@@ -81,7 +70,6 @@ return new class extends Migration
         ];
     }
 
-    /** Course list items from rich text, one per line. */
     private function lines(string $html): string
     {
         preg_match_all('/<li[^>]*>(.*?)<\/li>/s', $html, $matches);

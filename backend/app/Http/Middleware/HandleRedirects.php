@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Applies CMS-managed and automatic slug-change redirects before routing.
- */
 class HandleRedirects
 {
     public function handle(Request $request, Closure $next): Response
@@ -34,7 +31,6 @@ class HandleRedirects
 
         $target = $request->getQueryString() && ! str_contains($to, '?') ? $to.'?'.$request->getQueryString() : $to;
 
-        // Inertia visits follow internal redirects themselves; other sites need a full page load.
         if ($request->header('X-Inertia') && preg_match('#^https?://#i', $target) && parse_url($target, PHP_URL_HOST) !== $request->getHost()) {
             return Inertia::location($target);
         }

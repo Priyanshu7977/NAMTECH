@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Stores uploaded images safely: the content is sniffed (not trusted from the browser),
- * the original goes to a private disk under a random name, and only re-encoded variants
- * are ever written to the public disk. Uploaded files can therefore never execute.
- */
 class MediaUploader
 {
     public const AllowedMimeTypes = [
@@ -25,17 +20,11 @@ class MediaUploader
 
     public const MaxPixels = 40_000_000;
 
-    /**
-     * @param  array{alt?: string|null, caption?: string|null, credit?: string|null}  $meta
-     */
     public function store(UploadedFile $file, array $meta = [], bool $sync = false): Media
     {
         return $this->storePath($file->getRealPath(), $file->getClientOriginalName(), $meta, $sync);
     }
 
-    /**
-     * @param  array{alt?: string|null, caption?: string|null, credit?: string|null}  $meta
-     */
     public function storePath(string $path, string $originalName, array $meta = [], bool $sync = false): Media
     {
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path) ?: '';
@@ -77,15 +66,9 @@ class MediaUploader
 
         $sync ? GenerateMediaVariants::dispatchSync($media) : GenerateMediaVariants::dispatch($media);
 
-        return $media->fresh() ?? $media;
+        return $media->refresh();
     }
 
-    /**
-     * PDFs (disclosures, reports, brochures) are served as-is from the public disk under a
-     * random directory. They are checked to really be PDFs and are never executed.
-     *
-     * @param  array{alt?: string|null, caption?: string|null, credit?: string|null}  $meta
-     */
     private function storeDocument(string $path, string $originalName, array $meta): Media
     {
         $handle = fopen($path, 'rb');

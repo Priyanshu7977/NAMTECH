@@ -3,10 +3,6 @@
 use App\Models\Program;
 use Illuminate\Database\Migrations\Migration;
 
-/**
- * Program partner titles such as "Academic Partner: TUM Asia" become label "Academic Partner"
- * and name "TUM Asia", now that partner cards have their own label field.
- */
 return new class extends Migration
 {
     public function up(): void
@@ -32,8 +28,5 @@ return new class extends Migration
         });
     }
 
-    public function down(): void
-    {
-        // Labels stay in their own field.
-    }
+    public function down(): void {}
 };

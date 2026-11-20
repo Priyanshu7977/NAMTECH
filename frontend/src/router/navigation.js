@@ -1,11 +1,5 @@
 import { router as inertia } from '@inertiajs/react';
 
-/**
- * Inertia's router, with one addition: the public site and the CMS use different style
- * sheets, so moving between them loads a fresh page instead of an Inertia visit.
- *   router.get('/programs', { level: 'pg' }, { preserveScroll: true })
- *   router.post('/admin/content/pages', data, { onSuccess, onError })
- */
 export function crossesShell(target) {
     if (typeof window === 'undefined' || !/^\//.test(target)) return false;
     const isAdmin = (path) => /^\/admin(\/|$|\?)/.test(path) && !/^\/admin\/preview\//.test(path);

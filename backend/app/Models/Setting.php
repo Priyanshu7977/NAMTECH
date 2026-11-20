@@ -23,9 +23,6 @@ class Setting extends Model
         static::deleted(fn () => Cache::forget('settings:all'));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function allValues(): array
     {
         return Cache::rememberForever('settings:all', fn (): array => static::query()->pluck('value', 'key')->all());

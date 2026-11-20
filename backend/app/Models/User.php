@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\Role;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,12 +15,8 @@ use Spatie\Permission\Traits\HasRoles;
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
 
-    /**
-     * @var array<string, mixed>
-     */
     protected $attributes = [
         'is_active' => true,
         'two_factor_secret' => null,
@@ -29,11 +24,6 @@ class User extends Authenticatable
         'two_factor_confirmed_at' => null,
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -45,9 +35,6 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Privileged administrators must enrol in two-factor authentication.
-     */
     public function requiresTwoFactor(): bool
     {
         return (bool) config('namtech.enforce_two_factor') && $this->hasAnyRole(config('namtech.two_factor_roles'));

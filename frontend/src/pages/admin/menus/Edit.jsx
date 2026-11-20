@@ -78,7 +78,6 @@ function ItemEditor({ item, path, pages, errors, onChange, onRemove, onMove, can
     );
 }
 
-// Immutable helpers for a nested list addressed by an index path, e.g. [2, 0, 1].
 const getList = (items, path) => path.reduce((list, i) => list[i].children, items);
 const setList = (items, path, next) => {
     if (!path.length) return next;

@@ -108,9 +108,6 @@ class ImportedContentFieldsTest extends TestCase
         $this->get('/press-release')->assertRedirect('/media?tab=press');
     }
 
-    /**
-     * @param  array<string, mixed>  $attributes
-     */
     private function press(string $title, array $attributes): Post
     {
         return Post::create($attributes + [

@@ -10,9 +10,6 @@ use App\Services\PublicRenderer;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Shows draft content, including unpublished pending changes, in the real public templates.
- */
 class PreviewController extends Controller
 {
     public function __invoke(Request $request, string $resource, int $id, ContentWorkflow $workflow, PublicRenderer $renderer): Response

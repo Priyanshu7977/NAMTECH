@@ -26,9 +26,9 @@ function ModuleHeading({ lead, children, intro }) {
 }
 
 /** Joined outline grid of icon cards (why choose, learning approaches, documents, payment notes). */
-export function IconGrid({ items, columns = 3 }) {
+export function IconGrid({ items, columns = 3, className = '' }) {
     return (
-        <ul className={`nt-prog-grid nt-prog-grid--${columns} list-unstyled nt-stagger`}>
+        <ul className={`nt-prog-grid nt-prog-grid--${columns} list-unstyled nt-stagger ${className}`}>
             {items.map((item, i) => (
                 <li key={i}>
                     {item.icon ? <Icon name={item.icon} strokeWidth={1.1} className="nt-prog-grid__icon" /> : null}
@@ -64,8 +64,8 @@ function MixBars({ items, palette }) {
 }
 
 export function Snapshot({ program, data }) {
+    // Fields and order as in the Programmes template: Duration | Start date, Deadline | Mode, then Eligibility.
     const facts = [
-        ['graduation', 'Award', program.award],
         ['clock', 'Duration', [program.duration, program.duration_detail].filter(Boolean).join(' · ')],
         ['calendar', 'Start date', data?.start_date || program.intake],
         ['calendar', 'Deadline', data?.deadline || program.deadline],
@@ -99,8 +99,8 @@ export function Snapshot({ program, data }) {
                         Apply now
                     </SmartLink>
                 ) : null}
-                <SmartLink href="/admissions" className="nt-btn nt-btn--outline">
-                    Explore admissions
+                <SmartLink href={program.enquiry_url || '#enquire'} className="nt-btn nt-btn--outline">
+                    Speak to a Counsellor
                 </SmartLink>
             </div>
         </aside>
@@ -312,20 +312,39 @@ export function LearningModel({ data, lead }) {
     );
 }
 
-export function Labs({ data, lead }) {
+/**
+ * Labs band: a lavender full-width band over a centred carousel of lab photos captioned with the lab name, the
+ * neighbouring labs peeking in at the sides. Programmes template: a fixed heading and introduction. iPTP template
+ * (perLab): the heading is the lab in view ("Hydraulics Lab:") with its description.
+ */
+export function Labs({ data, lead, perLab = false }) {
+    const [active, setActive] = useState(0);
+    const current = data.items[active] ?? data.items[0];
     return (
         <div className="nt-prog__block nt-labs-mod">
-            <ModuleHeading lead={lead} intro={data.intro}>
-                {data.heading || 'Labs & Industry Immersion'}
-            </ModuleHeading>
-            <Carousel label={data.heading || 'Labs'} slideWidth="min(51rem, 86%)" gap="1.5rem" align="center">
+            <div className="nt-labs-mod__head" aria-live={perLab ? 'polite' : undefined}>
+                {perLab ? (
+                    <ModuleHeading lead={lead} intro={current.text}>
+                        {`${current.title}:`}
+                    </ModuleHeading>
+                ) : (
+                    <ModuleHeading lead={lead} intro={data.intro}>
+                        {data.heading || 'Labs & Industry Immersion'}
+                    </ModuleHeading>
+                )}
+            </div>
+            <Carousel
+                label={data.heading || 'Labs'}
+                slideWidth="min(63.3rem, 86vw)"
+                gap="3rem"
+                align="center"
+                className="nt-labs-mod__carousel"
+                onIndexChange={setActive}
+            >
                 {data.items.map((item, i) => (
-                    <figure key={i} className="nt-labs-mod__slide">
-                        <Media image={item.image} sizes="(min-width: 992px) 816px, 86vw" alt="" />
-                        <figcaption>
-                            <strong>{item.title}</strong>
-                            {item.text ? <span>{item.text}</span> : null}
-                        </figcaption>
+                    <figure key={i} className={`nt-labs-mod__slide ${i === active ? 'is-active' : ''}`}>
+                        <Media image={item.image} sizes="(min-width: 992px) 1013px, 86vw" alt="" />
+                        <figcaption>{item.title}</figcaption>
                     </figure>
                 ))}
             </Carousel>
@@ -399,7 +418,7 @@ export function Documents({ data, lead }) {
             <ModuleHeading lead={lead} intro={data.intro}>
                 {data.heading || 'Required documents'}
             </ModuleHeading>
-            <IconGrid items={data.items} columns={Math.min(4, Math.max(2, data.items.length))} />
+            <IconGrid items={data.items} columns={Math.min(4, Math.max(2, data.items.length))} className="nt-prog-grid--docs" />
         </div>
     );
 }
@@ -410,8 +429,8 @@ export function Outcomes({ data, lead }) {
             <ModuleHeading lead={lead} intro={data.intro}>
                 {data.heading || 'Key Outcomes & Impact'}
             </ModuleHeading>
-            {has(data.stats) || data.brochure ? (
-                <div className={`nt-outcomes ${data.brochure ? '' : 'nt-outcomes--full'}`}>
+            {has(data.stats) ? (
+                <div className="nt-outcomes">
                     <ul className="nt-outcomes__stats list-unstyled">
                         {(data.stats ?? []).map((stat, i) => (
                             <li key={i}>
@@ -422,12 +441,16 @@ export function Outcomes({ data, lead }) {
                             </li>
                         ))}
                     </ul>
-                    {data.brochure ? (
-                        <a className="nt-outcomes__brochure" href={data.brochure.url} target="_blank" rel="noopener">
-                            <Icon name="download" strokeWidth={1.4} />
-                            <span>Download Placement Brochure</span>
-                        </a>
-                    ) : null}
+                    {/* As in the template, the brochure panel is always shown; without an uploaded placement brochure
+                        it opens the brochure request form. */}
+                    <a
+                        className="nt-outcomes__brochure"
+                        href={data.brochure ? data.brochure.url : '#enquiry:brochure'}
+                        {...(data.brochure ? { target: '_blank', rel: 'noopener' } : {})}
+                    >
+                        <Icon name="download" strokeWidth={1.4} />
+                        <span>Download Placement Brochure</span>
+                    </a>
                 </div>
             ) : null}
             {has(data.logos) ? (
@@ -674,7 +697,7 @@ export function Faqs({ data, lead }) {
                 {data.heading || 'Frequently Asked Questions'}
             </ModuleHeading>
             <div className="nt-prog-faq">
-                <FaqItems items={data.items} />
+                <FaqItems items={data.items} openFirst />
             </div>
         </div>
     );

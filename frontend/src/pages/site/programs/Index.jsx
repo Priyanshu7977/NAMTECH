@@ -6,9 +6,7 @@ import ListingShell from '../../../components/site/ListingShell';
 export default function ProgramsIndex({ title, sections, breadcrumbs, programs, levels, schools, filters }) {
     const update = (key, value) => router.get('/programs', { ...filters, [key]: value || undefined }, { preserveScroll: true, preserveState: true, replace: true });
 
-    // When the CMS page lists programmes by level ("All Programs" design), the filtered list is not needed unless active filters are applied.
-    const hasActiveFilter = Boolean(filters?.level || filters?.school);
-    if (!hasActiveFilter && sections?.some((section) => ['program_levels', 'programs_list', 'programs_tabs'].includes(section.type))) {
+    if (sections?.some((section) => section.type === 'program_levels')) {
         return <ListingShell title={title} sections={sections} breadcrumbs={breadcrumbs} />;
     }
 

@@ -35,7 +35,7 @@ export default function EventShow({ event, related, breadcrumbs, hidden }) {
             </section>
             <Breadcrumbs items={breadcrumbs} />
             {(event.overview || event.summary) && show('overview') ? (
-                <section className="nt-section pt-4">
+                <section className="nt-section">
                     <div className="container">
                         <div className="row g-5">
                             <div className="col-lg-4"><h2 className="nt-h2">Overview</h2></div>

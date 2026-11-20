@@ -1,7 +1,3 @@
-/**
- * Minimal JSON fetch helper for admin widgets (media picker, uploads) that need data without
- * an Inertia visit, e.g. "/admin/media/browse". Sends Laravel's XSRF token.
- */
 function xsrfToken() {
     const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : '';

@@ -15,15 +15,8 @@ use App\Models\Program;
 use App\Models\Publication;
 use App\Models\School;
 
-/**
- * Shapes models into the minimal props each public component needs. Only these
- * fields are serialised to the browser.
- */
 class Presenters
 {
-    /**
-     * @return array<string, mixed>
-     */
     public static function programCard(Program $program): array
     {
         return [
@@ -40,12 +33,10 @@ class Presenters
             'duration' => $program->duration,
             'duration_detail' => $program->duration_detail,
             'image' => $program->image?->toImage($program->title),
+            'apply_url' => $program->apply_url,
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function schoolCard(School $school): array
     {
         return [
@@ -58,9 +49,6 @@ class Presenters
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function centreCard(Centre $centre): array
     {
         return [
@@ -73,9 +61,6 @@ class Presenters
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function facultyCard(Faculty $faculty): array
     {
         return [
@@ -87,16 +72,12 @@ class Presenters
             'phone' => $faculty->phone,
             'email' => $faculty->email,
             'photo' => $faculty->photo?->toImage($faculty->name),
-            // Shown in the quick-view popup.
             'qualification' => $faculty->qualifications[0]['title'] ?? null,
             'research_interests' => $faculty->research_interests,
             'summary' => $faculty->summary,
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function partnerLogo(Partner $partner): array
     {
         return [
@@ -107,9 +88,6 @@ class Presenters
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function partnerCard(Partner $partner): array
     {
         return [
@@ -122,9 +100,6 @@ class Presenters
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function postCard(Post $post): array
     {
         return [
@@ -144,9 +119,6 @@ class Presenters
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function gallery(Gallery $gallery): array
     {
         return [
@@ -170,9 +142,6 @@ class Presenters
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function leaderCard(Leader $leader): array
     {
         return [
@@ -186,9 +155,6 @@ class Presenters
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function eventCard(Event $event): array
     {
         return [
@@ -207,9 +173,6 @@ class Presenters
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function publicationCard(Publication $publication): array
     {
         return [
@@ -227,9 +190,6 @@ class Presenters
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public static function jobCard(JobOpening $job): array
     {
         return [

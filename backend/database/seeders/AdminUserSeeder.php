@@ -7,11 +7,6 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
-/**
- * Creates the first Super Admin. Set SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD in .env; when no
- * password is given a random one is generated and printed once. In the local environment an
- * Editor and a Publisher test account are also created with the same password.
- */
 class AdminUserSeeder extends Seeder
 {
     public function run(): void

@@ -14,9 +14,9 @@ export function ProgramsTabs({ data }) {
     const levels = data.levels ?? [];
     if (!levels.length) return null;
     return (
-        <section className="nt-section nt-tone-light">
+        <section className={`nt-section nt-tone-${data.tone === 'white' ? 'white' : 'light'}`}>
             <div className="container">
-                <div className="text-center mx-auto mb-4" style={{ maxWidth: '46rem' }}>
+                <div className="text-center mx-auto mb-4" style={{ maxWidth: '62rem' }}>
                     {data.eyebrow ? <p className="nt-pill d-table mx-auto">{data.eyebrow}</p> : null}
                     {data.heading ? <h2 className="nt-h2">{data.heading}</h2> : null}
                 </div>
@@ -29,7 +29,7 @@ export function ProgramsTabs({ data }) {
                         content: (
                             <Carousel label={level.label} slideWidth="min(58.75rem, 88%)">
                                 {level.programs.map((p) => (
-                                    <ProgramCard key={p.id} item={p} />
+                                    <ProgramCard key={p.id} item={p} buttons={Boolean(data.card_buttons)} />
                                 ))}
                             </Carousel>
                         ),
@@ -40,6 +40,43 @@ export function ProgramsTabs({ data }) {
     );
 }
 
+function WideEventCard({ event }) {
+    const external = /^https?:/.test(event.registration_url || '');
+    return (
+        <article className="nt-event-wide">
+            <Media image={event.image} sizes="(min-width: 992px) 450px, 90vw" className="nt-event-wide__media" alt="" />
+            <div className="nt-event-wide__body">
+                <h3>{event.title}</h3>
+                {event.summary ? <p className="nt-event-wide__summary">{event.summary}</p> : null}
+                <p className="nt-event-wide__meta">
+                    {event.date ? (
+                        <span>
+                            <Icon name="calendar" strokeWidth={1.5} />
+                            <time dateTime={event.datetime}>{event.date}</time>
+                        </span>
+                    ) : null}
+                    {event.venue ? (
+                        <span>
+                            <Icon name="pin" strokeWidth={1.5} />
+                            {event.venue}
+                        </span>
+                    ) : null}
+                </p>
+                <div className="nt-event-wide__actions">
+                    <SmartLink href={event.url} className="nt-btn">
+                        Learn more<span className="visually-hidden">: {event.title}</span>
+                    </SmartLink>
+                    {event.registration_url ? (
+                        <SmartLink href={event.registration_url} className="nt-btn nt-btn--outline" newTab={external}>
+                            Register now<span className="visually-hidden">: {event.title}</span>
+                        </SmartLink>
+                    ) : null}
+                </div>
+            </div>
+        </article>
+    );
+}
+
 export function EventsCarousel({ data }) {
     const events = data.events ?? [];
     if (!events.length) return null;
@@ -47,11 +84,19 @@ export function EventsCarousel({ data }) {
         <section className={`nt-section ${toneClass(data.tone)}`}>
             <div className="container">
                 <SplitHead data={data} />
-                <Carousel label={data.heading || 'Upcoming events'} slideWidth="min(22rem, 85%)" gap="1.5rem">
-                    {events.map((e) => (
-                        <EventCard key={e.id} event={e} />
-                    ))}
-                </Carousel>
+                {data.layout === 'wide' ? (
+                    <Carousel label={data.heading || 'Upcoming events'} slideWidth="min(61.9rem, 90%)" gap="2rem">
+                        {events.map((e) => (
+                            <WideEventCard key={e.id} event={e} />
+                        ))}
+                    </Carousel>
+                ) : (
+                    <Carousel label={data.heading || 'Upcoming events'} slideWidth="min(22rem, 85%)" gap="1.5rem">
+                        {events.map((e) => (
+                            <EventCard key={e.id} event={e} />
+                        ))}
+                    </Carousel>
+                )}
             </div>
         </section>
     );
@@ -95,7 +140,7 @@ export function ProgramFinder({ data }) {
         : [];
 
     return (
-        <section className={`nt-finder ${toneClass(data.tone, 'lavender')}`}>
+        <section className={`nt-section nt-finder ${toneClass(data.tone, 'lavender')}`}>
             <div className="container">
                 {data.heading ? <h2 className="nt-h3 mb-3">{data.heading}</h2> : null}
                 {data.body
@@ -155,7 +200,6 @@ export function JobListings({ data }) {
     const uid = useId();
 
     const visible = jobs.filter((j) => (!category || j.category === category) && (!query || `${j.title} ${j.department ?? ''} ${j.mode ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())));
-    // Every role type gets a tab, as in the design; an empty one shows a message instead of jobs.
     const tabs = [['', 'All Roles'], ...Object.entries(categories)];
     const list = useRef(null);
 
@@ -230,7 +274,6 @@ export function JobListings({ data }) {
     );
 }
 
-/** Two-step application form (personal details, then qualifications and CV). */
 export function JobApplyModal({ job, onClose }) {
     const dialog = useRef(null);
     const [step, setStep] = useState(1);
@@ -360,11 +403,10 @@ export function JobApplyModal({ job, onClose }) {
     );
 }
 
-/** "All Programs" design: one image block per level with its published programs as links. */
 export function ProgramLevels({ data }) {
     return (
         <section className="nt-section">
-            <div className="container d-grid nt-levels">
+            <div className="container d-grid gap-5">
                 {(data.items ?? []).map((item, i) => (
                     <article key={i} className={`nt-level ${item.image ? '' : 'nt-level--text'}`}>
                         {item.image ? <Media image={item.image} sizes="(min-width: 992px) 40vw, 100vw" alt="" className="nt-level__media" /> : null}

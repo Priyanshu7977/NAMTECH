@@ -5,14 +5,8 @@ namespace App\Support;
 use App\Models\Media;
 use App\Models\Setting;
 
-/**
- * Schema for global settings editable by Super Admins.
- */
 class SiteSettings
 {
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public static function fields(): array
     {
         return [
@@ -55,11 +49,6 @@ class SiteSettings
         ];
     }
 
-    /**
-     * Site-wide parts editors can switch off. Each is shown until switched off.
-     *
-     * @var array<int, array{name: string, label: string}>
-     */
     private const Toggles = [
         ['name' => 'show_announcement_bar', 'label' => 'Announcement bar (strip above the header)'],
         ['name' => 'show_utility_bar', 'label' => 'Top link bar (desktop header)'],
@@ -73,11 +62,6 @@ class SiteSettings
         ['name' => 'show_footer_contact', 'label' => 'Footer contact details'],
     ];
 
-    /**
-     * Stored values, with field defaults for settings that were never saved.
-     *
-     * @return array<string, mixed>
-     */
     public static function values(): array
     {
         $values = Setting::allValues();
@@ -85,11 +69,6 @@ class SiteSettings
         return collect(self::fields())->mapWithKeys(fn (array $field) => [$field['name'] => $values[$field['name']] ?? $field['default'] ?? null])->all();
     }
 
-    /**
-     * Settings needed by every public page.
-     *
-     * @return array<string, mixed>
-     */
     public static function public(): array
     {
         $values = self::values();

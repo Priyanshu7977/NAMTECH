@@ -16,7 +16,7 @@ separate API.
 | Rich text | Tiptap 3 · HTML Purifier | CMS editor; allow-list sanitising on every save |
 | Access | Laravel Fortify · spatie/permission | Login, password reset, two-factor; three roles |
 | Images | Intervention Image (GD) | AVIF, WebP and JPEG variants in several widths |
-| Data | MySQL 8 · Redis 7 | Content store; cache, sessions, queues |
+| Data | MySQL 8 | Content store; cache, sessions, queues |
 
 ```
 NAMTechWebProject/
@@ -66,7 +66,7 @@ The public site and the CMS use different style sheets, so moving between them l
 
 ## Run locally
 
-Requirements: PHP 8.5, Composer, MySQL 8, Node.js 22+ (Redis is used in production).
+Requirements: PHP 8.5, Composer, MySQL 8, Node.js 22+.
 
 ```bash
 cd frontend && npm install && cd ..
@@ -110,13 +110,12 @@ caching, forms, CSV export and the media library. They run on a MySQL test datab
 
 ## Deploy
 
-Production runs on AWS EC2 (Ubuntu 24.04) with PHP 8.3, MySQL 8, Redis, Node.js 22 and Supervisor. The web root
-is `backend/public`. Build the package on a Mac with PHP 8.3 from Homebrew:
+Production runs on Bluehost shared hosting. Build the all-in-one package on a Mac with PHP 8.3 from Homebrew:
 
 ```bash
 bash deploy/build.sh
 ```
 
-This writes `namtech-aws-ec2-php83.zip` with the compiled front end, PHP packages, a fresh database export and
-uploaded media. `deploy/SERVER-README.md` becomes the zip's `README.md` and has the server setup, update, backup
-and restore steps. The other files in `deploy/` run on the server.
+This writes `namtech-bluehost.zip` with the compiled front end, PHP packages, the settings file, a fresh database
+export and the uploaded media. Upload it to `public_html` in cPanel File Manager and extract it; the first visit
+applies the release. Setup and update steps are in `deploy/bluehost/README.md`.

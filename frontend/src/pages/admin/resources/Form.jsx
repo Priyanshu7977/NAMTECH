@@ -110,7 +110,6 @@ export default function ResourceForm({ resource, fields, sectionTypes, record, v
     const [media, setMedia] = useState(initialMedia ?? {});
     const lastValues = useRef(JSON.stringify(values));
 
-    // After publish/discard/restore the server sends new values: load them into the form.
     useEffect(() => {
         const next = JSON.stringify(values);
         if (next !== lastValues.current) {
@@ -139,7 +138,6 @@ export default function ResourceForm({ resource, fields, sectionTypes, record, v
                 const group = fields.find((f) => first === f.name || first?.startsWith(f.name + '.'))?.group ?? 'Content';
                 setTab(group);
             },
-            // The server may tidy what was sent, so the form continues from what it saved.
             onSuccess: (page) => {
                 const saved = page?.props?.values;
                 if (saved) {

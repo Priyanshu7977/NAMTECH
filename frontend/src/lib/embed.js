@@ -1,4 +1,3 @@
-/** Converts a YouTube or Vimeo page URL into a privacy-enhanced embed URL, or null. */
 export function toEmbedUrl(url) {
     try {
         const u = new URL(url);

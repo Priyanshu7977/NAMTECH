@@ -4,9 +4,6 @@ namespace App\Models\Concerns;
 
 use App\Models\Redirect;
 
-/**
- * When the public URL of live content changes, record a permanent redirect from the old URL.
- */
 trait CreatesSlugRedirects
 {
     public static function bootCreatesSlugRedirects(): void

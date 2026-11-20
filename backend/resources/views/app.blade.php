@@ -18,7 +18,6 @@
             <link rel="preload" as="image" type="{{ $preload['type'] }}" imagesrcset="{{ $preload['srcset'] }}" imagesizes="{{ $preload['sizes'] }}" fetchpriority="high">
         @endif
         @viteReactRefresh
-        {{-- Built from ../frontend (Vite); paths are relative to that folder. --}}
         @vite([$isAdmin ? 'src/styles/admin.scss' : 'src/styles/site.scss', 'src/app.jsx'])
         @inertiaHead
     </head>

@@ -4,9 +4,6 @@ use App\Models\Page;
 use App\Models\PageSection;
 use Illuminate\Database\Migrations\Migration;
 
-/**
- * The homepage partnerships section links to the corporate and academic partnership pages.
- */
 return new class extends Migration
 {
     public function up(): void
@@ -30,9 +27,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, PageSection>
-     */
     private function sections()
     {
         return PageSection::query()

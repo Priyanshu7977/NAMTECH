@@ -17,11 +17,6 @@ enum Role: string
         };
     }
 
-    /**
-     * Permissions granted to each role. Super Admin is also granted everything via Gate::before.
-     *
-     * @return array<int, string>
-     */
     public function permissions(): array
     {
         return match ($this) {

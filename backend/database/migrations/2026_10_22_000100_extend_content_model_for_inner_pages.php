@@ -5,16 +5,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Adds what the inner-page designs need: sections on schools/centres/posts (not only pages),
- * leadership profiles, events, publications, jobs and job applications, richer faculty
- * profiles, and PDF documents in the media library.
- */
 return new class extends Migration
 {
     public function up(): void
     {
-        // Sections become polymorphic so schools, centres and posts can use the section builder.
         Schema::table('page_sections', function (Blueprint $table) {
             $table->string('sectionable_type', 40)->nullable()->after('id');
             $table->unsignedBigInteger('sectionable_id')->nullable()->after('sectionable_type');

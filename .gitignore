@@ -1,35 +1,35 @@
-# Dependencies
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+
+# Installed packages and build output (recreated by composer install / npm run build)
 backend/vendor/
-backend/node_modules/
 frontend/node_modules/
+backend/public/build/
+backend/bootstrap/ssr/
+backend/public/hot
+backend/public/storage
 
-# Environment files
-backend/.env
-backend/.env.backup
-backend/.env.production
-
-# Cache and logs
-backend/storage/logs/*.log
+# Runtime files
 backend/storage/framework/cache/data/*
 backend/storage/framework/sessions/*
 backend/storage/framework/views/*
-backend/bootstrap/cache/*.php
+backend/storage/framework/testing/
+backend/storage/logs/*.log
+backend/.phpunit.result.cache
 
-# Symlinks & OS
-backend/public/storage
-backend/public/hot
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
+# Full-size originals of uploaded images (the site serves the resized copies in storage/app/public)
+backend/storage/app/private/media-originals/
+
+# Deploy package
+*.zip
+
+# Live settings for the Bluehost zip (contains secrets)
+deploy/bluehost.env
+
 .claude/
-
-# Scratch & Temporary
 scratch/
-download_figma_assets.py
-inspect_figma_images.py
-replace_assets.py
-scan_metadata_images.py
-scratch_test.py
-test_endpoints.py
-*.tmp
+

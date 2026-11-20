@@ -15,15 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
-/**
- * Declarative definition of an admin-managed content type: its form schema, list
- * columns and how form data maps onto attributes and relations.
- */
 abstract class Resource
 {
-    /**
-     * @return class-string<Model>
-     */
     abstract public function model(): string;
 
     abstract public function slug(): string;
@@ -32,11 +25,6 @@ abstract class Resource
 
     abstract public function singular(): string;
 
-    /**
-     * Form fields. Each field may set a "group" (tab) – defaults to "Content".
-     *
-     * @return array<int, array<string, mixed>>
-     */
     abstract public function fields(): array;
 
     public function navigationGroup(): string
@@ -54,17 +42,11 @@ abstract class Resource
         return 'title';
     }
 
-    /**
-     * @return array<int, string>
-     */
     public function searchable(): array
     {
         return [$this->titleAttribute()];
     }
 
-    /**
-     * @return array<int, string>
-     */
     public function with(): array
     {
         return [];
@@ -95,11 +77,6 @@ abstract class Resource
         return $this->model()::query()->with($this->with());
     }
 
-    /**
-     * Fields including the standard SEO tab.
-     *
-     * @return array<int, array<string, mixed>>
-     */
     public function allFields(): array
     {
         $fields = $this->fields();
@@ -117,13 +94,6 @@ abstract class Resource
         return $fields;
     }
 
-    /**
-     * Hidden sections can be saved while still incomplete (e.g. a placeholder waiting for
-     * content), so their fields are not required; formats and lengths are still checked.
-     *
-     * @param  array<string, array<int, mixed>>  $rules
-     * @return array<string, array<int, mixed>>
-     */
     private function draftSectionRules(array $rules): array
     {
         return array_map(fn (array $fieldRules): array => array_values(array_filter(
@@ -132,9 +102,6 @@ abstract class Resource
         )), $rules);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(Request $request, ?Model $record): array
     {
         $rules = Fields::rules($this->allFields());
@@ -173,11 +140,6 @@ abstract class Resource
         return Rule::unique($model->getTable(), 'slug')->ignore($record?->getKey());
     }
 
-    /**
-     * Error messages that make sense to non-technical editors.
-     *
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [
@@ -186,12 +148,6 @@ abstract class Resource
         ];
     }
 
-    /**
-     * Turn validated request data into [attributes, relations, media ids].
-     *
-     * @param  array<string, mixed>  $validated
-     * @return array{0: array<string, mixed>, 1: array<string, mixed>, 2: array<int, int>}
-     */
     public function extract(array $validated, ?Model $record): array
     {
         $fields = $this->allFields();
@@ -201,7 +157,6 @@ abstract class Resource
 
         foreach ($fields as $field) {
             $name = $field['name'];
-            // Fields with "store" are kept together in one JSON attribute (e.g. a program's page modules).
             if (isset($field['store'])) {
                 $attributes[$field['store']][$name] = $data[$name] ?? null;
 
@@ -210,7 +165,6 @@ abstract class Resource
             match ($field['type']) {
                 'sections' => null,
                 'belongsToMany' => $relations[$field['relation'] ?? $name] = $data[$name],
-                // Ordering numbers are NOT NULL columns; an empty field means "first".
                 'number' => $attributes[$name] = $data[$name] ?? 0,
                 default => $attributes[$name] = $data[$name] ?? null,
             };
@@ -226,7 +180,6 @@ abstract class Resource
 
         if ($this->hasSectionsField()) {
             unset($attributes['sections']);
-            // validated() may return list items out of order, so restore the submitted order.
             $submitted = $validated['sections'] ?? [];
             ksort($submitted, SORT_NUMERIC);
             $sections = [];
@@ -252,11 +205,6 @@ abstract class Resource
         return collect($this->fields())->contains('type', 'sections');
     }
 
-    /**
-     * Values shown in the edit form – pending changes take priority over live content.
-     *
-     * @return array<string, mixed>
-     */
     public function formValues(Model $record): array
     {
         if ($this->isPublishable()) {
@@ -282,29 +230,16 @@ abstract class Resource
         return $values;
     }
 
-    /**
-     * Default values for a new record.
-     *
-     * @return array<string, mixed>
-     */
     public function defaults(): array
     {
         return [];
     }
 
-    /**
-     * Columns shown in the list view.
-     *
-     * @return array<int, array{key: string, label: string}>
-     */
     public function columns(): array
     {
         return [['key' => 'title', 'label' => 'Title']];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function row(Model $record): array
     {
         $row = [
@@ -327,11 +262,6 @@ abstract class Resource
         return $row;
     }
 
-    /**
-     * Meta for the admin UI.
-     *
-     * @return array<string, mixed>
-     */
     public function meta(): array
     {
         return [
@@ -344,9 +274,6 @@ abstract class Resource
         ];
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function revisions(Model $record): array
     {
         if (! $this->isPublishable()) {

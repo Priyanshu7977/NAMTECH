@@ -7,10 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Only active users with an admin role may use the admin area. Privileged roles must
- * also have confirmed two-factor authentication before doing anything else.
- */
 class EnsureAdminAccess
 {
     public function handle(Request $request, Closure $next): Response

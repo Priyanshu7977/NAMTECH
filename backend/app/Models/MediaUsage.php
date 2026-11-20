@@ -20,11 +20,6 @@ class MediaUsage extends Model
         return $this->morphTo();
     }
 
-    /**
-     * Replace all usage rows for a record.
-     *
-     * @param  array<string, array<int, int>>  $references  field => media ids
-     */
     public static function syncFor(Model $usable, array $references): void
     {
         static::query()

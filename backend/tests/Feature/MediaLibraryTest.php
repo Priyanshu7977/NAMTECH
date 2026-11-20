@@ -33,7 +33,7 @@ class MediaLibraryTest extends TestCase
         $this->assertSame([400, 800], $media->availableWidths());
         Storage::disk('local')->assertExists($media->filename);
         Storage::disk('public')->assertExists($media->variantPath(800, 'webp'));
-        Storage::disk('public')->assertExists($media->variantPath(400, 'jpg'));
+        Storage::disk('public')->assertExists($media->variantPath(400, 'webp'));
         Storage::disk('public')->assertMissing($media->filename);
     }
 

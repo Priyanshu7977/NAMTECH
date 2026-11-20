@@ -1,61 +1,130 @@
 import { useState } from 'react';
-import Carousel from '../../../components/Carousel';
-import Icon from '../../../components/Icon';
-import { PostCard } from '../../../components/site/Cards';
+import Icon, { ArrowDot } from '../../../components/Icon';
+import { Media } from '../../../components/ResponsiveImage';
+import SmartLink from '../../../components/SmartLink';
 import { Pagination } from '../../../components/site/Common';
 import { visit } from '../../../components/site/Filters';
 import Layout from '../../../components/site/Layout';
 import ListingShell from '../../../components/site/ListingShell';
 
+const tagOf = (post) => post.category || post.type || 'Blog';
+
+function BlogCard({ post, headingLevel = 3 }) {
+    const Heading = `h${headingLevel}`;
+    return (
+        <article className="nt-blog-card">
+            <Media className="nt-blog-card__media" image={post.image} sizes="(min-width: 1200px) 400px, (min-width: 768px) 33vw, 90vw" alt="" />
+            <div className="nt-blog-card__meta">
+                <span className="nt-blog-card__tag">{tagOf(post)}</span>
+                {post.date ? <time dateTime={post.datetime}>{post.date}</time> : null}
+            </div>
+            <Heading className="nt-blog-card__title">
+                <SmartLink href={post.url} className="stretched-link">
+                    {post.title}
+                </SmartLink>
+            </Heading>
+            {post.excerpt ? <p className="nt-blog-card__excerpt">{post.excerpt}</p> : null}
+            <span className="nt-link-arrow mt-auto" aria-hidden="true">
+                View <ArrowDot />
+            </span>
+        </article>
+    );
+}
+
+function FeaturedBlog({ post }) {
+    return (
+        <article className="nt-blog-feature">
+            <Media className="nt-blog-feature__media" image={post.image} sizes="(min-width: 1200px) 1280px, 100vw" alt="" />
+            <div className="nt-blog-feature__panel on-dark">
+                <span className="nt-blog-feature__tag">{tagOf(post)}</span>
+                <p className="nt-blog-feature__meta">
+                    {post.date ? (
+                        <span>
+                            <Icon name="calendar" strokeWidth={1.6} />
+                            <time dateTime={post.datetime}>{post.date}</time>
+                        </span>
+                    ) : null}
+                    {post.reading_minutes ? (
+                        <span>
+                            <Icon name="clock" strokeWidth={1.6} />
+                            {post.reading_minutes} min read
+                        </span>
+                    ) : null}
+                </p>
+                <h3>
+                    <SmartLink href={post.url} className="stretched-link">
+                        {post.title}
+                    </SmartLink>
+                </h3>
+                {post.excerpt ? <p className="nt-blog-feature__excerpt">{post.excerpt}</p> : null}
+                <span className="nt-link-arrow" aria-hidden="true">
+                    Read <ArrowDot />
+                </span>
+            </div>
+        </article>
+    );
+}
+
 export default function Blogs({ title, sections, breadcrumbs, featured, posts, topics, filters }) {
     const [q, setQ] = useState(filters.q ?? '');
     const apply = (params) => visit('/blogs', { ...filters, q: q || undefined, ...params, page: undefined });
+    const [lead, ...highlights] = featured ?? [];
 
     return (
-        <ListingShell title={title} sections={sections} breadcrumbs={breadcrumbs}>
-            {featured?.length ? (
-                <section className="mb-5" aria-labelledby="featured-blogs">
-                    <h2 className="nt-h3" id="featured-blogs">Featured</h2>
-                    <Carousel label="Featured blogs" slideWidth="min(21rem, 82%)" gap="1.5rem">
-                        {featured.map((post) => <PostCard key={post.id} post={post} />)}
-                    </Carousel>
+        <ListingShell title={title} sections={sections} breadcrumbs={breadcrumbs} bare>
+            {lead ? (
+                <section className="nt-section nt-blogs-featured" aria-labelledby="featured-blogs">
+                    <div className="container">
+                        <h2 className="nt-h2" id="featured-blogs">Featured Highlights</h2>
+                        <FeaturedBlog post={lead} />
+                        {highlights.length ? (
+                            <div className="nt-blog-grid nt-stagger">
+                                {highlights.slice(0, 3).map((post) => <BlogCard key={post.id} post={post} />)}
+                            </div>
+                        ) : null}
+                    </div>
                 </section>
             ) : null}
-            <form className="nt-filters nt-form" role="search" aria-label="Find blogs" onSubmit={(e) => {
-                e.preventDefault();
-                apply({});
-            }}>
-                <div className="nt-search-box flex-grow-1" style={{ maxWidth: '26rem' }}>
-                    <label className="visually-hidden" htmlFor="blog-q">Search blogs</label>
-                    <input id="blog-q" type="search" className="form-control" placeholder="Search" value={q} onChange={(e) => setQ(e.target.value)} />
-                    <Icon name="search" strokeWidth={1.8} />
+
+            <section className="nt-section nt-tone-lavender nt-blogs-list" aria-label="All blogs">
+                <div className="container">
+                    <form className="nt-blog-filters" role="search" aria-label="Find blogs" onSubmit={(e) => {
+                        e.preventDefault();
+                        apply({});
+                    }}>
+                        <div className="nt-blog-filters__search">
+                            <label className="visually-hidden" htmlFor="blog-q">Search blogs</label>
+                            <input id="blog-q" type="search" placeholder="Search blog..." value={q} onChange={(e) => setQ(e.target.value)} />
+                            <button type="submit" aria-label="Search">
+                                <Icon name="search" strokeWidth={1.6} />
+                            </button>
+                        </div>
+                        <div className="nt-blog-filters__select">
+                            <label className="visually-hidden" htmlFor="blog-topic">Topic</label>
+                            <select id="blog-topic" value={filters.topic ?? ''} onChange={(e) => apply({ topic: e.target.value || undefined })}>
+                                <option value="">Topic</option>
+                                {Object.entries(topics).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                            </select>
+                        </div>
+                        <div className="nt-blog-filters__select">
+                            <label className="visually-hidden" htmlFor="blog-sort">Sort by</label>
+                            <select id="blog-sort" value={filters.sort === 'oldest' ? 'oldest' : ''} onChange={(e) => apply({ sort: e.target.value || undefined })}>
+                                <option value="">Sort by</option>
+                                <option value="oldest">Oldest first</option>
+                            </select>
+                        </div>
+                    </form>
+                    <p className="visually-hidden" role="status">{posts.total} blogs found</p>
+                    {posts.data.length ? (
+                        <div className="nt-blog-grid nt-stagger">
+                            {posts.data.map((post) => <BlogCard key={post.id} post={post} headingLevel={2} />)}
+                        </div>
+                    ) : (
+                        <p className="nt-empty">No blogs match your search.</p>
+                    )}
+                    <Pagination meta={posts} />
                 </div>
-                {Object.keys(topics).length ? (
-                    <div>
-                        <label className="visually-hidden" htmlFor="blog-topic">Topic</label>
-                        <select id="blog-topic" className="form-select" value={filters.topic ?? ''} onChange={(e) => apply({ topic: e.target.value || undefined })}>
-                            <option value="">All topics</option>
-                            {Object.entries(topics).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                        </select>
-                    </div>
-                ) : null}
-                <div>
-                    <label className="visually-hidden" htmlFor="blog-sort">Sort</label>
-                    <select id="blog-sort" className="form-select" value={filters.sort} onChange={(e) => apply({ sort: e.target.value === 'recent' ? undefined : e.target.value })}>
-                        <option value="recent">Most recent</option>
-                        <option value="oldest">Oldest first</option>
-                    </select>
-                </div>
-            </form>
-            <p className="visually-hidden" role="status">{posts.total} blogs found</p>
-            {posts.data.length ? (
-                <div className="nt-card-grid nt-card-grid--3 nt-stagger">
-                    {posts.data.map((post) => <PostCard key={post.id} post={post} headingLevel={2} />)}
-                </div>
-            ) : (
-                <p className="nt-empty">No blogs match your search.</p>
-            )}
-            <Pagination meta={posts} />
+            </section>
         </ListingShell>
     );
 }

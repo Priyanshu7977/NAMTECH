@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { toEmbedUrl } from '../../lib/embed';
 import { PickerDialog } from './MediaPicker';
 
-/** Approved video embed (YouTube/Vimeo only). The server sanitiser enforces the same allow-list. */
 const VideoEmbed = Node.create({
     name: 'videoEmbed',
     group: 'block',

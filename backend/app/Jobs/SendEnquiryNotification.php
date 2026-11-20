@@ -12,10 +12,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Throwable;
 
-/**
- * Emails staff about a new enquiry. The enquiry is already stored, so failures are
- * retried with backoff and recorded on the enquiry for follow-up in the admin area.
- */
 class SendEnquiryNotification implements ShouldQueue
 {
     use Queueable;
@@ -27,9 +23,6 @@ class SendEnquiryNotification implements ShouldQueue
         $this->onQueue('mail');
     }
 
-    /**
-     * @return array<int, int>
-     */
     public function backoff(): array
     {
         return [60, 300, 900, 3600];

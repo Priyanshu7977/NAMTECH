@@ -1,10 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { emptyItem, FieldList } from './Fields';
 
-/**
- * Controlled section builder: editors pick from approved components only, reorder them,
- * hide them and edit their fields. Layout and styling stay fixed by the design system.
- */
 export default function SectionBuilder({ sections, onChange, types, errors, media, onMediaLoaded }) {
     const list = Array.isArray(sections) ? sections : [];
     const [open, setOpen] = useState(() => new Set(list.length <= 3 ? list.map((_, i) => i) : []));

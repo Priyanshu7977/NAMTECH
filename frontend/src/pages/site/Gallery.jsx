@@ -12,7 +12,7 @@ export default function Gallery({ gallery, breadcrumbs }) {
                 </div>
             </header>
             <Breadcrumbs items={breadcrumbs} />
-            <section className="nt-section pt-4">
+            <section className="nt-section">
                 <div className="container">
                     {gallery.virtual_tour_url ? (
                         <div className="mb-5">

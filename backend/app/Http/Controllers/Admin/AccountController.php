@@ -7,9 +7,6 @@ use App\Http\Responses\PageResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Personal security settings: password and two-factor authentication (handled by Fortify endpoints).
- */
 class AccountController extends Controller
 {
     public function __invoke(Request $request): Response

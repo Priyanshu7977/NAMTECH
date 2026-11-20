@@ -40,9 +40,6 @@ class Partner extends Model
         return $this->belongsTo(Media::class, 'image_id');
     }
 
-    /**
-     * Partner stories only have a detail page when a story has been written.
-     */
     public function publicPath(): ?string
     {
         return $this->story ? '/partnerships/stories/'.$this->slug : null;

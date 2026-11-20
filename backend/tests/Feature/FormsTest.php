@@ -53,6 +53,21 @@ class FormsTest extends TestCase
         $this->assertNotNull(Enquiry::query()->first()->notified_at);
     }
 
+    public function test_partnership_enquiry_keeps_the_selected_collaboration_type(): void
+    {
+        Queue::fake();
+
+        $path = '/partnerships/corporate/sponsored-research';
+        $this->from($path)->post('/enquiries', $this->enquiry([
+            'type' => 'partnership',
+            'subject' => 'Sponsored Research',
+            'organisation' => 'Sample engineering team',
+            'message' => 'We would like to discuss a research collaboration.',
+        ]))->assertRedirect($path)->assertSessionHas('form_success.form', 'enquiry');
+
+        $this->assertDatabaseHas('enquiries', ['type' => 'partnership', 'subject' => 'Sponsored Research']);
+    }
+
     public function test_failed_notifications_keep_the_enquiry_and_record_the_error(): void
     {
         $this->post('/enquiries', $this->enquiry());

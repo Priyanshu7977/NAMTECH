@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { http } from '../../lib/http';
 
-/** Upload form used by the picker and the media library. Alt text is required for accessibility. */
 export function UploadForm({ onUploaded, compact = false, kind = 'any' }) {
     const accept = { image: 'image/jpeg,image/png,image/webp,image/avif', document: 'application/pdf' }[kind] ?? 'image/jpeg,image/png,image/webp,image/avif,application/pdf';
     const fileLabel = { image: 'Image (JPEG, PNG, WebP or AVIF)', document: 'PDF document' }[kind] ?? 'Image (JPEG, PNG, WebP, AVIF) or PDF';
@@ -66,7 +65,6 @@ export function UploadForm({ onUploaded, compact = false, kind = 'any' }) {
     );
 }
 
-/** Library dialog: browse, search or upload. `kind` limits it to images or PDF documents. */
 export function PickerDialog({ onSelect, onClose, kind = 'image' }) {
     const dialog = useRef(null);
     const [items, setItems] = useState([]);
@@ -132,7 +130,6 @@ export function PickerDialog({ onSelect, onClose, kind = 'image' }) {
     );
 }
 
-/** Single image field: shows the current image and opens the library picker. */
 export default function MediaPicker({ id, value, media, onChange, onMediaLoaded, invalid, kind = 'image' }) {
     const isDocument = kind === 'document';
     const [open, setOpen] = useState(false);

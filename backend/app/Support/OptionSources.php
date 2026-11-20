@@ -20,18 +20,10 @@ use App\Models\Statistic;
 use App\Models\Tag;
 use App\Sections\SectionRegistry;
 
-/**
- * Option lists for select-style fields. Section references use stable slugs;
- * admin record relations use ids.
- */
 class OptionSources
 {
-    /** @var array<string, array<string|int, string>> */
     private static array $cache = [];
 
-    /**
-     * @return array<string|int, string>
-     */
     public static function get(string $source): array
     {
         return self::$cache[$source] ??= match ($source) {

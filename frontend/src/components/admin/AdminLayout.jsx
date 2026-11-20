@@ -48,7 +48,7 @@ export default function AdminLayout({ title, actions, children }) {
             </a>
             <aside className={`admin-sidebar ${open ? 'is-open' : ''}`} aria-label="Admin navigation">
                 <div className="brand">
-                    <img src="/images/namtech-logo-white.png" alt="NAMTECH" width="700" height="192" />
+                    <img src="/images/namtech-logo-white.webp" alt="NAMTECH" width="700" height="192" />
                     <span className="badge text-bg-light">CMS</span>
                 </div>
                 <nav>

@@ -27,9 +27,6 @@ class MediaController extends Controller
         ]);
     }
 
-    /**
-     * JSON listing for the media picker inside forms.
-     */
     public function browse(Request $request): JsonResponse
     {
         return response()->json($this->paginate($request, 24));
@@ -78,9 +75,6 @@ class MediaController extends Controller
         return back()->with('success', 'Image details saved.');
     }
 
-    /**
-     * Images still referenced by content (including pending changes) cannot be deleted.
-     */
     public function destroy(Media $media): RedirectResponse
     {
         $usages = $this->usages($media);
@@ -95,9 +89,6 @@ class MediaController extends Controller
         return back()->with('success', 'Image deleted.');
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     private function usages(Media $media): array
     {
         return $media->usages()->with('usable')->get()->map(function (MediaUsage $usage): array {

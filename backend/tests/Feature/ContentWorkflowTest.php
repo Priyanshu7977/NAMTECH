@@ -92,13 +92,11 @@ class ContentWorkflowTest extends TestCase
         $this->actingAs($editor)->put("/admin/content/pages/{$page->id}", ['title' => 'Home', 'slug' => 'home', 'template' => 'home', 'sections' => $this->sections('Industry 5.0')])
             ->assertSessionHas('success');
 
-        // Live page is unchanged; a working copy holds the edit, in the submitted section order.
         $this->assertCount(0, $page->fresh()->sections);
         $working = $page->workingCopy()->firstOrFail();
         $this->assertSame(['card_grid', 'rich_text', 'cta_band'], array_column($working->data['relations']['sections'], 'type'));
         $this->get('/')->assertPage(fn (Assert $p) => $p->has('sections', 0));
 
-        // Preview shows the pending version to signed-in editors only.
         $this->actingAs($editor)->get("/admin/preview/pages/{$page->id}")->assertOk()
             ->assertPage(fn (Assert $p) => $p->where('preview', true)->where('sections.0.data.cards.1.title', 'Industry 5.0'));
 

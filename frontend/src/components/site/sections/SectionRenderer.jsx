@@ -53,6 +53,7 @@ const components = {
     accordion_media: Inner.AccordionMedia,
     numbered_list: Inner.NumberedList,
     card_tabs: Inner.CardTabs,
+    story_tabs: Inner.StoryTabs,
     tabs_media: Inner.TabsMedia,
     image_list: Inner.ImageList,
     image_mosaic: Inner.ImageMosaic,
@@ -66,12 +67,24 @@ const components = {
     job_listings: Listing.JobListings,
 };
 
-/** Renders CMS sections in order. Unknown types are skipped so old content can never break a page. */
 export default function SectionRenderer({ sections, page }) {
-    return (sections ?? []).map((section, index) => {
+    const entries = sections ?? [];
+    const panelAnchors = new Set(entries
+        .filter((section) => section.type === 'tabs' && section.data?.layout === 'section_panels')
+        .flatMap((section) => section.data.tabs?.map((tab) => tab.panel_anchor).filter(Boolean) ?? []));
+    const panels = new Map(entries
+        .filter((section) => panelAnchors.has(section.anchor) && ['media_cards', 'card_grid'].includes(section.type))
+        .map((section) => [section.anchor, section]));
+
+    function render(section, index) {
         const Component = components[section.type];
         if (!Component) return null;
-        const content = <Component data={section.data ?? {}} page={page} first={index === 0} anchor={section.anchor} />;
+        const panelContent = section.data?.layout === 'section_panels'
+            ? Object.fromEntries((section.data.tabs ?? [])
+                .filter((tab) => panels.has(tab.panel_anchor))
+                .map((tab) => [tab.panel_anchor, render(panels.get(tab.panel_anchor), -1)]))
+            : undefined;
+        const content = <Component data={section.data ?? {}} page={page} first={index === 0} anchor={section.anchor} panels={panelContent} />;
         return section.anchor ? (
             <div key={section.id} id={section.anchor}>
                 {content}
@@ -79,5 +92,7 @@ export default function SectionRenderer({ sections, page }) {
         ) : (
             <Fragment key={section.id}>{content}</Fragment>
         );
-    });
+    }
+
+    return entries.map((section, index) => panels.get(section.anchor) === section ? null : render(section, index));
 }

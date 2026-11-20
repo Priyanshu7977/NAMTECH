@@ -16,7 +16,6 @@ class Post extends Model
 {
     use CreatesSlugRedirects, HasPublication, HasSections, HasSeo, TracksMediaUsage;
 
-    /** Post type => URL prefix. */
     public const Types = [
         'news' => ['label' => 'News', 'prefix' => 'news'],
         'blog' => ['label' => 'Blog', 'prefix' => 'blogs'],
@@ -79,7 +78,6 @@ class Post extends Model
         return '/'.self::prefixFor((string) $this->type).'/'.$this->slug;
     }
 
-    /** The PDF or link this post opens instead of an article page (press coverage), if it has one. */
     public function externalLink(): ?string
     {
         return $this->document?->documentUrl() ?: ($this->external_url ?: null);

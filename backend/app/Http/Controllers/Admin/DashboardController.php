@@ -15,9 +15,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Real operational data only – no traffic figures are shown because none are collected here.
- */
 class DashboardController extends Controller
 {
     public function __invoke(Request $request): Response
@@ -70,9 +67,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function item($resource, Model $model): array
     {
         return [

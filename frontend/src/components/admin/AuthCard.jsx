@@ -10,7 +10,7 @@ export default function AuthCard({ title, children, status }) {
             </Head>
             <main className="auth-card">
                 <div className="text-center mb-4">
-                    <img src="/images/namtech-logo.png" alt="NAMTECH – Institute of Manufacturing Innovation" width="700" height="192" className="logo" />
+                    <img src="/images/namtech-logo.webp" alt="NAMTECH – Institute of Manufacturing Innovation" width="700" height="192" className="logo" />
                 </div>
                 <div className="admin-card p-4 shadow-sm">
                     <h1 className="h4 mb-3">{title}</h1>

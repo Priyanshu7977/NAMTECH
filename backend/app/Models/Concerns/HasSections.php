@@ -6,10 +6,6 @@ use App\Models\PageSection;
 use App\Sections\SectionRegistry;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-/**
- * Content built from the controlled section builder (pages, schools, centres, posts).
- * Sections are part of the content's revisions and pending changes.
- */
 trait HasSections
 {
     public static function bootHasSections(): void
@@ -22,9 +18,6 @@ trait HasSections
         return $this->morphMany(PageSection::class, 'sectionable')->orderBy('sort_order');
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function sectionsSnapshot(): array
     {
         $sections = $this->relationLoaded('sections') ? $this->sections : $this->sections()->get();
@@ -38,9 +31,6 @@ trait HasSections
         ])->values()->all();
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $sections
-     */
     public function replaceSections(array $sections): void
     {
         $this->sections()->delete();
@@ -57,9 +47,6 @@ trait HasSections
         $this->unsetRelation('sections');
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $sections
-     */
     public function previewSections(array $sections): void
     {
         $this->setRelation('sections', collect($sections)->values()->map(fn (array $section, int $index) => (new PageSection)->forceFill([
@@ -73,9 +60,6 @@ trait HasSections
         ])));
     }
 
-    /**
-     * @return array<int, int>
-     */
     public function sectionMediaIds(): array
     {
         $ids = [];

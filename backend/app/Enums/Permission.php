@@ -28,9 +28,6 @@ final class Permission
 
     public const AuditView = 'audit.view';
 
-    /**
-     * @return array<int, string>
-     */
     public static function all(): array
     {
         return array_values((new \ReflectionClass(self::class))->getConstants());

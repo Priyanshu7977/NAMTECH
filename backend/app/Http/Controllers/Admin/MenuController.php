@@ -100,9 +100,6 @@ class MenuController extends Controller
         return back()->with('success', 'Menu saved and published.');
     }
 
-    /**
-     * Header menus support mega menus: top item → column heading → links.
-     */
     private function maxDepth(Menu $menu): int
     {
         return match ($menu->location) {

@@ -1,10 +1,6 @@
 import Link from '../router/Link';
 import { isInternalPage } from '../lib/links';
 
-/**
- * Uses Inertia visits for site pages (prefetched on hover) and plain anchors for
- * external, mailto:, tel: and in-page links. External links open in a new tab only when asked.
- */
 export default function SmartLink({ href, newTab = false, children, ...props }) {
     if (!href) {
         return <span {...props}>{children}</span>;

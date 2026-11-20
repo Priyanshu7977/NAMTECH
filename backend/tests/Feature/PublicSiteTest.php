@@ -65,7 +65,6 @@ class PublicSiteTest extends TestCase
         $this->get('/about-us')->assertStatus(301)->assertRedirect('/about');
         $this->get('/about')->assertOk();
 
-        // Changing it back removes the loop and points older URLs at the current one.
         $page->update(['slug' => 'about-us']);
         $this->assertDatabaseMissing('redirects', ['from_path' => '/about-us']);
         $this->assertSame('/about-us', Redirect::query()->where('from_path', '/about')->value('to_url'));

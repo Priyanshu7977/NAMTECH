@@ -59,7 +59,7 @@ export default function FacultyShow({ person, breadcrumbs, hidden }) {
             </section>
             <Breadcrumbs items={breadcrumbs} />
             {show('biography') || (panels.length && show('details')) || (person.programs?.length && show('programs')) ? (
-                <section className="nt-section pt-4">
+                <section className="nt-section">
                     <div className="container">
                         <div className="row g-5">
                             <div className="col-lg-4"><h2 className="nt-h2">{show('biography') ? 'Biography' : 'Profile'}</h2></div>

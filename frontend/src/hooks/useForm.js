@@ -1,12 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { router } from '../router/navigation';
 
-/**
- * Form state and submission:
- *   const form = useForm({ email: '' });
- *   form.setData('email', value); form.post('/newsletter', { preserveScroll: true });
- * Validation errors from the API land in form.errors (first message per field).
- */
 export default function useForm(initialValues = {}) {
     const defaults = useRef(initialValues);
     const transformer = useRef((data) => data);
@@ -67,7 +61,6 @@ export default function useForm(initialValues = {}) {
             if (!fields.length) setDataState(defaults.current);
             else setDataState((current) => ({ ...current, ...Object.fromEntries(fields.map((f) => [f, defaults.current[f]])) }));
         },
-        // Replaces both the data and the defaults, e.g. with the values the server saved.
         load: (values) => {
             defaults.current = values;
             setDataState(values);

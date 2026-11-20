@@ -23,9 +23,6 @@ class Redirect extends Model
         return $path === '' ? '/' : $path;
     }
 
-    /**
-     * Record a permanent redirect after a URL change, collapsing chains and removing loops.
-     */
     public static function record(string $from, string $to): void
     {
         $from = self::normalizePath($from);
@@ -35,10 +32,8 @@ class Redirect extends Model
             return;
         }
 
-        // The new URL is live again, so it must not redirect anywhere.
         static::query()->where('from_path', $to)->delete();
 
-        // Point older redirects at the new destination to avoid chains.
         static::query()->where('to_url', $from)->update(['to_url' => $to]);
 
         static::updateOrCreate(['from_path' => $from], ['to_url' => $to, 'status_code' => 301, 'is_automatic' => true]);

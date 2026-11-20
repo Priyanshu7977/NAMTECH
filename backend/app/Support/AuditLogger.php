@@ -9,11 +9,6 @@ use Illuminate\Support\Str;
 
 class AuditLogger
 {
-    /**
-     * Record an administrative action. Never pass secrets in $properties.
-     *
-     * @param  array<string, mixed>  $properties
-     */
     public static function log(string $action, ?Model $subject, string $description, array $properties = [], ?User $user = null): void
     {
         $request = app()->runningInConsole() ? null : request();

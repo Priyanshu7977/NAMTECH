@@ -1,11 +1,11 @@
 import usePage from '../../../hooks/usePage';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import Carousel from '../../Carousel';
 import Icon, { ArrowDot } from '../../Icon';
 import { Media } from '../../ResponsiveImage';
 import SmartLink from '../../SmartLink';
 import Tabs from '../../Tabs';
-import { IconCard, PersonCard, PostCard, ProgramCard, SimpleCard } from '../Cards';
+import { FacultyGrid, IconCard, PersonCard, PostCard, ProgramCard, SimpleCard } from '../Cards';
 import { Cta, RichText, SectionHeading } from '../Common';
 import EnquiryForm from '../EnquiryForm';
 import { SplitHead, toneClass } from './InnerSections';
@@ -48,7 +48,7 @@ export function PageHero({ data, page, first }) {
     const buttons =
         (data.cta_label && data.cta_url) || (data.secondary_label && data.secondary_url) ? (
             <div className="d-flex flex-wrap gap-3 mt-3 nt-hero-in" style={{ '--d': 3 }}>
-                <Cta label={data.cta_label} url={data.cta_url} variant={data.layout === 'plain' ? '' : 'light'} />
+                <Cta label={data.cta_label} url={data.cta_url} variant={data.layout === 'plain' || data.layout === 'light' ? '' : 'light'} />
                 {data.secondary_label && data.secondary_url ? (
                     <SmartLink href={data.secondary_url} className={`nt-btn ${data.layout === 'plain' ? 'nt-btn--outline' : 'nt-btn--ghost'}`}>
                         {data.secondary_label}
@@ -77,7 +77,7 @@ export function PageHero({ data, page, first }) {
     }
 
     return (
-        <section className="nt-page-hero on-dark">
+        <section className={`nt-page-hero ${data.layout === 'light' ? 'nt-page-hero--light' : 'on-dark'} ${data.button_size === 'large' ? 'nt-page-hero--large-buttons' : ''}`}>
             <div className="nt-page-hero__grid">
                 <div className="nt-page-hero__content">
                     {data.eyebrow ? <p className="nt-pill align-self-start nt-hero-in">{data.eyebrow}</p> : null}
@@ -98,6 +98,39 @@ export function PageHero({ data, page, first }) {
 }
 
 export function Intro({ data }) {
+    if (data.align === 'statement') {
+        return (
+            <section className={`nt-section ${toneClass(data.tone)}`}>
+                <div className="container">
+                    <RichText html={data.body} className="nt-intro__statement" />
+                </div>
+            </section>
+        );
+    }
+    if (data.align === 'center') {
+        return (
+            <section className={`nt-section ${toneClass(data.tone)}`}>
+                <div className="container text-center nt-intro--center">
+                    {data.icon ? <Icon name={data.icon} strokeWidth={1} className="nt-intro__icon" /> : null}
+                    <SectionHeading eyebrow={data.eyebrow} heading={data.heading} className="mb-0" />
+                    {data.body ? <RichText html={data.body} className="nt-intro__body mx-auto mt-4" /> : null}
+                    <Cta label={data.cta_label} url={data.cta_url} variant={data.tone === 'purple' ? 'light' : ''} className="mt-4" />
+                </div>
+            </section>
+        );
+    }
+    if (!data.heading && !data.eyebrow && !data.icon) {
+        return (
+            <section className={`nt-section nt-intro--solo ${toneClass(data.tone)}`}>
+                <div className="container">
+                    <div className="nt-intro__solo">
+                        <RichText html={data.body} />
+                        <Cta label={data.cta_label} url={data.cta_url} variant={data.tone === 'purple' ? 'light' : ''} className="mt-4" />
+                    </div>
+                </div>
+            </section>
+        );
+    }
     return (
         <section className={`nt-section ${toneClass(data.tone)}`}>
             <div className="container">
@@ -158,6 +191,21 @@ export function ImageText({ data }) {
     const left = data.image_position !== 'right';
     const layout = data.layout || 'side';
 
+    if (layout === 'research') {
+        return (
+            <section className="nt-section nt-partnership-research">
+                <div className="container">
+                    <SectionHeading eyebrow={data.eyebrow} heading={data.heading} />
+                    <div className="nt-partnership-research__panel">
+                        <Media image={data.image} sizes="(min-width: 768px) 50vw, 100vw" />
+                        <RichText html={data.body} />
+                    </div>
+                    <Cta label={data.cta_label} url={data.cta_url} className="mt-4" />
+                </div>
+            </section>
+        );
+    }
+
     if (layout === 'panel') {
         return (
             <section className={`nt-image-panel ${left ? '' : 'nt-image-panel--reverse'}`}>
@@ -191,25 +239,56 @@ export function ImageText({ data }) {
     );
 }
 
-export function CardGrid({ data }) {
+export function CardGrid({ data, anchor }) {
     const tone = data.tone || 'white';
     const columns = Number(data.columns || 3);
     const style = data.style || (tone === 'purple' ? 'filled' : 'outlined');
     const cards = data.cards ?? [];
+    const research = anchor === 'academic-research-themes';
+    const joinedCards = cards.map((card, i) => (
+        <div className="nt-joined-card" key={i}>
+            <Icon name={card.icon || 'graduation'} strokeWidth={1.1} />
+            <h3>{card.link_url ? <SmartLink href={card.link_url} className="stretched-link">{card.title}</SmartLink> : card.title}</h3>
+            {card.body ? <p>{card.body}</p> : null}
+        </div>
+    ));
+
+    if (style === 'lines' || style === 'numbered') {
+        const numbered = style === 'numbered';
+        return (
+            <section className={`nt-section ${toneClass(tone)}`}>
+                <div className="container">
+                    <SplitHead data={numbered ? { ...data, tone, cta_label: null, cta_url: null } : { ...data, tone }} />
+                    {data.list_label ? <h3 className="nt-card-lines__label">{data.list_label}</h3> : null}
+                    <ul className={`nt-card-lines nt-card-lines--${style} list-unstyled nt-stagger`} style={{ '--cols': columns }}>
+                        {cards.map((card, i) => (
+                            <li key={i}>
+                                {numbered ? <span className="nt-card-lines__num">{String(i + 1).padStart(2, '0')}</span> : <Icon name={card.icon || 'graduation'} strokeWidth={1.1} />}
+                                <div>
+                                    {card.title ? <h4>{card.link_url ? <SmartLink href={card.link_url}>{card.title}</SmartLink> : card.title}</h4> : null}
+                                    {card.body ? <p>{card.body}</p> : null}
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    {data.footer ? <p className="nt-card-lines__footer">{data.footer}</p> : null}
+                    {numbered ? (
+                        <div className="text-center">
+                            <Cta label={data.cta_label} url={data.cta_url} className="mt-5" />
+                        </div>
+                    ) : null}
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className={`nt-section ${toneClass(tone)}`}>
             <div className="container">
-                <SplitHead data={{ ...data, tone }} />
+                <SplitHead data={research ? { ...data, tone, cta_label: null, cta_url: null } : { ...data, tone }} />
                 {style === 'joined' || style === 'joined_light' ? (
-                    <div className={`nt-joined-cards nt-stagger ${style === 'joined_light' ? 'nt-joined-cards--light' : ''}`} style={{ '--cols': columns }}>
-                        {cards.map((card, i) => (
-                            <div className="nt-joined-card" key={i}>
-                                <Icon name={card.icon || 'graduation'} strokeWidth={1.1} />
-                                <h3>{card.link_url ? <SmartLink href={card.link_url} className="stretched-link">{card.title}</SmartLink> : card.title}</h3>
-                                {card.body ? <p>{card.body}</p> : null}
-                            </div>
-                        ))}
+                    <div className={`nt-joined-cards nt-stagger ${style === 'joined_light' ? 'nt-joined-cards--light' : ''}${research ? ' d-none d-md-grid' : ''}`} style={{ '--cols': columns }}>
+                        {joinedCards}
                     </div>
                 ) : (
                     <div className={`row g-4 row-cols-1 row-cols-md-2 row-cols-lg-${columns} nt-stagger`}>
@@ -220,6 +299,14 @@ export function CardGrid({ data }) {
                         ))}
                     </div>
                 )}
+                {research ? (
+                    <>
+                        <div className="d-md-none">
+                            <Carousel label="Sample research themes" slideWidth="82%" gap="0">{joinedCards}</Carousel>
+                        </div>
+                        <div className="text-center mt-4"><Cta label={data.cta_label} url={data.cta_url} /></div>
+                    </>
+                ) : null}
             </div>
         </section>
     );
@@ -298,6 +385,19 @@ function MediaCard({ item, layout, linkLabel }) {
                     <Media image={item.image} sizes="(min-width: 992px) 30vw, 90vw" className="nt-hcard__media" />
                 </article>
             );
+        case 'feature':
+            return (
+                <article className="nt-feature-card">
+                    <div className="nt-feature-card__text">
+                        {item.icon ? <Icon name={item.icon} strokeWidth={1} /> : null}
+                        <h3>{item.title}</h3>
+                        {item.subtitle ? <p className="nt-feature-card__sub">{item.subtitle}</p> : null}
+                        {item.body ? <p>{item.body}</p> : null}
+                        {link}
+                    </div>
+                    <Media image={item.image} sizes="(min-width: 992px) 600px, 90vw" className="nt-feature-card__media" />
+                </article>
+            );
         case 'story':
             return (
                 <article className="nt-story-panel">
@@ -306,15 +406,37 @@ function MediaCard({ item, layout, linkLabel }) {
                         {item.tag ? <span className="nt-tag align-self-start">{item.tag}</span> : null}
                         <h3>{item.title}</h3>
                         {item.subtitle ? <p className="nt-hcard__sub">{item.subtitle}</p> : null}
-                        {item.body ? <p>{item.body}</p> : null}
+                        {item.body ? <p className="nt-pre-line">{item.body}</p> : null}
                         {item.meta ? (
                             <p className="nt-story-card__highlight">
                                 <Icon name="trend" />
                                 {item.meta}
                             </p>
                         ) : null}
+                        {item.metrics?.length ? (
+                            <div>
+                                {item.sample_metrics ? <p className="nt-partnership-figures__label">Sample figures</p> : null}
+                                <dl className="nt-partnership-figures">
+                                    {item.metrics.map((metric) => (
+                                        <div key={metric.label}>
+                                            <dt>{metric.label}</dt>
+                                            <dd>{metric.value}</dd>
+                                        </div>
+                                    ))}
+                                </dl>
+                            </div>
+                        ) : null}
                         {link}
                     </div>
+                </article>
+            );
+        case 'partnership_tiles':
+            return (
+                <article className="nt-partnership-tile">
+                    <Icon name={item.icon || 'building'} strokeWidth={1.1} />
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                    {link}
                 </article>
             );
         case 'logo':
@@ -324,7 +446,7 @@ function MediaCard({ item, layout, linkLabel }) {
                     <div className="nt-logo-card__body">
                         {item.logo ? <img src={item.logo.src} alt={item.logo.alt} width={item.logo.width} height={item.logo.height} loading="lazy" className="nt-logo-card__logo" /> : null}
                         <h3>{item.title}</h3>
-                        {item.body ? <p>{item.body}</p> : null}
+                        {item.body ? <p className="nt-pre-line">{item.body}</p> : null}
                         {item.meta ? (
                             <p className="nt-story-card__highlight">
                                 <Icon name="trend" />
@@ -335,9 +457,28 @@ function MediaCard({ item, layout, linkLabel }) {
                     </div>
                 </article>
             );
-        case 'tall':
+        case 'centers':
             return (
-                <article className="nt-tall-card">
+                <article className="nt-center-card">
+                    <Media image={item.image} sizes="(min-width: 992px) 1000px, 88vw" className="nt-center-card__media" alt="" />
+                    {item.logo ? <img src={item.logo.src} alt={item.logo.alt} width={item.logo.width} height={item.logo.height} loading="lazy" className="nt-center-card__logo" /> : null}
+                    <h3>{item.title}</h3>
+                    {item.body ? <p>{item.body}</p> : null}
+                    {link}
+                </article>
+            );
+        case 'labs':
+            return (
+                <article className="nt-lab-card">
+                    <Media image={item.image} sizes="(min-width: 992px) 680px, 85vw" className="nt-lab-card__media" alt="" />
+                    <h3>{item.link_url ? <SmartLink href={item.link_url} className="stretched-link">{item.title}</SmartLink> : item.title}</h3>
+                    {item.body ? <p>{item.body}</p> : null}
+                </article>
+            );
+        case 'tall':
+        case 'tall_wide':
+            return (
+                <article className={`nt-tall-card ${layout === 'tall_wide' ? 'nt-tall-card--wide' : ''}`}>
                     <Media image={item.image} sizes="(min-width: 992px) 25vw, 80vw" className="nt-tall-card__media" />
                     <div className="nt-tall-card__body">
                         {item.date || item.tag ? <p className="nt-tall-card__meta">{[item.tag, item.date].filter(Boolean).join(' · ')}</p> : null}
@@ -357,20 +498,31 @@ function MediaCard({ item, layout, linkLabel }) {
     }
 }
 
-export function MediaCards({ data }) {
+export function MediaCards({ data, page }) {
     const layout = data.layout || 'cards';
     const items = data.items ?? [];
-    const widths = { cards: 'min(22rem, 82%)', showcase: 'min(56rem, 88%)', horizontal: 'min(60rem, 92%)', story: 'min(62rem, 92%)', logo: 'min(24rem, 85%)', tall: 'min(18rem, 75%)' };
+    const widths = { cards: 'min(22rem, 82%)', showcase: 'min(56rem, 88%)', horizontal: 'min(60rem, 92%)', story: 'min(71.7rem, 92%)', logo: 'min(24rem, 85%)', tall: 'min(18rem, 75%)', tall_wide: 'min(36.5rem, 85%)', labs: 'min(32.1rem, 85%)', centers: 'min(62.5rem, 88%)', feature: 'min(75rem, 92%)', partnership_tiles: 'min(21rem, 78%)' };
+    const stackOnMobile = layout === 'feature' && page?.path?.split('/')[0] === 'partnerships';
+    const cards = items.map((item, i) => <MediaCard key={i} item={item} layout={layout} linkLabel={data.card_link_label} />);
 
     return (
-        <section className={`nt-section ${toneClass(data.tone)} nt-media-cards--${layout}`}>
+        <section className={`nt-section ${toneClass(data.tone)} nt-media-cards--${layout}${layout === 'centers' ? ' nt-divider' : ''}`}>
             <div className="container">
-                <SplitHead data={data} />
-                <Carousel label={data.heading || 'Highlights'} slideWidth={widths[layout] ?? widths.cards} gap={layout === 'tall' ? '1.25rem' : '2rem'} align={layout === 'showcase' ? 'center' : 'start'}>
-                    {items.map((item, i) => (
-                        <MediaCard key={i} item={item} layout={layout} linkLabel={data.card_link_label} />
-                    ))}
-                </Carousel>
+                {layout === 'feature' || data.head_align === 'center' ? (
+                    <div className="nt-media-cards__head text-center mx-auto">
+                        {data.eyebrow ? <p className="nt-pill d-table mx-auto">{data.eyebrow}</p> : null}
+                        {data.heading ? <h2 className="nt-h2">{data.heading}</h2> : null}
+                        {data.body ? <p className="nt-lead mx-auto">{data.body}</p> : null}
+                    </div>
+                ) : (
+                    <SplitHead data={data} />
+                )}
+                <div className={stackOnMobile ? 'd-none d-md-block' : undefined}>
+                    <Carousel label={data.heading || 'Highlights'} slideWidth={widths[layout] ?? widths.cards} gap={{ tall: '1.25rem', centers: '2.25rem', partnership_tiles: '0' }[layout] ?? '2rem'} align={layout === 'showcase' ? 'center' : 'start'}>
+                        {cards}
+                    </Carousel>
+                </div>
+                {stackOnMobile ? <div className="nt-partnership-feature-stack d-md-none">{cards}</div> : null}
                 {data.footer_label && data.footer_url ? (
                     <p className="text-center mt-4 mb-0">
                         <SmartLink href={data.footer_url} className="nt-link-arrow">
@@ -383,11 +535,12 @@ export function MediaCards({ data }) {
     );
 }
 
-export function TabsSection({ data }) {
+export function TabsSection({ data, panels }) {
     if (!data.tabs?.length) return null;
     const centered = data.layout === 'centered';
+    const sectionPanels = data.layout === 'section_panels';
     return (
-        <section className={`nt-section ${toneClass(data.tone)}`}>
+        <section className={`nt-section ${toneClass(data.tone)}${sectionPanels ? ' nt-partnership-models' : ''}`}>
             <div className="container">
                 <div className={centered ? 'text-center mx-auto' : ''} style={centered ? { maxWidth: '48rem' } : undefined}>
                     {data.eyebrow ? <p className={`nt-pill ${centered ? 'd-table mx-auto' : ''}`}>{data.eyebrow}</p> : null}
@@ -400,7 +553,13 @@ export function TabsSection({ data }) {
                     tabs={data.tabs.map((tab, i) => ({
                         key: i,
                         label: tab.label,
-                        content: centered ? (
+                        anchor: sectionPanels ? tab.panel_anchor : undefined,
+                        content: sectionPanels ? (
+                            <div className="nt-partnership-models__panel">
+                                <RichText html={tab.body} />
+                                {panels && Object.hasOwn(panels, tab.panel_anchor) ? panels[tab.panel_anchor] : null}
+                            </div>
+                        ) : centered ? (
                             <div className="text-center mx-auto nt-fade-in" style={{ maxWidth: '48rem' }}>
                                 {tab.image ? <Media image={tab.image} sizes="(min-width: 992px) 48rem, 100vw" className="mb-4" style={{ aspectRatio: '16 / 9' }} /> : null}
                                 {tab.title ? <h3 className="nt-h3 mb-3">{tab.title}</h3> : null}
@@ -426,12 +585,20 @@ export function TabsSection({ data }) {
     );
 }
 
-export function FaqItems({ items }) {
+export function FaqItems({ items, openFirst = false }) {
+    const [openIndex, setOpenIndex] = useState(openFirst ? 0 : -1);
     return (
         <div className="nt-faq">
             {(items ?? []).map((item, i) => (
-                <details key={i}>
-                    <summary>{item.question}</summary>
+                <details key={i} open={openIndex === i}>
+                    <summary
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setOpenIndex(openIndex === i ? -1 : i);
+                        }}
+                    >
+                        {item.question}
+                    </summary>
                     <RichText html={item.answer} />
                 </details>
             ))}
@@ -534,19 +701,24 @@ export function People({ data }) {
             ['residential', 'Residential Faculty'],
             ['visiting', 'Visiting Faculty'],
         ]
-            .map(([key, label]) => ({ key, label, list: people.filter((p) => (p.category || 'residential') === key) }))
-            .filter((g) => g.list.length);
+            .map(([key, label]) => {
+                const list = people.filter((p) => (p.category || 'residential') === key);
+                const samples = [1, 2, 3, 4].map((i) => ({ id: `sample-${key}-${i}`, name: `SAMPLE – ${label.replace(' Faculty', '')} faculty name`, designation: 'SAMPLE – Designation', url: null, photo: people[0]?.photo ?? null }));
+                return { key, label, list: list.length ? list : samples };
+            });
         const carousel = (list, label) => (
-            <Carousel label={label} slideWidth="min(17rem, 75%)" gap="1.5rem">
+            <Carousel label={label} slideWidth="min(22.2rem, 80%)" gap="2.25rem">
                 {list.map((person) => (
                     <PersonCard key={person.id} person={person} />
                 ))}
             </Carousel>
         );
-        body = groups.length > 1 ? (
-            <Tabs label="Faculty type" tabs={groups.map((g) => ({ key: g.key, label: g.label, content: carousel(g.list, g.label) }))} />
-        ) : (
-            carousel(people, data.heading || 'Faculty')
+        body = (
+            <Tabs
+                label="Faculty type"
+                className="nt-people-tabs"
+                tabs={groups.map((g) => ({ key: g.key, label: g.label, content: carousel(g.list, g.label) }))}
+            />
         );
     } else if (layout === 'list') {
         body = (
@@ -564,15 +736,7 @@ export function People({ data }) {
             </ul>
         );
     } else {
-        body = (
-            <div className="row g-4 row-cols-1 row-cols-sm-2 row-cols-lg-4 nt-stagger">
-                {people.map((person) => (
-                    <div className="col" key={person.id}>
-                        <PersonCard person={person} />
-                    </div>
-                ))}
-            </div>
-        );
+        body = <FacultyGrid people={people} />;
     }
 
     return (
@@ -630,6 +794,19 @@ export function PostList({ data }) {
 
 export function LogoStrip({ data }) {
     if (!data.logos?.length) return null;
+    if (data.layout === 'band') {
+        return (
+            <section className="nt-logo-band" aria-label={data.heading || 'Partners'}>
+                <ul className="nt-logos nt-logo-band__list list-unstyled m-0 nt-stagger">
+                    {data.logos.map((logo) => (
+                        <li key={logo.id}>
+                            {logo.logo ? <img src={logo.logo.src} width={logo.logo.width} height={logo.logo.height} alt={logo.name} loading="lazy" /> : <span>{logo.name}</span>}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+        );
+    }
     return (
         <section className={`nt-section ${toneClass(data.tone)}`}>
             <div className="container">
@@ -646,39 +823,90 @@ export function LogoStrip({ data }) {
     );
 }
 
-function Spotlight({ items }) {
+function Spotlight({ data, items, responsive }) {
     const [active, setActive] = useState(0);
+    const id = useId();
     const item = items[active];
+    const photo = item.image || data.image;
     return (
-        <div className="nt-spotlight">
-            <ul className="nt-spotlight__names" role="tablist" aria-label="Testimonials">
-                {items.map((it, i) => (
-                    <li key={i} role="presentation">
-                        <button type="button" role="tab" aria-selected={i === active} onClick={() => setActive(i)}>
-                            <strong>{it.name}</strong>
-                            {it.role ? <span>{it.role}</span> : null}
-                        </button>
-                    </li>
-                ))}
-            </ul>
-            <figure className="nt-spotlight__card nt-fade-in" key={active} role="tabpanel">
-                {item.image ? <Media image={item.image} sizes="(min-width: 992px) 30vw, 90vw" alt="" className="nt-spotlight__media" /> : null}
-                <blockquote>“{item.quote}”</blockquote>
-                <figcaption>
-                    <strong>{item.name}</strong>
-                    {item.role ? <span>{item.role}</span> : null}
-                </figcaption>
-            </figure>
-        </div>
+        <>
+        <section className={`nt-spotlight${responsive ? ' d-none d-lg-grid' : ''}`}>
+            <div className="nt-spotlight__side">
+                <div className="nt-spotlight__inner">
+                    {data.eyebrow ? <p className="nt-pill">{data.eyebrow}</p> : null}
+                    {data.heading ? <h2 className="nt-h2">{data.heading}</h2> : null}
+                    {data.body ? <p className="nt-spotlight__intro">{data.body}</p> : null}
+                    <ul className="nt-spotlight__names" role="tablist" aria-label={data.heading || 'Testimonials'}>
+                        {items.map((it, i) => (
+                            <li key={i} role="presentation">
+                                <button
+                                    type="button"
+                                    role="tab"
+                                    id={`${id}-t${i}`}
+                                    aria-controls={`${id}-p`}
+                                    aria-selected={i === active}
+                                    tabIndex={i === active ? 0 : -1}
+                                    onClick={() => setActive(i)}
+                                >
+                                    <strong>{it.name}</strong>
+                                    {it.role ? <span>{it.role}</span> : null}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                    {data.cta_label && data.cta_url ? <Cta label={data.cta_label} url={data.cta_url} /> : null}
+                </div>
+            </div>
+            <div className="nt-spotlight__stage" role="tabpanel" id={`${id}-p`} aria-labelledby={`${id}-t${active}`}>
+                {photo ? <Media image={photo} sizes="(min-width: 992px) 52vw, 100vw" alt="" className="nt-spotlight__media" /> : null}
+                {photo && !item.image && data.photo_caption ? <span className="nt-spotlight__photo-caption">{data.photo_caption}</span> : null}
+                <SpotlightQuote item={item} key={active} />
+            </div>
+        </section>
+        {responsive ? (
+            <section className="nt-section nt-tone-lavender nt-partnership-leadership d-lg-none">
+                <div className="container">
+                    <SectionHeading eyebrow={data.eyebrow} heading={data.heading} />
+                    {data.body ? <p>{data.body}</p> : null}
+                    <Carousel label={data.heading || 'Leadership perspectives'} slideWidth="86%" gap="0.75rem">
+                        {items.map((entry, index) => (
+                            <div className="nt-spotlight-mobile" key={index}>
+                                {entry.image || data.image ? (
+                                    <div className="nt-spotlight-mobile__photo">
+                                        <Media image={entry.image || data.image} sizes="86vw" alt="" />
+                                        {!entry.image && data.photo_caption ? <span className="nt-spotlight__photo-caption">{data.photo_caption}</span> : null}
+                                    </div>
+                                ) : null}
+                                <SpotlightQuote item={entry} />
+                            </div>
+                        ))}
+                    </Carousel>
+                    <div className="text-center"><Cta label={data.cta_label} url={data.cta_url} className="mt-4" /></div>
+                </div>
+            </section>
+        ) : null}
+        </>
     );
 }
 
-export function Testimonials({ data }) {
+function SpotlightQuote({ item }) {
+    return (
+        <figure className="nt-spotlight__card on-dark nt-fade-in">
+            <figcaption>
+                <strong>{item.name}</strong>
+                {item.role ? <span>{item.role}</span> : null}
+            </figcaption>
+            <blockquote>“{item.quote}”</blockquote>
+        </figure>
+    );
+}
+
+export function Testimonials({ data, page }) {
     const items = data.items ?? [];
     const layout = data.layout || 'quotes';
     let body;
     if (layout === 'spotlight' && items.length) {
-        body = <Spotlight items={items} />;
+        return <Spotlight data={data} items={items} responsive={page?.path?.split('/')[0] === 'partnerships'} />;
     } else if (layout === 'portrait') {
         body = (
             <Carousel label={data.heading || 'Testimonials'} slideWidth="min(60rem, 92%)">
@@ -768,30 +996,33 @@ export function Documents({ data }) {
         isFile: Boolean(item.file?.url),
     }));
 
+    const docLink = (item) =>
+        item.url ? (
+            <a href={item.url} className="nt-doc-link" {...(item.isFile ? { target: '_blank', rel: 'noopener' } : {})}>
+                View PDF<span className="visually-hidden">: {item.title}</span>
+            </a>
+        ) : (
+            <span className="nt-doc-link nt-doc-link--soon">Coming soon</span>
+        );
+
     if (data.layout === 'list') {
         return (
             <section className={`nt-section ${toneClass(data.tone)}`}>
                 <div className="container">
-                    <div className="row g-5">
-                        <div className="col-lg-4">
+                    <div className="row g-5 align-items-start">
+                        <div className="col-lg-5">
                             <SectionHeading eyebrow={data.eyebrow} heading={data.heading} />
-                            {data.body ? <p>{data.body}</p> : null}
+                            {data.body ? <p className="nt-doc-intro">{data.body}</p> : null}
                         </div>
-                        <div className="col-lg-8">
+                        <div className="col-lg-6 offset-lg-1">
                             <ul className="nt-doc-rows">
                                 {items.map((item, i) => (
                                     <li key={i}>
-                                        <span>
+                                        <span className="nt-doc-rows__title">
                                             {item.title}
                                             {item.meta ? <small className="d-block text-muted">{item.meta}</small> : null}
                                         </span>
-                                        {item.url ? (
-                                            <a href={item.url} className="nt-link-arrow" {...(item.isFile ? { target: '_blank', rel: 'noopener' } : {})}>
-                                                Download<span className="visually-hidden"> {item.title}</span> <Icon name="download" strokeWidth={1.8} />
-                                            </a>
-                                        ) : (
-                                            <span className="small text-muted">Coming soon</span>
-                                        )}
+                                        {docLink(item)}
                                     </li>
                                 ))}
                             </ul>
@@ -805,22 +1036,13 @@ export function Documents({ data }) {
     return (
         <section className={`nt-section ${toneClass(data.tone)}`}>
             <div className="container">
-                <SplitHead data={data} />
+                {data.heading || data.body || data.eyebrow ? <SplitHead data={data} /> : null}
                 <ul className="nt-doc-grid nt-stagger">
                     {items.map((item, i) => (
                         <li key={i}>
-                            <Icon name="document" strokeWidth={1.1} />
-                            <span className="nt-doc-grid__title">
-                                {item.url ? (
-                                    <a href={item.url} className="stretched-link" {...(item.isFile ? { target: '_blank', rel: 'noopener' } : {})}>
-                                        {item.title}
-                                    </a>
-                                ) : (
-                                    item.title
-                                )}
-                            </span>
+                            <span className="nt-doc-grid__title">{item.title}</span>
                             {item.meta ? <span className="nt-doc-grid__meta">{item.meta}</span> : null}
-                            {item.url ? <Icon name="download" strokeWidth={1.8} className="nt-doc-grid__dl" /> : null}
+                            {docLink(item)}
                         </li>
                     ))}
                 </ul>

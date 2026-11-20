@@ -28,8 +28,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/admin');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Errors are shown as on-brand Inertia error pages. JSON is kept only for the plain
-        // JSON requests CMS widgets make (media picker, uploads), which are not Inertia visits.
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
             $status = $response->getStatusCode();
             $friendly = in_array($status, [403, 404, 419, 429, 500, 503], true);
@@ -47,8 +45,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
         });
     })->create();
 
-// Shared hosting (e.g. Bluehost): the app sits beside the web root "public_html" instead of having its
-// own "public" folder, so built assets and the storage link live there.
 $sharedHostingPublic = dirname(__DIR__, 2).'/public_html';
 if (! is_dir(dirname(__DIR__).'/public') && is_dir($sharedHostingPublic)) {
     $app->usePublicPath($sharedHostingPublic);

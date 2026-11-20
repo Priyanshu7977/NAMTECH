@@ -6,13 +6,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CsvExporter
 {
-    /**
-     * Stream a CSV download. Cells that could be interpreted as spreadsheet formulas are
-     * prefixed with an apostrophe to prevent CSV injection.
-     *
-     * @param  array<int, string>  $headings
-     * @param  iterable<array<int, mixed>>  $rows
-     */
     public static function download(string $filename, array $headings, iterable $rows): StreamedResponse
     {
         return response()->streamDownload(function () use ($headings, $rows): void {

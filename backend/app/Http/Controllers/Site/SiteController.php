@@ -16,6 +16,7 @@ use App\Models\Post;
 use App\Models\Program;
 use App\Models\Publication;
 use App\Models\School;
+use App\Sections\SampleContent;
 use App\Sections\SectionPresenter;
 use App\Services\PublicRenderer;
 use App\Support\Presenters;
@@ -62,9 +63,20 @@ class SiteController extends Controller
         ], 'Postgraduate, executive and industry programs in advanced manufacturing, engineering and technology at NAMTECH.');
     }
 
-    public function program(string $slug): Response
+    public function program(string $slug): Response|RedirectResponse
     {
-        return $this->renderer->program(Program::query()->published()->where('slug', $slug)->firstOrFail());
+        $program = Program::query()->published()->where('slug', $slug)->firstOrFail();
+
+        if ($program->isIptp()) {
+            return redirect($program->publicPath(), 301);
+        }
+
+        return $this->renderer->program($program);
+    }
+
+    public function iptpProgram(string $name): Response
+    {
+        return $this->renderer->program(Program::query()->published()->where('slug', Program::IptpSlugPrefix.$name)->firstOrFail());
     }
 
     public function schools(): Response
@@ -92,8 +104,7 @@ class SiteController extends Controller
         $type = array_key_exists((string) $request->query('type'), Faculty::Categories) ? (string) $request->query('type') : null;
 
         $people = Faculty::query()->published()->with('photo')
-            ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $q) => $q->where('name', 'like', "%{$search}%")
-                ->orWhere('designation', 'like', "%{$search}%")->orWhere('research_interests', 'like', "%{$search}%")))
+            ->when($search !== '', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"))
             ->when(is_string($school) && $school !== '', fn (Builder $q) => $q->whereHas('school', fn (Builder $s) => $s->where('slug', $school)))
             ->when($type, fn (Builder $q) => $q->where('category', $type))
             ->orderBy('sort_order')->orderBy('name')->paginate(24)->withQueryString()
@@ -147,9 +158,6 @@ class SiteController extends Controller
         return $this->renderer->partner(Partner::query()->published()->where('slug', $slug)->whereNotNull('story')->firstOrFail());
     }
 
-    /**
-     * Media hub: News, Press Release and Announcements tabs with sidebar filters.
-     */
     public function media(Request $request): Response
     {
         $tabs = ['news' => 'News', 'press' => 'Press Release', 'announcement' => 'Announcements'];
@@ -170,6 +178,7 @@ class SiteController extends Controller
             'tab' => $tab,
             'featured' => $featured ? Presenters::postCard($featured) : null,
             'posts' => $posts,
+            'sample_image' => (new SampleContent)->image(),
             'categories' => Category::query()->whereHas('posts', fn (Builder $q) => $q->published()->where('type', 'news'))->orderBy('name')->pluck('name', 'slug'),
             'years' => Post::query()->published()->where('type', $tab)->selectRaw('distinct '.$this->yearExpression().' as y')->orderByDesc('y')->pluck('y')->map(fn ($y) => (int) $y)->filter()->values(),
             'filters' => ['categories' => $categories, 'years' => $years],
@@ -178,19 +187,38 @@ class SiteController extends Controller
 
     public function stories(Request $request): Response
     {
-        $categories = Category::query()->whereHas('posts', fn (Builder $q) => $q->published()->where('type', 'story'))->orderBy('id')->pluck('name', 'slug');
+        $journey = 'student-journey-innovations';
+        $designed = [
+            'industry-case-studies' => 'Industry Case Studies',
+            'industrial-social-impact' => 'Industrial & Social Impact',
+            $journey => 'Student Journey & Innovations',
+            'faculty-stories' => 'Faculty Stories',
+            'research-breakthroughs' => 'Research Breakthroughs',
+        ];
+        $slugs = array_keys($designed);
+        $categoryNames = Category::query()->whereIn('slug', $slugs)->pluck('name', 'slug')->all();
+        $categories = array_replace($designed, $categoryNames) + Category::query()->whereNotIn('slug', $slugs)
+            ->whereHas('posts', fn (Builder $q) => $q->published()->where('type', 'story'))->orderBy('id')->pluck('name', 'slug')->all();
         $category = $request->query('category');
-        $query = Post::query()->published()->with('image', 'category')->where('type', 'story')
-            ->when(is_string($category) && $category !== '', fn (Builder $q) => $q->whereHas('category', fn (Builder $c) => $c->where('slug', $category)));
-        $featured = (clone $query)->orderByDesc('is_featured')->latest('published_at')->first();
-        $posts = $query->when($featured, fn (Builder $q) => $q->whereKeyNot($featured->id))->latest('published_at')
+        $query = Post::query()->published()->with('image', 'category')->where('type', 'story');
+
+        if (! $request->query->has('category') && $request->query('view') !== 'all'
+            && (clone $query)->whereHas('category', fn (Builder $c) => $c->where('slug', $journey))->exists()) {
+            $category = $journey;
+        }
+
+        $category = is_string($category) && $category !== '' ? $category : null;
+        $query->when($category, fn (Builder $q) => $q->whereHas('category', fn (Builder $c) => $c->where('slug', $category)));
+        $featured = (clone $query)->orderByDesc('is_featured')->latest('published_at')->latest('id')->first();
+        $posts = $query->when($featured, fn (Builder $q) => $q->whereKeyNot($featured->id))->latest('published_at')->latest('id')
             ->paginate(9)->withQueryString()->through(Presenters::postCard(...));
 
         return $this->listing('impact/stories', 'site/posts/Stories', 'Impact Stories', [
             'categories' => $categories,
-            'featured' => $featured ? Presenters::postCard($featured) : null,
+            'featured' => $featured && $posts->onFirstPage() ? Presenters::postCard($featured) : null,
             'posts' => $posts,
             'filters' => ['category' => $category],
+            'sample_image' => $featured ? null : (new SampleContent)->image(),
         ], 'Case studies and stories of impact from NAMTECH students, faculty and partners.');
     }
 
@@ -206,9 +234,15 @@ class SiteController extends Controller
             ->orderBy('published_at', $sort === 'oldest' ? 'asc' : 'desc')
             ->paginate(9)->withQueryString()->through(Presenters::postCard(...));
 
+        $featured = Post::query()->published()->with('image', 'category')->where('type', 'blog')->where('is_featured', true)
+            ->latest('published_at')->limit(4)->get();
+        if ($featured->count() < 4) {
+            $featured = $featured->concat(Post::query()->published()->with('image', 'category')->where('type', 'blog')
+                ->whereNotIn('id', $featured->pluck('id'))->latest('published_at')->limit(4 - $featured->count())->get());
+        }
+
         return $this->listing('blogs', 'site/posts/Blogs', 'Voices of NAMTECH', [
-            'featured' => Post::query()->published()->with('image', 'category')->where('type', 'blog')->where('is_featured', true)
-                ->latest('published_at')->limit(6)->get()->map(Presenters::postCard(...)),
+            'featured' => $featured->map(Presenters::postCard(...))->values(),
             'posts' => $posts,
             'topics' => Category::query()->whereHas('posts', fn (Builder $q) => $q->published()->where('type', 'blog'))->orderBy('name')->pluck('name', 'slug'),
             'filters' => ['q' => $search, 'topic' => $topic, 'sort' => $sort],
@@ -286,12 +320,6 @@ class SiteController extends Controller
         return DB::connection()->getDriverName() === 'sqlite' ? "strftime('%Y', published_at)" : 'YEAR(published_at)';
     }
 
-    /**
-     * A listing page. If a published CMS page exists at the same path its sections
-     * (hero, introduction) are rendered above the listing.
-     *
-     * @param  array<string, mixed>  $props
-     */
     private function listing(string $path, string $component, string $title, array $props, string $description): Response
     {
         $page = Page::query()->published()->where('path', $path)->with('sections')->first();

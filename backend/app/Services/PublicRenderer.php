@@ -11,30 +11,25 @@ use App\Models\JobOpening;
 use App\Models\Leader;
 use App\Models\Media;
 use App\Models\Page;
-use App\Models\PageSection;
 use App\Models\Partner;
 use App\Models\Post;
 use App\Models\Program;
 use App\Models\Publication;
 use App\Models\School;
 use App\Models\Setting;
+use App\Sections\SampleContent;
 use App\Sections\SectionPresenter;
 use App\Support\HtmlSanitizer;
 use App\Support\PageBlocks;
-use App\Support\ProgramDetails;
 use App\Support\Presenters;
+use App\Support\ProgramDetails;
 use App\Support\SiteSettings;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Builds the Inertia page for each public content type. Used by the public
- * controllers and by the admin preview (with unsaved pending changes applied).
- */
 class PublicRenderer
 {
-    /** Set while rendering a CMS preview, so the page shows the preview bar. */
     private bool $preview = false;
 
     public function __construct(private SectionPresenter $sections) {}
@@ -62,6 +57,16 @@ class PublicRenderer
 
     public function page(Page $page): Response
     {
+        if ('/'.$page->path === Program::IptpBasePath
+            && ($iptp = Program::query()->where('slug', Program::IptpOverviewSlug)->first())) {
+            $page->loadMissing('sections');
+
+            return $this->program($iptp, $page->sections->filter(fn ($s) => $s->type === 'programs_list')->values(), [
+                ['label' => 'School of Technical Education', 'url' => '/school-of-technical-education'],
+                ['label' => 'iPTP', 'url' => Program::IptpBasePath],
+            ]);
+        }
+
         $page->loadMissing('sections');
         $isHome = $page->template === 'home';
         $hero = $page->sections->firstWhere('type', 'page_hero') ?? $page->sections->firstWhere('type', 'home_hero');
@@ -80,6 +85,7 @@ class PublicRenderer
                 'id' => $page->id,
                 'title' => $page->title,
                 'template' => $page->template,
+                'path' => $page->path,
                 'breadcrumbs' => $isHome ? [] : $this->pageTrail($page),
                 'has_hero' => $hero !== null,
             ],
@@ -87,10 +93,16 @@ class PublicRenderer
         ], $seo);
     }
 
-    public function program(Program $program): Response
+    public function program(Program $program, ?iterable $sections = null, ?array $trail = null): Response
     {
         $program->loadMissing('image', 'school', 'faculty.photo', 'sections');
-        $trail = [['label' => 'Programs', 'url' => '/programs'], ['label' => $program->title, 'url' => $program->publicPath()]];
+        $trail ??= $program->isIptp()
+            ? [
+                ['label' => 'School of Technical Education', 'url' => '/school-of-technical-education'],
+                ['label' => 'iPTP', 'url' => Program::IptpBasePath],
+                ['label' => $program->title, 'url' => $program->publicPath()],
+            ]
+            : [['label' => 'Programs', 'url' => '/programs'], ['label' => $program->title, 'url' => $program->publicPath()]];
         $seo = $program->seo(['description' => $program->summary, 'image' => $program->image]);
         $seo['jsonLd'] = [$this->breadcrumbs($trail), array_filter([
             '@context' => 'https://schema.org',
@@ -108,24 +120,19 @@ class PublicRenderer
                 'school' => $program->school ? ['title' => $program->school->name, 'url' => $program->school->isLive() ? $program->school->publicPath() : null] : null,
                 'image' => $program->image?->toImage($program->title),
             ],
-            'details' => $this->withProgramPartners(ProgramDetails::present($program->details)),
+            'details' => $this->withProgramPartnerMedia(ProgramDetails::present($program->details)),
             'tabs' => ProgramDetails::Tabs,
-            'faculty' => $program->faculty->filter->isLive()->map(Presenters::facultyCard(...))->values(),
-            'sections' => $this->sections->present($program->sections),
+            'faculty' => ($faculty = $program->faculty->filter->isLive()->map(Presenters::facultyCard(...))->values())->isNotEmpty()
+                ? $faculty
+                : (new SampleContent)->fill('people', [], [])['people'],
+            'sections' => $this->sections->present($sections ?? $program->sections),
             'hidden' => PageBlocks::hidden($program),
             'breadcrumbs' => $trail,
             'programs' => Program::query()->published()->orderBy('title')->get(['id', 'title']),
         ], $seo);
     }
 
-    /**
-     * Program partners: the program's own list, with logos and photos filled in from the Partners
-     * library by name; without a list, NAMTECH's featured partners are shown.
-     *
-     * @param  array<string, mixed>  $details
-     * @return array<string, mixed>
-     */
-    private function withProgramPartners(array $details): array
+    private function withProgramPartnerMedia(array $details): array
     {
         $library = Partner::query()->published()->with('logo', 'image', 'category')->orderBy('sort_order')->get();
         $items = $details['partners']['items'] ?? [];
@@ -153,6 +160,25 @@ class PublicRenderer
         }
 
         $details['partners'] = ['heading' => $details['partners']['heading'] ?? null, 'items' => $items];
+
+        $partnersBySlug = $library->keyBy('slug');
+        $employersBySlug = collect($details['outcomes']['logos'] ?? [])
+            ->filter(fn (array $employer) => ! empty($employer['image']))
+            ->keyBy(fn (array $employer) => Str::slug($employer['name'] ?? ''));
+        foreach ($details['recruiter_quotes']['items'] ?? [] as $index => $quote) {
+            if (empty($quote['sample_company_slug'])) {
+                continue;
+            }
+
+            $slug = $quote['sample_company_slug'];
+            $partner = $partnersBySlug->get($slug);
+            $employer = $employersBySlug->get($slug);
+            $logo = $partner?->logo?->toImage($partner->name) ?? $employer['image'] ?? null;
+            if ($logo) {
+                $details['recruiter_quotes']['items'][$index]['name'] = $partner?->name ?? $employer['name'];
+                $details['recruiter_quotes']['items'][$index]['logo'] = $logo;
+            }
+        }
 
         return $details;
     }
@@ -234,6 +260,28 @@ class PublicRenderer
     public function post(Post $post): Response
     {
         $post->loadMissing('image', 'category', 'author.photo', 'tags', 'sections');
+        $isStory = $post->type === 'story';
+        $caseStudy = $isStory && Str::contains(Str::lower($post->category?->name ?? ''), 'case stud');
+        $bodyText = trim(strip_tags((string) $post->body, ['img', 'iframe']));
+        $placeholderBody = $isStory && (in_array($bodyText, ['', 'Content to be confirmed.'], true)
+            || preg_match('/^(?:SAMPLE\s*[–-]\s*replace with real content[.\s…]*)+$/iu', $bodyText) === 1);
+        $sampleBody = $placeholderBody && $post->sections->where('type', '!=', 'page_hero')->isEmpty();
+        $related = Post::query()->published()->with('image', 'category')->where('type', $post->type)
+            ->whereKeyNot($post->id ?? 0);
+        if ($isStory) {
+            $caseCategories = fn ($query) => $query->whereRaw('lower(name) like ?', ['%case stud%']);
+            $caseStudy ? $related->whereHas('category', $caseCategories) : $related->whereDoesntHave('category', $caseCategories);
+        }
+        $related = $related->latest('published_at')->limit(3)->get()->map(Presenters::postCard(...));
+        $sampleImages = [];
+        if ($isStory && ($sampleBody || $related->count() < 3)) {
+            $names = $sampleBody ? ['p028', 'p033', 'p050', 'p114', 'p120', 'p127', 'p136', 'p139'] : ['p139'];
+            $sampleImages = Media::query()->where('kind', 'image')->where('status', 'ready')
+                ->whereIn('original_name', array_map(fn (string $name) => $name.'.jpg', $names))
+                ->orderBy('id')->get()
+                ->mapWithKeys(fn (Media $media) => [pathinfo($media->original_name, PATHINFO_FILENAME) => $media->toImage()])
+                ->filter()->all();
+        }
         $prefix = Post::prefixFor($post->type);
         $label = match ($post->type) {
             'blog' => 'Blogs',
@@ -259,19 +307,19 @@ class PublicRenderer
 
         return $this->respond('site/posts/Show', [
             'post' => Presenters::postCard($post) + [
-                'body' => ($anchored = HtmlSanitizer::withHeadingAnchors($post->body))['html'],
+                'body' => ($anchored = HtmlSanitizer::withHeadingAnchors($placeholderBody ? null : $post->body))['html'],
                 'toc' => $anchored['toc'],
                 'author_name' => $post->author?->name,
                 'author' => $post->author ? ['name' => $post->author->name, 'designation' => $post->author->designation, 'photo' => $post->author->photo?->toImage($post->author->name)] : null,
                 'tags' => $post->tags->pluck('name'),
                 'kind' => $post->type,
             ],
+            ...($isStory ? ['caseStudy' => $caseStudy, 'sampleStoryBody' => $sampleBody, 'sampleStoryImages' => $sampleImages] : []),
             'sections' => $this->sections->present($post->sections),
             'latest' => $post->type === 'blog'
                 ? Post::query()->published()->with('image')->where('type', 'blog')->whereKeyNot($post->id ?? 0)->latest('published_at')->limit(5)->get()->map(Presenters::postCard(...))
                 : [],
-            'related' => Post::query()->published()->with('image', 'category')->where('type', $post->type)
-                ->whereKeyNot($post->id ?? 0)->latest('published_at')->limit(3)->get()->map(Presenters::postCard(...)),
+            'related' => $related,
             'hidden' => PageBlocks::hidden($post),
             'breadcrumbs' => $trail,
             'listing' => ['label' => $label, 'url' => '/'.$prefix],
@@ -311,19 +359,12 @@ class PublicRenderer
         ], $seo);
     }
 
-    /**
-     * A school or centre landing page built from sections (School Landing Page template).
-     *
-     * @param  array<int, array{label: string, url: string}>  $trail
-     * @param  iterable<PageSection>  $sections
-     * @param  array<string, mixed>  $seo
-     */
     private function landing(string $title, array $trail, iterable $sections, array $seo, array $jsonLd = []): Response
     {
         $seo['jsonLd'] = [$this->breadcrumbs($trail), ...$jsonLd];
 
         return $this->respond('site/Page', [
-            'page' => ['id' => null, 'title' => $title, 'template' => 'default', 'breadcrumbs' => $trail, 'has_hero' => true],
+            'page' => ['id' => null, 'title' => $title, 'template' => 'landing', 'breadcrumbs' => $trail, 'has_hero' => true],
             'sections' => $this->sections->present($sections),
         ], $seo);
     }
@@ -413,10 +454,6 @@ class PublicRenderer
         ], $seo);
     }
 
-    /**
-     * @param  array<string, mixed>  $props
-     * @param  array<string, mixed>  $seo
-     */
     public function respond(string $component, array $props, array $seo): Response
     {
         $seo = $this->completeSeo($seo);
@@ -426,12 +463,6 @@ class PublicRenderer
         return PageResponse::render($component, $props + ['seo' => $seo], $seo + ['preloadImage' => $this->heroImage($props)]);
     }
 
-    /**
-     * The above-the-fold hero image, preloaded so the browser fetches it before scripts.
-     *
-     * @param  array<string, mixed>  $props
-     * @return array{srcset: string, type: string, sizes: string}|null
-     */
     private function heroImage(array $props): ?array
     {
         if (in_array('hero_image', $props['hidden'] ?? [], true)) {
@@ -445,25 +476,19 @@ class PublicRenderer
             default => $props['program']['image'] ?? $props['post']['image'] ?? $props['person']['photo'] ?? $props['unit']['image'] ?? $props['partner']['image'] ?? null,
         };
 
-        if (! is_array($image) || empty($image['sources'])) {
+        if (! is_array($image) || empty($image['srcset'])) {
             return null;
         }
 
-        $type = isset($image['sources']['avif']) ? 'avif' : (isset($image['sources']['webp']) ? 'webp' : 'jpg');
-
         return [
-            'srcset' => $image['sources'][$type],
-            'type' => $type === 'jpg' ? 'image/jpeg' : 'image/'.$type,
+            'srcset' => $image['srcset'],
+            'type' => 'image/webp',
             'sizes' => ($first['type'] ?? null) === 'home_hero' || ($first['type'] ?? null) === 'page_hero' || ! isset($props['sections'])
                 ? '(min-width: 992px) 50vw, 100vw'
                 : '100vw',
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $seo
-     * @return array<string, mixed>
-     */
     public function completeSeo(array $seo): array
     {
         $settings = SiteSettings::public();
@@ -483,9 +508,6 @@ class PublicRenderer
         ];
     }
 
-    /**
-     * @return array<int, array{label: string, url: string}>
-     */
     private function pageTrail(Page $page): array
     {
         $trail = [];
@@ -499,10 +521,6 @@ class PublicRenderer
         return $trail;
     }
 
-    /**
-     * @param  array<int, array{label: string, url: string}>  $trail
-     * @return array<string, mixed>
-     */
     private function breadcrumbs(array $trail): array
     {
         $items = array_merge([['label' => 'Home', 'url' => '/']], $trail);
@@ -519,9 +537,6 @@ class PublicRenderer
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function organizationSchema(): array
     {
         $settings = SiteSettings::public();
@@ -532,7 +547,7 @@ class PublicRenderer
             'name' => $settings['site_name'] ?? 'NAMTECH',
             'alternateName' => $settings['site_tagline'] ?? null,
             'url' => url('/'),
-            'logo' => asset('images/namtech-logo.svg'),
+            'logo' => asset('images/namtech-logo.webp'),
             'email' => $settings['email'] ?? null,
             'telephone' => $settings['phones'][0]['number'] ?? null,
             'address' => isset($settings['address']) ? ['@type' => 'PostalAddress', 'streetAddress' => $settings['address'], 'addressCountry' => 'IN'] : null,

@@ -27,11 +27,9 @@ export function Cta({ label, url, variant = '', className = '' }) {
 
 export function RichText({ html, className = '' }) {
     if (!html) return null;
-    // HTML is sanitised server-side (allow-list) before it is stored.
     return <div className={`nt-prose ${className}`} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-/** Returns `show(key)` for a detail page: false for the blocks an editor switched off in the CMS. */
 export function blockSwitch(hidden) {
     const off = new Set(hidden ?? []);
     return (key) => !off.has(key);
@@ -62,7 +60,6 @@ export function Breadcrumbs({ items }) {
     );
 }
 
-/** Laravel paginator links rendered as accessible pagination. */
 export function Pagination({ meta }) {
     if (!meta || meta.last_page <= 1) return null;
     return (

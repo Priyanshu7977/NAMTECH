@@ -45,17 +45,8 @@ use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void {}
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->registerSchemaMacros();
@@ -109,13 +100,9 @@ class AppServiceProvider extends ServiceProvider
         $this->registerAuthAuditing();
     }
 
-    /**
-     * Shared column sets for publishable and SEO-enabled content tables.
-     */
     private function registerSchemaMacros(): void
     {
         Blueprint::macro('publishable', function (): void {
-            /** @var Blueprint $this */
             $this->string('status', 20)->default('draft')->index();
             $this->string('review_state', 20)->nullable()->index();
             $this->timestamp('published_at')->nullable()->index();
@@ -126,7 +113,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blueprint::macro('seo', function (): void {
-            /** @var Blueprint $this */
             $this->string('meta_title')->nullable();
             $this->string('meta_description', 500)->nullable();
             $this->foreignId('og_image_id')->nullable()->constrained('media')->nullOnDelete();

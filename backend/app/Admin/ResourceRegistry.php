@@ -6,9 +6,6 @@ use App\Admin\Resources\Resource;
 
 class ResourceRegistry
 {
-    /**
-     * @return array<string, class-string<resource>>
-     */
     public static function map(): array
     {
         return [
@@ -42,9 +39,6 @@ class ResourceRegistry
         return new $class;
     }
 
-    /**
-     * @return array<int, resource>
-     */
     public static function all(): array
     {
         return array_map(fn (string $class) => new $class, array_values(self::map()));

@@ -23,7 +23,7 @@ export default function SchoolShow({ unit, programs, centres, faculty, breadcrum
             </section>
             <Breadcrumbs items={breadcrumbs} />
             {show('about') ? (
-                <section className="nt-section pt-4">
+                <section className="nt-section">
                     <div className="container" style={{ maxWidth: '52rem' }}>
                         <h2 className="nt-h2">About the {unit.kind === 'Centre' ? 'centre' : 'school'}</h2>
                         {unit.summary ? <p className="nt-lead">{unit.summary}</p> : null}

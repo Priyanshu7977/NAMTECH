@@ -19,8 +19,6 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Requests are Inertia visits, as the React front end makes them: pages answer with
-        // {component, props}, writes redirect with flash messages or validation errors.
         $this->withHeaders([
             'X-Inertia' => 'true',
             'X-Inertia-Version' => (string) app(HandleInertiaRequests::class)->version(Request::create('/')),
@@ -43,12 +41,6 @@ abstract class TestCase extends BaseTestCase
         return $user;
     }
 
-    /**
-     * @template T of Model
-     *
-     * @param  T  $model
-     * @return T
-     */
     protected function publish(Model $model): Model
     {
         $model->forceFill(['status' => ContentStatus::Published, 'published_at' => now()->subMinute()])->save();
@@ -56,9 +48,6 @@ abstract class TestCase extends BaseTestCase
         return $model->fresh();
     }
 
-    /**
-     * @param  array<int, array{0: string, 1: array<string, mixed>}>  $sections
-     */
     protected function page(string $title, string $slug, array $sections = [], bool $live = true, string $template = 'default'): Page
     {
         $page = Page::create(['title' => $title, 'slug' => $slug, 'template' => $template]);

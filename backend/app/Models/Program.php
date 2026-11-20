@@ -51,8 +51,26 @@ class Program extends Model
         return $this->belongsToMany(Faculty::class)->withPivot('role');
     }
 
+    public const IptpSlugPrefix = 'iptp-';
+
+    public const IptpBasePath = '/school-of-technical-education/iptp';
+
+    public const IptpOverviewSlug = 'iptp';
+
+    public function isIptp(): bool
+    {
+        return str_starts_with((string) $this->slug, self::IptpSlugPrefix);
+    }
+
     public function publicPath(): ?string
     {
+        if ($this->slug === self::IptpOverviewSlug) {
+            return self::IptpBasePath;
+        }
+        if ($this->isIptp()) {
+            return self::IptpBasePath.'/'.substr($this->slug, strlen(self::IptpSlugPrefix));
+        }
+
         return '/programs/'.$this->slug;
     }
 

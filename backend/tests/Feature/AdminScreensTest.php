@@ -15,10 +15,6 @@ class AdminScreensTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Every CMS screen returns a page envelope for a Super Admin. Set DUMP_ADMIN_SCREENS to a
-     * file path to save the envelopes (the front end renders them in its CMS smoke check).
-     */
     public function test_every_cms_screen_returns_a_page_envelope(): void
     {
         Queue::fake();
@@ -45,7 +41,6 @@ class AdminScreensTest extends TestCase
             $envelopes[$screen] = $response->json();
         }
 
-        // The signed-in user and sidebar are shared with every CMS screen.
         $this->actingAs($admin)->get('/admin')->assertOk()->assertJsonPath('props.auth.user.id', $admin->id)->assertJsonStructure(['props' => ['navigation']]);
         if ($file = getenv('DUMP_ADMIN_SCREENS')) {
             file_put_contents($file, json_encode($envelopes, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));

@@ -1,9 +1,5 @@
 import Head from './Head';
 
-/**
- * Title, description, canonical, robots, Open Graph, Twitter and JSON-LD tags.
- * Rendered into the initial HTML by SSR and kept up to date on client-side navigation.
- */
 export default function Seo({ seo }) {
     if (!seo) return null;
 

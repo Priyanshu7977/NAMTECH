@@ -18,31 +18,20 @@ use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void {}
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
 
-        // Inactive accounts cannot sign in.
         Fortify::authenticateUsing(function (Request $request): ?User {
             $user = User::query()->where('email', Str::lower((string) $request->input('email')))->first();
 
             return $user && $user->is_active && Hash::check((string) $request->input('password'), $user->password) ? $user : null;
         });
 
-        // The CMS sign-in screens are Inertia pages.
         $screen = fn (string $component, array $props = []) => PageResponse::render($component, $props, ['title' => 'Sign in | NAMTECH CMS', 'noindex' => true]);
         Fortify::loginView(fn () => $screen('admin/auth/Login'));
         Fortify::twoFactorChallengeView(fn () => $screen('admin/auth/TwoFactorChallenge'));
@@ -53,7 +42,6 @@ class FortifyServiceProvider extends ServiceProvider
         ]));
         Fortify::confirmPasswordView(fn () => $screen('admin/auth/ConfirmPassword'));
 
-        // Password reset emails link to the CMS reset screen.
         ResetPassword::createUrlUsing(fn (User $user, string $token): string => url('/admin/reset-password/'.$token).'?email='.urlencode($user->email));
 
         RateLimiter::for('login', function (Request $request) {

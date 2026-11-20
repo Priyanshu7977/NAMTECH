@@ -26,7 +26,7 @@ export default function PartnerStory({ partner, breadcrumbs }) {
                 </div>
             </section>
             <Breadcrumbs items={breadcrumbs} />
-            <article className="nt-section pt-4">
+            <article className="nt-section">
                 <div className="container" style={{ maxWidth: '48rem' }}>
                     <RichText html={partner.story} />
                 </div>

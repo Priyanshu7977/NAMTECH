@@ -53,7 +53,6 @@ function MultiSelect({ id, options, value, onChange }) {
     );
 }
 
-/** One switch per page block; the stored value lists the blocks that are switched off. */
 function BlockSwitches({ id, options, value, onChange }) {
     const off = new Set(value ?? []);
     return (
@@ -132,9 +131,6 @@ function Repeater({ field, value, onChange, path, errors, media, onMediaLoaded, 
     );
 }
 
-/**
- * Renders one schema field. `path` is the dotted key used for server validation errors.
- */
 export function Field({ field, value, onChange, path, errors, media, onMediaLoaded, allValues, sectionTypes, hideItems }) {
     const id = `f-${path.replace(/\./g, '-')}`;
     const error = errors?.[path];

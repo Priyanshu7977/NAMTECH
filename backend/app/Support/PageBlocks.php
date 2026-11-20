@@ -11,15 +11,8 @@ use App\Models\Program;
 use App\Models\School;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * The fixed blocks of each detail-page template that editors can switch off per record.
- * The record's "hidden_blocks" attribute lists the keys that are switched off.
- */
 class PageBlocks
 {
-    /**
-     * @var array<class-string<Model>, array<string, string>>
-     */
     private const Blocks = [
         School::class => [
             'hero_image' => 'Hero image',
@@ -59,21 +52,11 @@ class PageBlocks
         ],
     ];
 
-    /**
-     * @param  class-string<Model>  $model
-     * @return array<string, string>
-     */
     public static function for(string $model): array
     {
         return $model === Program::class ? ProgramDetails::blockLabels() : (self::Blocks[$model] ?? []);
     }
 
-    /**
-     * The CMS form field: one switch per block, all shown by default.
-     *
-     * @param  class-string<Model>  $model
-     * @return array<string, mixed>
-     */
     public static function field(string $model, string $help = ''): array
     {
         return [
@@ -86,11 +69,6 @@ class PageBlocks
         ];
     }
 
-    /**
-     * Keys switched off on a record, limited to the blocks its template has.
-     *
-     * @return array<int, string>
-     */
     public static function hidden(Model $record): array
     {
         return array_values(array_intersect(array_keys(self::for($record::class)), (array) ($record->getAttribute('hidden_blocks') ?? [])));

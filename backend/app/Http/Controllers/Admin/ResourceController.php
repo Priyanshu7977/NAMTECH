@@ -22,10 +22,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Generic CRUD and publishing workflow for every resource in the ResourceRegistry.
- * Every action re-checks permissions server-side.
- */
 class ResourceController extends Controller
 {
     public function __construct(private ContentWorkflow $workflow) {}
@@ -216,12 +212,6 @@ class ResourceController extends Controller
         ]);
     }
 
-    /**
-     * Thumbnails for every media id referenced by the form, so pickers can render immediately.
-     *
-     * @param  array<string, mixed>  $values
-     * @return array<int, array<string, mixed>>
-     */
     private function mediaPreviews(Resource $definition, array $values): array
     {
         $ids = Fields::mediaIds($definition->allFields(), $values);
@@ -235,9 +225,6 @@ class ResourceController extends Controller
             ->mapWithKeys(fn ($media) => [$media->id => $media->toAdmin()])->all();
     }
 
-    /**
-     * @return array{0: array<string, mixed>, 1: array<string, mixed>, 2: array<int, int>}
-     */
     private function validated(Request $request, Resource $definition, ?Model $record): array
     {
         OptionSources::forget();
@@ -278,9 +265,6 @@ class ResourceController extends Controller
         return (string) $record->getAttribute($definition->titleAttribute());
     }
 
-    /**
-     * @return array<string, bool>
-     */
     private function abilities(Request $request, Resource $definition): array
     {
         $user = $request->user();

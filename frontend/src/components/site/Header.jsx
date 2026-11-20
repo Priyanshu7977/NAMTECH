@@ -12,24 +12,37 @@ function isCurrent(url, current) {
 }
 
 const hasChildren = (item) => item.children?.length > 0;
-// An item whose children have their own children opens as a full-width mega menu.
+
+function currentIn(items, current) {
+    let best = null;
+    let length = -1;
+    for (const item of items ?? []) {
+        const path = item.url?.split('?')[0];
+        if (isCurrent(item.url, current) && path.length > length) {
+            best = item.id;
+            length = path.length;
+        }
+    }
+    return best;
+}
+
+const containsCurrent = (item, current) => isCurrent(item.url, current) || (item.children ?? []).some((child) => containsCurrent(child, current));
 const isMega = (item) => item.children?.some(hasChildren);
 const canHover = () => typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 const linksTo = (item, current) => item.url?.split('?')[0] === current || item.children?.some((child) => linksTo(child, current));
 
-/** The one top-level item to highlight: the page's own item first, so a page also listed in another menu lights up once. */
 function findActiveItem(items, current) {
     return (items.find((item) => isCurrent(item.url, current)) ?? items.find((item) => linksTo(item, current)))?.id;
 }
 
-/** Simple dropdown list (e.g. Partnerships → Corporate / Academic). */
 function DropdownPanel({ id, item, open, current, onNavigate }) {
+    const here = currentIn(item.children, current);
     return (
         <div className="nt-dropdown" id={id} data-open={open} aria-hidden={!open}>
             <ul>
                 {item.children.map((child, i) => (
                     <li key={child.id} style={{ '--i': i }}>
-                        <SmartLink href={child.url} newTab={child.newTab} onClick={onNavigate} tabIndex={open ? undefined : -1} aria-current={isCurrent(child.url, current) ? 'page' : undefined}>
+                        <SmartLink href={child.url} newTab={child.newTab} onClick={onNavigate} tabIndex={open ? undefined : -1} aria-current={child.id === here ? 'page' : undefined}>
                             {child.label}
                         </SmartLink>
                     </li>
@@ -39,9 +52,9 @@ function DropdownPanel({ id, item, open, current, onNavigate }) {
     );
 }
 
-/** Full-width two-column menu: headings on the left, the hovered/selected heading's links on the right. */
 function MegaPanel({ id, item, open, current, onNavigate }) {
-    const firstWithChildren = Math.max(0, item.children.findIndex(hasChildren));
+    const currentGroup = item.children.findIndex((child) => hasChildren(child) && containsCurrent(child, current));
+    const firstWithChildren = currentGroup >= 0 ? currentGroup : Math.max(0, item.children.findIndex(hasChildren));
     const [active, setActive] = useState(firstWithChildren);
     const group = item.children[active];
 
@@ -58,7 +71,7 @@ function MegaPanel({ id, item, open, current, onNavigate }) {
                             {hasChildren(child) ? (
                                 <button
                                     type="button"
-                                    className="nt-mega__group"
+                                    className={`nt-mega__group${i === currentGroup ? ' is-current' : ''}`}
                                     aria-expanded={i === active}
                                     aria-controls={`${id}-links`}
                                     tabIndex={open ? undefined : -1}
@@ -70,7 +83,7 @@ function MegaPanel({ id, item, open, current, onNavigate }) {
                                     <Icon name="chevronRight" strokeWidth={1.6} />
                                 </button>
                             ) : (
-                                <SmartLink className="nt-mega__group" href={child.url} newTab={child.newTab} onClick={onNavigate} tabIndex={open ? undefined : -1}>
+                                <SmartLink className="nt-mega__group" aria-current={isCurrent(child.url, current) ? 'page' : undefined} href={child.url} newTab={child.newTab} onClick={onNavigate} tabIndex={open ? undefined : -1}>
                                     {child.label}
                                 </SmartLink>
                             )}
@@ -82,7 +95,7 @@ function MegaPanel({ id, item, open, current, onNavigate }) {
                         <ul key={group.id} aria-label={group.label}>
                             {group.children.map((link, i) => (
                                 <li key={link.id} style={{ '--i': i }}>
-                                    <SmartLink href={link.url} newTab={link.newTab} onClick={onNavigate} tabIndex={open ? undefined : -1} aria-current={isCurrent(link.url, current) ? 'page' : undefined}>
+                                    <SmartLink href={link.url} newTab={link.newTab} onClick={onNavigate} tabIndex={open ? undefined : -1} aria-current={link.id === currentIn(group.children, current) ? 'page' : undefined}>
                                         {link.label}
                                     </SmartLink>
                                 </li>
@@ -95,10 +108,6 @@ function MegaPanel({ id, item, open, current, onNavigate }) {
     );
 }
 
-/**
- * Top-level navigation item. Opens on hover (pointer devices) or click/Enter/Space;
- * only one menu is open at a time (state lives in the header).
- */
 function NavItem({ item, current, activeId, openId, setOpenId, scheduleClose, cancelClose }) {
     const id = useId();
     const open = openId === item.id;
@@ -153,9 +162,9 @@ function NavItem({ item, current, activeId, openId, setOpenId, scheduleClose, ca
     );
 }
 
-/** Mobile accordion for up to three levels. */
-function MobileList({ items, onClose, level = 1 }) {
-    const [openId, setOpenId] = useState(null);
+function MobileList({ items, onClose, current, level = 1 }) {
+    const [openId, setOpenId] = useState(() => items.find((item) => hasChildren(item) && containsCurrent(item, current))?.id ?? null);
+    const here = currentIn(items, current);
     return (
         <ul className={level === 1 ? 'nt-mobile-menu__list' : `nt-mobile-menu__sub nt-mobile-menu__sub--${level}`}>
             {items.map((item) => {
@@ -165,7 +174,7 @@ function MobileList({ items, onClose, level = 1 }) {
                     <li key={item.id}>
                         <div className="nt-mobile-menu__row">
                             {href ? (
-                                <SmartLink href={href} newTab={item.newTab} onClick={onClose}>
+                                <SmartLink href={href} newTab={item.newTab} onClick={onClose} aria-current={item.id === here && !hasChildren(item) ? 'page' : undefined} className={hasChildren(item) && containsCurrent(item, current) ? 'is-active' : undefined}>
                                     {item.label}
                                 </SmartLink>
                             ) : (
@@ -179,7 +188,7 @@ function MobileList({ items, onClose, level = 1 }) {
                         </div>
                         {hasChildren(item) ? (
                             <div id={`m-sub-${item.id}`} hidden={!open}>
-                                <MobileList items={item.children} onClose={onClose} level={level + 1} />
+                                <MobileList items={item.children} onClose={onClose} current={current} level={level + 1} />
                             </div>
                         ) : null}
                     </li>
@@ -189,12 +198,11 @@ function MobileList({ items, onClose, level = 1 }) {
     );
 }
 
-function MobileMenu({ menus, onClose, settings }) {
+function MobileMenu({ menus, onClose, settings, current }) {
     const panelRef = useRef(null);
     const closeRef = useRef(onClose);
     closeRef.current = onClose;
 
-    // Runs once while the menu is open: lock page scroll, trap focus, close on Escape, restore focus on close.
     useEffect(() => {
         const previous = document.activeElement;
         document.body.style.overflow = 'hidden';
@@ -227,14 +235,16 @@ function MobileMenu({ menus, onClose, settings }) {
         <div className="nt-mobile-menu" role="dialog" aria-modal="true" aria-label="Site menu" ref={panelRef}>
             <div className="nt-mobile-menu__top">
                 <span className="nt-logo">
-                    <img src="/images/namtech-logo.png" alt="NAMTECH – Institute of Manufacturing Innovation" width="700" height="192" />
+                    <img src="/images/namtech-logo.webp" alt="NAMTECH – Institute of Manufacturing Innovation" width="700" height="192" />
                 </span>
-                <button type="button" className="nt-icon-btn" onClick={onClose} aria-label="Close menu">
-                    <Icon name="close" />
+                <button type="button" className="nt-icon-btn nt-mobile-menu__close" onClick={onClose} aria-label="Close menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" focusable="false">
+                        <path d="M6.3 6.3l11.4 11.4M17.7 6.3 6.3 17.7" />
+                    </svg>
                 </button>
             </div>
             <nav aria-label="Mobile">
-                <MobileList items={[...(menus.primary ?? []), ...(menus.utility ?? [])]} onClose={onClose} />
+                <MobileList items={[...(menus.primary ?? []), ...(menus.utility ?? [])]} onClose={onClose} current={current} />
             </nav>
             <div className="nt-mobile-menu__secondary">
                 {settings.show_search !== false ? (
@@ -273,7 +283,7 @@ function Announcements({ items }) {
                         <Icon name="chevronLeft" strokeWidth={2} />
                     </span>
                 )}
-                <p className="m-0 d-flex align-items-center justify-content-center gap-2" aria-live="polite">
+                <p className="m-0 d-flex align-items-center gap-2" aria-live="polite">
                     {item.label ? <span className="nt-announcement__label">{item.label}</span> : null}
                     {item.url ? <SmartLink href={item.url}>{item.text}</SmartLink> : <span>{item.text}</span>}
                 </p>
@@ -291,11 +301,6 @@ function Announcements({ items }) {
     );
 }
 
-/**
- * While scrolling down, the announcement strip and top link bar slide away and the navbar (logo and
- * main menu) stays pinned at the top; any upward scroll brings the whole header back. The full header
- * always shows near the top of the page, while a menu is open, or while keyboard focus is inside it.
- */
 function useHideOnScroll(headerRef, pinned) {
     const [hidden, setHidden] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -303,7 +308,6 @@ function useHideOnScroll(headerRef, pinned) {
     useEffect(() => {
         let last = window.scrollY;
         let frame = 0;
-        // How far the header moves up: everything above the navbar.
         const measure = () => {
             const header = headerRef.current;
             const navbar = header?.querySelector('.nt-mainbar');
@@ -339,7 +343,6 @@ export default function Header() {
     const page = usePage();
     const current = (page.url || '/').split('?')[0];
     const { menus = {}, settings = {}, announcements = [] } = page.props.site ?? {};
-    // Global settings → Show / hide; anything not switched off is shown.
     const shown = (key) => settings[key] !== false;
     const [mobileOpen, setMobileOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
@@ -379,7 +382,6 @@ export default function Header() {
         [],
     );
 
-    // Close menus on Escape anywhere and on clicks outside the header.
     useEffect(() => {
         if (openId === null) return undefined;
         const onKey = (e) => e.key === 'Escape' && setOpenIdState(null);
@@ -438,7 +440,7 @@ export default function Header() {
                 <div className="nt-mainbar">
                     <div className="container">
                         <SmartLink href="/" className="nt-logo" aria-label="NAMTECH home">
-                            <img src="/images/namtech-logo.png" alt="NAMTECH – Institute of Manufacturing Innovation" width="700" height="192" />
+                            <img src="/images/namtech-logo.webp" alt="NAMTECH – Institute of Manufacturing Innovation" width="700" height="192" />
                         </SmartLink>
                         <nav className="nt-mainbar__nav" aria-label="Main">
                             <ul className="nt-nav-list">
@@ -447,7 +449,6 @@ export default function Header() {
                                 ))}
                             </ul>
                         </nav>
-                        {/* Without the top link bar, desktop keeps its search button here. */}
                         <div className={`d-flex align-items-center ${shown('show_utility_bar') ? 'd-xl-none' : ''}`}>
                             {shown('show_search') ? (
                                 <SmartLink className="nt-icon-btn" href="/search" aria-label="Search">
@@ -481,7 +482,7 @@ export default function Header() {
                     </div>
                 ) : null}
             </header>
-            {mobileOpen ? <MobileMenu menus={menus} settings={settings} onClose={() => setMobileOpen(false)} /> : null}
+            {mobileOpen ? <MobileMenu menus={menus} settings={settings} current={current} onClose={() => setMobileOpen(false)} /> : null}
         </>
     );
 }

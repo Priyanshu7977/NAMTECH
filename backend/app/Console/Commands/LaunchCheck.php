@@ -13,10 +13,6 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
-/**
- * Lists content that still needs attention before launch: placeholder copy, empty
- * sections, unpublished legal pages, missing settings and images without alt text.
- */
 #[Signature('content:launch-check')]
 #[Description('Report placeholder content, missing settings and other pre-launch issues')]
 class LaunchCheck extends Command

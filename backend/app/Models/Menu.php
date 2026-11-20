@@ -10,7 +10,6 @@ class Menu extends Model
 {
     use FlushesPublicCache;
 
-    /** Menu locations rendered by the site layout. */
     public const Locations = [
         'utility' => 'Header – top utility bar',
         'primary' => 'Header – main navigation',
@@ -33,11 +32,6 @@ class Menu extends Model
         return $this->items()->whereNull('parent_id');
     }
 
-    /**
-     * Visible tree for public rendering.
-     *
-     * @return array<int, array<string, mixed>>
-     */
     public function tree(): array
     {
         $items = $this->items()->with('page:id,path,status,published_at')->where('is_visible', true)->get();

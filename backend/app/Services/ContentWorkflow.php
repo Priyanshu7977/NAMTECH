@@ -9,21 +9,8 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Draft → review → schedule/publish → unpublish workflow with revision history.
- *
- * Models using it must use the HasPublication trait.
- */
 class ContentWorkflow
 {
-    /**
-     * Save editor changes. Changes to live content are held in a working copy until published.
-     *
-     * @param  array<string, mixed>  $attributes
-     * @param  array<string, mixed>  $relations
-     * @param  array<int, int>  $mediaIds  media referenced by the change (for usage tracking)
-     * @return bool true when the change is held as a working copy
-     */
     public function save(Model $model, array $attributes, array $relations, array $mediaIds = [], ?string $note = null): bool
     {
         return DB::transaction(function () use ($model, $attributes, $relations, $mediaIds, $note): bool {
@@ -94,9 +81,6 @@ class ContentWorkflow
         AuditLogger::log('content.published', $model, 'Published "'.$model->displayTitle().'"');
     }
 
-    /**
-     * Schedule publication (or schedule pending changes of live content).
-     */
     public function schedule(Model $model, CarbonInterface $when): void
     {
         $model->scheduled_for = $when;
@@ -123,9 +107,6 @@ class ContentWorkflow
         AuditLogger::log('content.discarded', $model, 'Discarded pending changes to "'.$model->displayTitle().'"');
     }
 
-    /**
-     * Restoring a revision is treated as a new edit, so live content still goes through publishing.
-     */
     public function restore(Model $model, ContentRevision $revision): bool
     {
         $data = $revision->data;
@@ -135,11 +116,6 @@ class ContentWorkflow
         return $held;
     }
 
-    /**
-     * Publish everything whose scheduled time has passed. Returns the number published.
-     *
-     * @param  array<int, class-string<Model>>  $models
-     */
     public function publishDue(array $models): int
     {
         $count = 0;
@@ -154,9 +130,6 @@ class ContentWorkflow
         return $count;
     }
 
-    /**
-     * Content as it would look once pending changes are published, without saving anything.
-     */
     public function previewModel(Model $model): Model
     {
         $working = $model->workingCopy()->first();
@@ -178,7 +151,6 @@ class ContentWorkflow
             'data' => $model->fresh()->toSnapshot(),
         ]);
 
-        // Keep history bounded.
         $keep = $model->revisions()->where('kind', ContentRevision::KindSnapshot)->latest('id')->skip(50)->take(PHP_INT_MAX)->pluck('id');
         if ($keep->isNotEmpty()) {
             ContentRevision::query()->whereIn('id', $keep)->delete();

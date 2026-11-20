@@ -12,10 +12,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Throwable;
 
-/**
- * Emails the careers team about a new application. The application is already stored;
- * failures are retried and recorded for follow-up in the CMS.
- */
 class SendJobApplicationNotification implements ShouldQueue
 {
     use Queueable;
@@ -27,9 +23,6 @@ class SendJobApplicationNotification implements ShouldQueue
         $this->onQueue('mail');
     }
 
-    /**
-     * @return array<int, int>
-     */
     public function backoff(): array
     {
         return [60, 300, 900, 3600];

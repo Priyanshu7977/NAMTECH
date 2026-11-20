@@ -8,7 +8,7 @@ export default function PublicationShow({ publication, breadcrumbs }) {
         <>
             <PageHero first data={{ eyebrow: publication.topic || publication.school || 'Publication', title: publication.title, body: publication.authors, image: publication.image }} />
             <Breadcrumbs items={breadcrumbs} />
-            <article className="nt-section pt-4">
+            <article className="nt-section">
                 <div className="container" style={{ maxWidth: '52rem' }}>
                     <dl className="nt-facts-inline">
                         {publication.publisher ? <div><dt>Published in</dt><dd>{publication.publisher}</dd></div> : null}

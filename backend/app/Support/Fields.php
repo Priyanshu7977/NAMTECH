@@ -5,21 +5,8 @@ namespace App\Support;
 use App\Rules\SafeUrl;
 use Illuminate\Validation\Rule;
 
-/**
- * Schema-driven validation and normalisation shared by the section builder and admin forms.
- *
- * A field is an array: name, type, label, required?, max?, min?, options?, source?, fields? (repeater),
- * minItems?, maxItems?, help?, group?, default?.
- *
- * A "blocks" field stores the keys of the page blocks an editor has switched off (its options are the
- * blocks). Repeater items may carry "_hidden" => true, which keeps them in the CMS but off the site.
- */
 class Fields
 {
-    /**
-     * @param  array<int, array<string, mixed>>  $fields
-     * @return array<string, mixed>
-     */
     public static function rules(array $fields, string $prefix = ''): array
     {
         $rules = [];
@@ -76,13 +63,6 @@ class Fields
         return $rules;
     }
 
-    /**
-     * Keep only known keys, cast scalar types and sanitise rich text.
-     *
-     * @param  array<int, array<string, mixed>>  $fields
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
     public static function normalize(array $fields, array $data): array
     {
         $clean = [];
@@ -107,13 +87,6 @@ class Fields
         return $clean;
     }
 
-    /**
-     * A repeater item; the "_hidden" flag is kept only when set.
-     *
-     * @param  array<int, array<string, mixed>>  $fields
-     * @param  array<string, mixed>  $item
-     * @return array<string, mixed>
-     */
     private static function normalizeItem(array $fields, array $item): array
     {
         $clean = self::normalize($fields, $item);
@@ -121,13 +94,6 @@ class Fields
         return filter_var($item['_hidden'] ?? false, FILTER_VALIDATE_BOOLEAN) ? $clean + ['_hidden' => true] : $clean;
     }
 
-    /**
-     * Repeater items with "_hidden" removed, at any depth, for the public site.
-     *
-     * @param  array<int, array<string, mixed>>  $fields
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
     public static function withoutHiddenItems(array $fields, array $data): array
     {
         foreach ($fields as $field) {
@@ -146,11 +112,6 @@ class Fields
         return $data;
     }
 
-    /**
-     * Validated arrays can come back with list items out of order; restore index order.
-     *
-     * @return array<int|string, mixed>
-     */
     private static function inSubmittedOrder(mixed $value): array
     {
         if (! is_array($value)) {
@@ -161,13 +122,6 @@ class Fields
         return $value;
     }
 
-    /**
-     * Media ids referenced by data matching the schema.
-     *
-     * @param  array<int, array<string, mixed>>  $fields
-     * @param  array<string, mixed>  $data
-     * @return array<int, int>
-     */
     public static function mediaIds(array $fields, array $data): array
     {
         $ids = [];
@@ -189,12 +143,6 @@ class Fields
         return array_values(array_unique($ids));
     }
 
-    /**
-     * Prepare a schema for the admin UI: attaches option lists for reference/belongsTo fields.
-     *
-     * @param  array<int, array<string, mixed>>  $fields
-     * @return array<int, array<string, mixed>>
-     */
     public static function forAdmin(array $fields): array
     {
         return array_map(function (array $field): array {

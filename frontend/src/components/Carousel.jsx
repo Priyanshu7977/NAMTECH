@@ -1,15 +1,6 @@
 import { Children, useCallback, useEffect, useId, useRef, useState } from 'react';
 import Icon from './Icon';
 
-/**
- * Accessible carousel built on native horizontal scrolling with scroll-snap:
- * swipe on touch devices, previous/next buttons and dots for keyboard and pointer users.
- * Slides outside the viewport stay in the DOM (and lazy-load images).
- *
- * `autoplay` (milliseconds) moves to the next slide on a timer and loops back at the end. It waits while
- * the pointer is over the carousel, a control has keyboard focus, the carousel is off screen or the tab is
- * hidden, and is off for visitors who prefer reduced motion. A pause button stops it for good.
- */
 export default function Carousel({
     label,
     children,
@@ -21,9 +12,9 @@ export default function Carousel({
     showArrows = true,
     controlsClassName = '',
     align = 'start',
+    firstSlideAtStart = false,
     onIndexChange,
     autoplay = 0,
-    startIndex = 0,
 }) {
     const slides = Children.toArray(children);
     const rootRef = useRef(null);
@@ -31,11 +22,8 @@ export default function Carousel({
     const [index, setIndex] = useState(0);
     const [atStart, setAtStart] = useState(true);
     const [atEnd, setAtEnd] = useState(slides.length <= 1);
-    const [paused, setPaused] = useState(false);
     const [held, setHeld] = useState({ hover: false, focus: false });
     const [onScreen, setOnScreen] = useState(false);
-    // Extra room after the last slide so the final stop lines up with a slide edge, instead of leaving
-    // a sliver of the previous slide showing at the start of the track.
     const [tail, setTail] = useState(0);
     const [pageVisible, setPageVisible] = useState(true);
     const [reducedMotion, setReducedMotion] = useState(false);
@@ -50,7 +38,9 @@ export default function Carousel({
         let nearest = 0;
         let best = Infinity;
         items.forEach((item, i) => {
-            const offset = item.getBoundingClientRect().left - trackLeft + left - (align === 'center' ? (track.clientWidth - item.clientWidth) / 2 : 0);
+            const offset = firstSlideAtStart && i === 0
+                ? 0
+                : item.getBoundingClientRect().left - trackLeft + left - (align === 'center' ? (track.clientWidth - item.clientWidth) / 2 : 0);
             const distance = Math.abs(offset - left);
             if (distance < best) {
                 best = distance;
@@ -61,7 +51,7 @@ export default function Carousel({
         onIndexChange?.(nearest);
         setAtStart(left <= 2);
         setAtEnd(left + track.clientWidth >= track.scrollWidth - 2);
-    }, [align, onIndexChange]);
+    }, [align, firstSlideAtStart, onIndexChange]);
 
     const measureTail = useCallback(() => {
         const track = trackRef.current;
@@ -75,25 +65,6 @@ export default function Carousel({
         const stop = items.map((item) => item.offsetLeft - first).find((start) => start >= maxWithout - 1);
         setTail(stop === undefined ? 0 : Math.ceil(stop - maxWithout));
     }, [align]);
-
-    // Centred carousels (Figma) open on a middle slide on desktop, so a neighbour shows on both sides.
-    const started = useRef(false);
-    useEffect(() => {
-        const track = trackRef.current;
-        if (!track || started.current) return undefined;
-        started.current = true;
-        const i = Math.min(startIndex, slides.length - 1);
-        if (i <= 0 || !window.matchMedia('(min-width: 992px)').matches) return undefined;
-        const frame = requestAnimationFrame(() => {
-            const item = track.children[i];
-            if (!item) return;
-            const box = item.getBoundingClientRect();
-            const trackBox = track.getBoundingClientRect();
-            const target = track.scrollLeft + box.left - trackBox.left - (align === 'center' ? (trackBox.width - box.width) / 2 : 0);
-            track.scrollTo({ left: target, behavior: 'instant' });
-        });
-        return () => cancelAnimationFrame(frame);
-    }, [startIndex, slides.length, align]);
 
     useEffect(() => {
         const track = trackRef.current;
@@ -120,9 +91,12 @@ export default function Carousel({
 
     const goTo = (i) => {
         const track = trackRef.current;
-        const item = track?.children[Math.max(0, Math.min(i, slides.length - 1))];
+        const target = Math.max(0, Math.min(i, slides.length - 1));
+        const item = track?.children[target];
         if (!track || !item) return;
-        const offset = item.offsetLeft - track.offsetLeft - (align === 'center' ? (track.clientWidth - item.clientWidth) / 2 : 0);
+        const offset = firstSlideAtStart && target === 0
+            ? 0
+            : item.offsetLeft - track.offsetLeft - (align === 'center' ? (track.clientWidth - item.clientWidth) / 2 : 0);
         track.scrollTo({ left: offset, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     };
 
@@ -147,9 +121,8 @@ export default function Carousel({
         };
     }, [autoplay]);
 
-    // Restarts on every slide change, so a swipe or button press gives the visitor a full interval.
     useEffect(() => {
-        if (!autoplays || paused || held.hover || held.focus || !onScreen || !pageVisible) return undefined;
+        if (!autoplays || held.hover || held.focus || !onScreen || !pageVisible) return undefined;
         const timer = window.setTimeout(() => goTo(atEnd ? 0 : index + 1), autoplay);
         return () => window.clearTimeout(timer);
     });
@@ -212,19 +185,8 @@ export default function Carousel({
                     ) : (
                         <span />
                     )}
-                    {showArrows || autoplays ? (
+                    {showArrows ? (
                         <div className="nt-carousel__arrows">
-                            {autoplays ? (
-                                <button
-                                    type="button"
-                                    className="nt-carousel__arrow nt-carousel__toggle"
-                                    aria-controls={id}
-                                    aria-label={paused ? 'Start auto-scroll' : 'Pause auto-scroll'}
-                                    onClick={() => setPaused((value) => !value)}
-                                >
-                                    <Icon name={paused ? 'play' : 'pause'} strokeWidth={2} />
-                                </button>
-                            ) : null}
                             {showArrows ? (
                                 <>
                                     <button type="button" className="nt-carousel__arrow" aria-controls={id} aria-label="Previous slide" disabled={atStart} onClick={() => goTo(index - 1)}>

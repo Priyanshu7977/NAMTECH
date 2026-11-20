@@ -74,7 +74,6 @@ class ShowHideTest extends TestCase
         $this->actingAs($this->admin())->get('/admin/settings')->assertOk()
             ->assertPage(fn (Assert $p) => $p->where('values.show_footer_newsletter', true));
 
-        // The settings form sends every value; here all switches stay on except the newsletter.
         $values = array_fill_keys(array_column(array_filter(SiteSettings::fields(), fn ($f) => $f['group'] === 'Show / hide'), 'name'), true);
         $this->actingAs($this->admin())->put('/admin/settings', ['site_name' => 'NAMTECH', 'show_footer_newsletter' => false] + $values)
             ->assertSessionHas('success');

@@ -1,8 +1,6 @@
-// NAMTECH CMS – admin interface.
 @import '@fontsource/poppins/latin-400.css';
 @import '@fontsource/poppins/latin-500.css';
 
-// Brand tokens shared with the public site (styles/site.scss).
 $nt-primary: #5d24fc;
 $nt-ink: #2e1363;
 $nt-lavender: #f6f3ff;
@@ -179,13 +177,10 @@ $input-btn-focus-color: rgba($nt-primary, 0.25);
     }
 }
 
-// Lets flex and grid children shrink below their content width (needed for text-truncate).
 .min-w-0 {
     min-width: 0;
 }
 
-// Keeps absolutely positioned helpers (visually hidden labels) inside the scroll area, so wide
-// tables scroll on their own instead of widening the page on phones.
 .table-responsive {
     position: relative;
 }
@@ -259,7 +254,6 @@ $input-btn-focus-color: rgba($nt-primary, 0.25);
     padding: 0.85rem 0.85rem 0.25rem;
     margin-bottom: 0.75rem;
     background: #fcfbff;
-    // Kept in the CMS but not shown on the website.
     &.is-hidden {
         opacity: 0.6;
     }

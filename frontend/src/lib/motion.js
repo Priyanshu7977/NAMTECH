@@ -1,8 +1,3 @@
-/**
- * Site-wide scroll animations. Content is always server-rendered visible; only elements
- * that start below the fold are hidden and then revealed, so there is no flash and
- * nothing is lost without JavaScript. Respects prefers-reduced-motion.
- */
 const TARGETS = [
     'main section .container > *',
     'main section .nt-reveal',
@@ -40,7 +35,6 @@ export function initReveal(root = document) {
         { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
     );
 
-    // Elements hidden by an earlier run (initial load, then Inertia's navigate event) are observed again.
     root.querySelectorAll('.rv:not(.rv-in)').forEach((el) => observer.observe(el));
 
     const fold = window.innerHeight;
@@ -56,11 +50,6 @@ export function initReveal(root = document) {
     return () => observer?.disconnect();
 }
 
-/**
- * Animates numbers such as "584+", "93%", "₹24 LPA" counting up from zero when first visible.
- * Numbers already on screen when the page loads are left as they are, unless `immediate` is set
- * (content revealed later, e.g. a newly opened tab).
- */
 export function initCountUp(root = document, { immediate = false } = {}) {
     if (typeof window === 'undefined' || reducedMotion() || !('IntersectionObserver' in window)) return () => {};
     const io = new IntersectionObserver((entries) => {
@@ -78,7 +67,6 @@ export function initCountUp(root = document, { immediate = false } = {}) {
             const duration = 1800;
             const tick = (now) => {
                 const p = Math.min(1, Math.max(0, (now - start) / duration));
-                // Ease-out (expo): races up, then settles gently on the final value.
                 const eased = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
                 el.textContent = `${prefix}${(target * eased).toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
                 if (p < 1) requestAnimationFrame(tick);
@@ -89,7 +77,6 @@ export function initCountUp(root = document, { immediate = false } = {}) {
     }, { threshold: 0.6 });
     root.querySelectorAll('[data-countup]').forEach((el) => {
         if (immediate || el.getBoundingClientRect().top > window.innerHeight * 0.9) {
-            // Revealed content starts from zero straight away, so the final value never flashes first.
             if (immediate) el.textContent = el.dataset.countup.replace(/\d[\d,]*\.?\d*/, (n) => n.replace(/\d/g, '0').replace(/^0+(?=\d)/, ''));
             io.observe(el);
         }
@@ -97,7 +84,6 @@ export function initCountUp(root = document, { immediate = false } = {}) {
     return () => io.disconnect();
 }
 
-/** Fades the new page in after a client-side visit (not on first load, which is already painted). */
 export function enterPage(main = document.getElementById('main')) {
     if (!main || reducedMotion()) return;
     main.classList.remove('nt-page-enter');

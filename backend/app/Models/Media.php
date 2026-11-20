@@ -8,18 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
-/**
- * An uploaded image. The validated original is kept on a private disk; the public
- * disk only holds re-encoded responsive variants (AVIF, WebP and JPEG).
- */
 class Media extends Model
 {
     use FlushesPublicCache;
 
-    /** Widths generated for every image (only those smaller than the original). */
     public const Widths = [400, 800, 1200, 1600, 2000];
 
-    /** Named sizes used by templates and social metadata. */
+    public const Format = 'webp';
+
     public const NamedSizes = ['sm' => 400, 'md' => 800, 'lg' => 1200, 'xl' => 1600];
 
     protected $fillable = [
@@ -47,20 +43,9 @@ class Media extends Model
         return $this->hasMany(MediaUsage::class);
     }
 
-    /**
-     * @return array<int, int>
-     */
     public function availableWidths(): array
     {
         return array_map('intval', $this->variants['widths'] ?? []);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    public function availableFormats(): array
-    {
-        return $this->variants['formats'] ?? [];
     }
 
     public function variantPath(int $width, string $format): string
@@ -68,10 +53,7 @@ class Media extends Model
         return $this->directory.'/'.$width.'.'.$format;
     }
 
-    /**
-     * Public URL of the closest generated variant (JPEG fallback) for a named size or width.
-     */
-    public function url(string|int $size = 'lg', string $format = 'jpg'): ?string
+    public function url(string|int $size = 'lg'): ?string
     {
         $widths = $this->availableWidths();
         if ($widths === []) {
@@ -80,16 +62,10 @@ class Media extends Model
 
         $target = is_int($size) ? $size : (self::NamedSizes[$size] ?? 1200);
         $chosen = collect($widths)->sortBy(fn (int $w) => abs($w - $target))->first();
-        $format = in_array($format, $this->availableFormats(), true) ? $format : 'jpg';
 
-        return Storage::disk('public')->url($this->variantPath($chosen, $format));
+        return Storage::disk('public')->url($this->variantPath($chosen, self::Format));
     }
 
-    /**
-     * Data needed by the front-end <ResponsiveImage> component.
-     *
-     * @return array<string, mixed>|null
-     */
     public function toImage(?string $altOverride = null): ?array
     {
         if ($this->status !== 'ready' || $this->availableWidths() === []) {
@@ -97,17 +73,14 @@ class Media extends Model
         }
 
         $disk = Storage::disk('public');
-        $sources = [];
-        foreach ($this->availableFormats() as $format) {
-            $sources[$format] = collect($this->availableWidths())
-                ->map(fn (int $w): string => $disk->url($this->variantPath($w, $format)).' '.$w.'w')
-                ->implode(', ');
-        }
+        $srcset = collect($this->availableWidths())
+            ->map(fn (int $w): string => $disk->url($this->variantPath($w, self::Format)).' '.$w.'w')
+            ->implode(', ');
 
         return [
             'id' => $this->id,
             'src' => $this->url('lg'),
-            'sources' => $sources,
+            'srcset' => $srcset,
             'width' => $this->width,
             'height' => $this->height,
             'alt' => $altOverride ?? (string) $this->alt,
@@ -115,19 +88,11 @@ class Media extends Model
         ];
     }
 
-    /**
-     * Summary used by the admin media picker.
-     *
-     * @return array<string, mixed>
-     */
     public function isDocument(): bool
     {
         return $this->kind === 'document';
     }
 
-    /**
-     * Public URL of an uploaded document (PDF).
-     */
     public function documentUrl(): ?string
     {
         return $this->isDocument() ? Storage::disk('public')->url($this->directory.'/'.basename($this->filename)) : null;
@@ -139,7 +104,7 @@ class Media extends Model
             'id' => $this->id,
             'kind' => $this->kind,
             'document_url' => $this->documentUrl(),
-            'thumb' => $this->url('sm', 'webp'),
+            'thumb' => $this->url('sm'),
             'url' => $this->url('lg'),
             'original_name' => $this->original_name,
             'alt' => $this->alt,

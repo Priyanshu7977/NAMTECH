@@ -7,10 +7,6 @@ use App\Models\PageSection;
 use App\Models\Program;
 use Illuminate\Database\Migrations\Migration;
 
-/**
- * Undergraduate (B.Tech.) programs are hidden for now: the programs are unpublished, their menu links
- * switched off and their cards on other pages hidden. Everything stays in the CMS to switch back on.
- */
 return new class extends Migration
 {
     public function up(): void
@@ -30,13 +26,11 @@ return new class extends Migration
         Program::query()->where('level', 'undergraduate')
             ->update(['status' => ($hide ? ContentStatus::Unpublished : ContentStatus::Published)->value]);
 
-        // Header "UG Programs" with its sub-links, and the footer B.Tech. links.
         $urls = array_merge(['/programs?level=undergraduate'], array_map(fn (string $slug) => "/programs/{$slug}", $slugs));
         $parents = MenuItem::query()->whereIn('url', $urls)->pluck('id');
         MenuItem::query()->where(fn ($q) => $q->whereIn('url', $urls)->orWhereIn('parent_id', $parents))
             ->update(['is_visible' => ! $hide]);
 
-        // Cards and blocks that point to undergraduate programs.
         PageSection::query()->whereIn('type', ['media_cards', 'program_levels'])->each(function (PageSection $section) use ($hide, $slugs): void {
             $data = $section->data ?? [];
             $changed = false;
@@ -56,7 +50,6 @@ return new class extends Migration
             }
         });
 
-        // Admissions page: the UG program finder, and "Undergraduate" in the hero title.
         $admissions = Page::query()->where('slug', 'admissions')->value('id');
         PageSection::query()->where('sectionable_type', 'page')->where('sectionable_id', $admissions)
             ->where('type', 'program_finder')->get()

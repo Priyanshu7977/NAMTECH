@@ -21,6 +21,7 @@ use App\Support\Fields;
 use App\Support\HtmlSanitizer;
 use App\Support\Presenters;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Turns stored section data into front-end props: media ids become responsive image
@@ -41,15 +42,17 @@ class SectionPresenter
 
         $ids = $sections->flatMap(fn (PageSection $section) => SectionRegistry::mediaIds($section->type, $section->data ?? []))->unique();
         $this->media = Media::query()->whereIn('id', $ids)->get()->keyBy('id');
+        $samples = new SampleContent;
 
         return $sections->map(fn (PageSection $section): array => [
             'id' => $section->id,
             'type' => $section->type,
             'anchor' => $section->anchor,
-            'data' => $this->resolve($section->type, $this->withImages(
+            // Empty content is filled with labelled samples, so a section never disappears from the page.
+            'data' => $samples->fill($section->type, SectionRegistry::fields($section->type), $this->resolve($section->type, $this->withImages(
                 SectionRegistry::fields($section->type),
                 Fields::withoutHiddenItems(SectionRegistry::fields($section->type), $section->data ?? []),
-            )),
+            ))),
         ])->all();
     }
 
@@ -90,8 +93,8 @@ class SectionPresenter
                 'programs' => Program::query()->published()->with('image')
                     ->when($data['featured_only'] ?? false, fn ($q) => $q->where('is_featured', true))
                     ->orderBy('sort_order')->limit(12)->get()->map(Presenters::programCard(...))->all(),
-                // Programs tab: one group of cards per level (UG, PG, Executive, iPTP).
-                'program_groups' => collect(['undergraduate' => 'UG Programs', 'postgraduate' => 'PG Programs', 'executive' => 'Executive Education', 'technical' => 'iPTP'])
+                // Programs tab: show only Master Programs and iPTP (hiding iPMPX until details are available).
+                'program_groups' => collect(['postgraduate' => 'Master Programs', 'technical' => 'iPTP'])
                     ->map(fn (string $label, string $level) => [
                         'key' => $level,
                         'label' => $label,
@@ -107,13 +110,11 @@ class SectionPresenter
                 ], $data['items'] ?? []),
             ]),
             'partners_showcase' => array_merge($data, [
-                'logos' => $this->partners($data['category'] ?? null)->filter(fn (Partner $p) => $p->logo)->map(Presenters::partnerLogo(...))->values()->all(),
-                'stories' => ($data['show_stories'] ?? false)
-                    ? $this->partners($data['category'] ?? null)->filter(fn (Partner $p) => $p->is_featured && $p->image)->map(Presenters::partnerCard(...))->values()->all()
-                    : [],
+                'logos' => $this->partners($data['category'] ?? null)->filter(fn (Partner $p) => $p->logo && $p->slug !== 'tum-asia')->map(Presenters::partnerLogo(...))->values()->all(),
+                'stories' => ($data['show_stories'] ?? false) ? $this->partnerStories($data) : [],
             ]),
             'logo_strip' => array_merge($data, [
-                'logos' => $this->partners($data['category'] ?? null)->filter(fn (Partner $p) => $p->logo)->map(Presenters::partnerLogo(...))->values()->all(),
+                'logos' => $this->partnerLogos($data),
             ]),
             'faculty_showcase' => array_merge($data, [
                 // The homepage carousel shows the faculty marked "featured"; without any, it falls back to the first 12 profiles.
@@ -134,10 +135,7 @@ class SectionPresenter
                 'statistics' => Statistic::approvedFor($data['statistics_group'] ?? null),
             ]),
             'news_carousel', 'post_list' => array_merge($data, [
-                'posts' => Post::query()->published()->with('image', 'category')
-                    ->when($data['post_type'] ?? null, fn ($q, $type) => $q->where('type', $type))
-                    ->when($data['category'] ?? null, fn ($q, $category) => $q->whereHas('category', fn ($c) => $c->where('slug', $category)))
-                    ->latest('published_at')->limit($data['limit'] ?? 6)->get()->map(Presenters::postCard(...))->all(),
+                'posts' => $this->posts($data),
             ]),
             'programs_list' => array_merge($data, [
                 'programs' => Program::query()->published()->with('image')
@@ -150,7 +148,7 @@ class SectionPresenter
                     ->orderBy('sort_order')->get()->map(Presenters::leaderCard(...))->all(),
             ]),
             'programs_tabs' => array_merge($data, [
-                'levels' => collect(Program::Levels)->map(fn (string $label, string $level) => [
+                'levels' => ($data['tab_by'] ?? null) === 'program' ? $this->programTabs($data) : collect(Program::Levels)->map(fn (string $label, string $level) => [
                     'key' => $level,
                     'label' => $label,
                     'programs' => Program::query()->published()->with('image')->where('level', $level)
@@ -201,14 +199,106 @@ class SectionPresenter
     private function partners(?string $category): Collection
     {
         return Partner::query()->published()->with('logo', 'image')
+            ->whereNotIn('slug', ['tum-asia', 'technical-university-of-munich-tum-asia'])
             ->when($category, fn ($q) => $q->whereHas('category', fn ($c) => $c->where('slug', $category)))
             ->orderBy('sort_order')->get();
+    }
+
+    /** @param array<string, mixed> $data */
+    private function partnerStories(array $data): array
+    {
+        if (! ($data['show_stories'] ?? false)) {
+            return [];
+        }
+
+        $covers = collect($data['story_images'] ?? [])->filter(fn (array $item): bool => ! empty($item['image']))->values();
+        $preferredSlugs = $covers->pluck('slug');
+        $stories = $this->partners($data['category'] ?? null)
+            ->filter(fn (Partner $partner): bool => $preferredSlugs->contains($partner->slug)
+                || ($partner->is_featured && ($partner->image || ($data['stories_layout'] ?? null) === 'text')))
+            ->sortBy(fn (Partner $partner): int => $preferredSlugs->search($partner->slug, strict: true) !== false
+                ? (int) $preferredSlugs->search($partner->slug, strict: true) : $preferredSlugs->count())
+            ->map(function (Partner $partner) use ($covers): array {
+                $card = Presenters::partnerCard($partner);
+                $cover = $covers->firstWhere('slug', $partner->slug);
+                if ($cover) {
+                    $card['image'] = $cover['image'];
+                    $card['summary'] ??= Str::limit(strip_tags((string) $partner->story), 290);
+                }
+
+                return $card;
+            })->values()->all();
+
+        if (! $stories && ! empty($data['sample_image'])) {
+            $stories[] = [
+                'id' => 'sample-partner-story', 'name' => 'Sample industry collaboration',
+                'summary' => 'An example of how an industry partner could work with faculty to design a hands-on manufacturing project.',
+                'image' => $data['sample_image'],
+            ];
+        }
+
+        return $stories;
+    }
+
+    /** @param array<string, mixed> $data */
+    private function partnerLogos(array $data): array
+    {
+        $custom = collect($data['custom_logos'] ?? [])->filter(fn (array $item): bool => ! empty($item['logo']))->values();
+        $logos = $custom->isNotEmpty()
+            ? $custom->map(fn (array $item, int $i): array => ['id' => 'logo-'.$i, 'name' => $item['name'] ?? '', 'url' => null, 'logo' => $item['logo']])->all()
+            : $this->partners($data['category'] ?? null)->filter(fn (Partner $p) => $p->logo)->map(Presenters::partnerLogo(...))->values()->all();
+
+        if (! $logos && ($data['sample_when_empty'] ?? false)) {
+            $logos[] = ['id' => 'sample-partner', 'name' => 'Sample partner', 'logo' => null];
+        }
+
+        return $logos;
+    }
+
+    /** @param array<string, mixed> $data */
+    private function posts(array $data): array
+    {
+        $posts = Post::query()->published()->with('image', 'category')
+            ->when($data['post_type'] ?? null, fn ($q, $type) => $q->where('type', $type))
+            ->when($data['category'] ?? null, fn ($q, $category) => $q->whereHas('category', fn ($c) => $c->where('slug', $category)))
+            ->latest('published_at')->limit($data['limit'] ?? 6)->get()->map(Presenters::postCard(...))->all();
+
+        if (! $posts && ! empty($data['sample_image'])) {
+            $posts[] = [
+                'id' => 'sample-insight', 'title' => 'How industry projects can support engineering education',
+                'type' => 'Sample insight', 'image' => $data['sample_image'],
+                'excerpt' => 'An example article about bringing practical manufacturing challenges into the classroom.',
+            ];
+        }
+
+        return $posts;
     }
 
     /**
      * @param  array<string, mixed>  $data
      * @return Collection<int, Faculty>
      */
+    /**
+     * One tab per program (e.g. the School of Technical Education): each tab's carousel starts at that program and
+     * continues with the others, so the next program peeks in.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<int, array<string, mixed>>
+     */
+    private function programTabs(array $data): array
+    {
+        $cards = Program::query()->published()->with('image')
+            ->when($data['school'] ?? null, fn ($q, $school) => $q->whereHas('school', fn ($s) => $s->where('slug', $school)))
+            ->orderBy('sort_order')->get()->map(Presenters::programCard(...))->values();
+
+        return $cards->map(fn (array $card, int $i) => [
+            'key' => 'program-'.$card['id'],
+            // "International Professional Technologist Program (iPTP): Automation" → "iPTP Automation".
+            'label' => preg_match('/\(([^)]+)\)\s*:?\s*(.+)$/', $card['title'], $m) ? $m[1].' '.$m[2] : $card['title'],
+            'programs' => $cards->slice($i)->concat($cards->slice(0, $i))->values()->all(),
+        ])->all();
+    }
+
     private function peopleFor(array $data): Collection
     {
         $slugs = collect($data['members'] ?? [])->pluck('faculty')->filter()->values();

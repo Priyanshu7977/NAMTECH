@@ -20,17 +20,6 @@ use App\Http\Controllers\Site\SitemapController;
 use App\Http\Middleware\EnsureAdminAccess;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web routes
-|--------------------------------------------------------------------------
-| Controllers return Inertia pages (a React page component and its props); there is no
-| separate API. The few JSON endpoints left serve CMS widgets (media picker).
-|
-| Admin (CMS): authentication screens (login, password reset, two-factor) are registered
-| by Fortify under /admin (see FortifyServiceProvider).
-*/
-
 Route::prefix('admin')->name('admin.')->middleware(['auth', EnsureAdminAccess::class, 'throttle:admin'])->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('account', AccountController::class)->name('account');
@@ -99,12 +88,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', EnsureAdminAccess::c
     Route::get('audit', AuditLogController::class)->middleware('can:'.Permission::AuditView)->name('audit');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Public website
-|--------------------------------------------------------------------------
-| Settings, announcements and menus are shared with every public page (HandleInertiaRequests).
-*/
 Route::get('sitemap.xml', [SitemapController::class, 'sitemap'])->name('sitemap');
 Route::get('robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
@@ -121,12 +104,12 @@ Route::controller(SiteController::class)->group(function () {
     Route::get('/', 'home')->name('home');
     Route::get('programs', 'programs')->name('programs.index');
     Route::get('programs/{slug}', 'program')->name('programs.show');
+    Route::get('school-of-technical-education/iptp/{name}', 'iptpProgram')->where('name', '[a-z0-9-]+')->name('programs.iptp.show');
     Route::get('schools', 'schools')->name('schools.index');
     Route::get('schools/{slug}', 'school')->name('schools.show');
     Route::get('centres/{slug}', 'centre')->name('centres.show');
     Route::get('faculty', 'faculty')->name('faculty.index');
     Route::get('faculty/{slug}', 'facultyProfile')->name('faculty.show');
-    // Addresses from the previous website.
     Route::get('blog', fn () => redirect('/blogs', 301));
     Route::get('blog/{slug}', fn (string $slug) => redirect('/blogs/'.$slug, 301));
     Route::get('news-events', fn () => redirect('/media', 301));

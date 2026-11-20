@@ -1,13 +1,47 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import Carousel from '../../Carousel';
-import Icon, { ArrowDot } from '../../Icon';
+import Icon from '../../Icon';
 import { Media } from '../../ResponsiveImage';
-import SmartLink from '../../SmartLink';
 import { IconCard, PersonCard, PostCard, ProgramCard, StoryCard } from '../Cards';
 import { Cta, SectionHeading } from '../Common';
 import { toEmbedUrl } from '../../../lib/embed';
 import { TourButton } from './MediaEmbeds';
 import indiaMap from '../../../images/india-map.svg';
+import advancedComputingAiImage from '../../../images/met-centre-advanced-computing-ai.webp';
+import automotiveEngineeringImage from '../../../images/met-centre-automotive-engineering.webp';
+import managementStudiesImage from '../../../images/met-centre-management-studies.webp';
+import sustainableEnergyImage from '../../../images/met-centre-sustainable-energy-circularity.webp';
+import manufacturingDesignAiImage from '../../../images/met-manufacturing-design-ai.webp';
+import manufacturingTechnologiesImage from '../../../images/met-manufacturing-technologies.webp';
+import automotiveProgramImage from '../../../images/met-program-automotive.webp';
+import dataAnalyticsProgramImage from '../../../images/met-program-data-analytics.webp';
+import heavyIndustryProgramImage from '../../../images/met-program-heavy-industry.webp';
+import roboticsProgramImage from '../../../images/met-program-robotics.webp';
+import semiconductorManufacturingProgramImage from '../../../images/met-program-semiconductor-manufacturing.webp';
+import smartManufacturingProgramImage from '../../../images/met-program-smart-manufacturing.webp';
+import sustainabilityProgramImage from '../../../images/met-program-sustainability.webp';
+import roboticsImage from '../../../images/met-robotics.webp';
+import sustainabilityImage from '../../../images/met-sustainability.webp';
+import technicalEducationImage from '../../../images/met-technical-education.webp';
+
+const homeAcademicsImages = {
+    '/schools/school-of-manufacturing-technologies': { src: manufacturingTechnologiesImage, width: 1600, height: 873 },
+    '/schools/school-of-manufacturing-design-ai': { src: manufacturingDesignAiImage, width: 1600, height: 901 },
+    '/schools/school-of-robotics': { src: roboticsImage, width: 1600, height: 897 },
+    '/schools/school-of-sustainability': { src: sustainabilityImage, width: 1600, height: 1067 },
+    '/schools/school-of-technical-education': { src: technicalEducationImage, width: 1600, height: 1066 },
+    '/centres/coe-in-automotive-engineering': { src: automotiveEngineeringImage, width: 1600, height: 800 },
+    '/centres/centre-of-advanced-computing-ai': { src: advancedComputingAiImage, width: 1600, height: 800 },
+    '/centres/center-of-management': { src: managementStudiesImage, width: 1600, height: 902 },
+    '/centres/experiential-learning-center-for-sustainable-energy-circularity': { src: sustainableEnergyImage, width: 1600, height: 901 },
+    '/programs/master-in-smart-manufacturing-technology-and-management': { src: smartManufacturingProgramImage, width: 1600, height: 902 },
+    '/programs/master-in-heavy-industry-engineering-and-management': { src: heavyIndustryProgramImage, width: 1600, height: 902 },
+    '/programs/master-in-semiconductor-manufacturing-technology-and-management': { src: semiconductorManufacturingProgramImage, width: 1600, height: 903 },
+    '/programs/master-in-robotics-engineering-and-management': { src: roboticsProgramImage, width: 1600, height: 1066 },
+    '/programs/master-in-sustainability-engineering-and-management': { src: sustainabilityProgramImage, width: 1600, height: 901 },
+    '/programs/master-in-automotive-technology-and-management': { src: automotiveProgramImage, width: 1600, height: 901 },
+    '/programs/master-in-data-analytics-and-artificial-intelligence': { src: dataAnalyticsProgramImage, width: 1600, height: 902 },
+};
 
 export function HomeHero({ data }) {
     const slides = data.slides ?? [];
@@ -37,19 +71,15 @@ export function HomeHero({ data }) {
                     </div>
                     <div className="nt-hero__content order-lg-1">
                         {data.badges?.length ? (
-                            <p className="nt-hero__badges nt-hero-in" style={{ '--d': 0 }} aria-label="Focus areas">
+                            <p className="nt-hero__badges" aria-label="Focus areas">
                                 {data.badges.map((badge) => (
                                     <span key={badge.text}>{badge.text}</span>
                                 ))}
                             </p>
                         ) : null}
-                        {i === 0 ? (
-                            <h1 className="nt-hero__title nt-hero-in" style={{ '--d': 1 }}>{slide.title}</h1>
-                        ) : (
-                            <h2 className="nt-hero__title nt-hero-in" style={{ '--d': 1 }}>{slide.title}</h2>
-                        )}
-                        {slide.body ? <p className="nt-hero__body nt-hero-in" style={{ '--d': 2 }}>{slide.body}</p> : null}
-                        {slide.cta_label && slide.cta_url ? <Cta label={slide.cta_label} url={slide.cta_url} variant="light" className="mt-4 align-self-start nt-hero-in" style={{ '--d': 3 }} /> : null}
+                        {i === 0 ? <h1 className="nt-hero__title">{slide.title}</h1> : <h2 className="nt-hero__title">{slide.title}</h2>}
+                        {slide.body ? <p className="nt-hero__body">{slide.body}</p> : null}
+                        {slide.cta_label && slide.cta_url ? <Cta label={slide.cta_label} url={slide.cta_url} variant="light" className="mt-4 align-self-start" /> : null}
                         {multiple ? (
                             <div className="nt-carousel__dots nt-hero__dots">
                                 {slides.map((_, d) => (
@@ -71,14 +101,9 @@ export function HomeHero({ data }) {
 
 function BlueprintText({ item, className }) {
     return (
-        <div className={`nt-blueprint__text ${className || ''}`}>
+        <div className={`nt-blueprint__text ${className}`}>
             <h3>{item.title}</h3>
             <p>{item.body}</p>
-            {item.link_url ? (
-                <SmartLink href={item.link_url} className="nt-link-arrow" aria-label={`Learn more about ${item.title}`}>
-                    <ArrowDot />
-                </SmartLink>
-            ) : null}
         </div>
     );
 }
@@ -86,27 +111,22 @@ function BlueprintText({ item, className }) {
 export function FeatureBlocks({ data }) {
     const items = data.items ?? [];
     const pairs = [];
-    for (let i = 0; i < items.length; i += 2) {
-        pairs.push(items.slice(i, i + 2));
-    }
+    for (let i = 0; i < items.length; i += 2) pairs.push(items.slice(i, i + 2));
     const listRef = useRef(null);
 
-    // Phones and small tablets (< 992px): cards stack while scrolling.
-    // Desktop (>= 992px): editorial interlocking 12-column grid matching Figma handoff.
+    // Phones and small tablets: the blocks are cards that stack while scrolling (each sticks near the top
+    // and the next slides over it). A covered card shrinks and dims a little; desktop is unaffected.
     useEffect(() => {
         const list = listRef.current;
-        if (!list || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
         const narrow = window.matchMedia('(max-width: 991.98px)');
+        if (!list || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
         let frame = 0;
         const update = () => {
             frame = 0;
             const cards = [...list.querySelectorAll('.nt-blueprint__block')];
             cards.forEach((card, i) => {
                 const next = cards[i + 1];
-                if (!narrow.matches || !next) {
-                    card.style.removeProperty('--cover');
-                    return;
-                }
+                if (!narrow.matches || !next) return card.style.removeProperty('--cover');
                 const box = card.getBoundingClientRect();
                 const covered = 1 - (next.getBoundingClientRect().top - box.top) / box.height;
                 card.style.setProperty('--cover', Math.min(1, Math.max(0, covered)).toFixed(3));
@@ -126,29 +146,23 @@ export function FeatureBlocks({ data }) {
     return (
         <section className="nt-section nt-blueprint" aria-labelledby="blueprint-heading">
             <div className="container" ref={listRef}>
-                {data.eyebrow ? (
-                    <div className="d-flex justify-content-center mb-3">
-                        <span className="nt-pill">{data.eyebrow}</span>
-                    </div>
-                ) : null}
+                {data.eyebrow ? <p className="nt-pill d-table mx-auto">{data.eyebrow}</p> : null}
                 {data.heading ? (
                     <h2 className="nt-blueprint__heading" id="blueprint-heading">
                         {data.heading}
                     </h2>
                 ) : null}
+                {/* All pairs share one grid on desktop, so every image in the section gets the same width and height. */}
                 <div className="nt-blueprint__pairs">
-                    {pairs.map((pair, pIdx) => (
-                        <div
-                            key={pIdx}
-                            className={`nt-blueprint__pair ${pair.length === 2 ? 'nt-blueprint__pair--two' : 'nt-blueprint__pair--one'}`}
-                            style={{ '--p': pIdx }}
-                        >
-                            <div className="nt-blueprint__block" style={{ '--i': pIdx * 2 }}>
+                    {pairs.map((pair, p) => (
+                        <div key={p} className={`nt-blueprint__pair ${pair.length === 2 ? 'nt-blueprint__pair--two' : 'nt-blueprint__pair--one'}`} style={{ '--p': p }}>
+                            {/* Each block is title/text + image; desktop interlocks two blocks with equal-sized images. */}
+                            <div className="nt-blueprint__block" style={{ '--i': p * 2 }}>
                                 <BlueprintText item={pair[0]} className="b1-text" />
                                 <Media className="nt-blueprint__img b1-img" image={pair[0].image} sizes="(min-width: 992px) 55vw, 100vw" />
                             </div>
                             {pair[1] ? (
-                                <div className="nt-blueprint__block" style={{ '--i': pIdx * 2 + 1 }}>
+                                <div className="nt-blueprint__block" style={{ '--i': p * 2 + 1 }}>
                                     <Media className="nt-blueprint__img b2-img" image={pair[1].image} sizes="(min-width: 992px) 55vw, 100vw" />
                                     <BlueprintText item={pair[1]} className="b2-text" />
                                 </div>
@@ -161,7 +175,8 @@ export function FeatureBlocks({ data }) {
     );
 }
 
-export function AcademicsTabs({ data }) {
+export function AcademicsTabs({ data, page }) {
+    const cardImages = page?.template === 'home' ? homeAcademicsImages : null;
     const tabs = [
         { key: 'schools', label: data.schools_label || 'Schools', items: data.schools, heading: data.schools_heading, body: data.schools_body },
         { key: 'centres', label: data.centres_label || 'Centres', items: data.centres, heading: data.centres_heading, body: data.centres_body },
@@ -175,6 +190,8 @@ export function AcademicsTabs({ data }) {
     if (!tabs.length) return null;
     const tab = tabs[active] ?? tabs[0];
     const groups = tab.groups?.length ? tab.groups : null;
+    // When any tab has level filters, every tab keeps a row of that height so the cards start at the same place.
+    const hasFilters = tabs.some((t) => (t.groups?.length ?? 0) > 1);
     const items = groups ? groups[Math.min(group, groups.length - 1)].programs : tab.items;
     const select = (i) => {
         const next = (i + tabs.length) % tabs.length;
@@ -186,18 +203,28 @@ export function AcademicsTabs({ data }) {
     return (
         <section className="nt-section nt-divider nt-academics" aria-labelledby="academics-heading">
             <div className="container">
-                {/* The heading and introduction follow the selected tab (client copy). */}
-                <div className="text-center mx-auto nt-academics__head" style={{ maxWidth: '52rem' }}>
-                    <SectionHeading eyebrow={data.eyebrow} heading={tab.heading || data.heading} id="academics-heading" />
-                    {tab.body ? (
-                        <div className="nt-academics__intro nt-fade-in" key={tab.key}>
-                            {tab.body.split(/\n{2,}/).map((para, i) => (
-                                <p key={i}>{para}</p>
-                            ))}
+                {/* The heading and introduction follow the selected tab (client copy). Every tab's copy shares one
+                    cell, the others hidden, so the area keeps the tallest one's height and the tab bar never moves. */}
+                <div className="nt-academics__heads">
+                    {tabs.map((t, i) => (
+                        <div
+                            key={t.key}
+                            className={`text-center mx-auto nt-academics__head ${i === active ? '' : 'is-hidden'}`}
+                            style={{ maxWidth: '62rem' }}
+                            aria-hidden={i === active ? undefined : true}
+                        >
+                            <SectionHeading eyebrow={data.eyebrow} heading={t.heading || data.heading} id={i === active ? 'academics-heading' : undefined} />
+                            {t.body ? (
+                                <div className={`nt-academics__intro ${i === active ? 'nt-fade-in' : ''}`} key={`${t.key}-${i === active}`}>
+                                    {t.body.split(/\n{2,}/).map((para, j) => (
+                                        <p key={j}>{para}</p>
+                                    ))}
+                                </div>
+                            ) : null}
                         </div>
-                    ) : null}
+                    ))}
                 </div>
-                <div className="nt-tabs mt-4 mt-lg-5" role="tablist" aria-label={data.eyebrow || 'Schools, centres and programs'}>
+                <div className={`nt-tabs mt-4 mt-lg-5 ${hasFilters ? 'nt-academics__tabs--filters' : ''}`} role="tablist" aria-label={data.eyebrow || 'Schools, centres and programs'}>
                     {tabs.map((t, i) => (
                         <button
                             key={t.key}
@@ -221,21 +248,27 @@ export function AcademicsTabs({ data }) {
                     ))}
                 </div>
                 <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${active}`}>
-                    {groups && groups.length > 1 ? (
-                        <div className="nt-chips" role="group" aria-label="Program level">
-                            {groups.map((g, i) => (
-                                <button key={g.key} type="button" aria-pressed={i === group} onClick={() => setGroup(i)}>
-                                    {g.label}
-                                    <span className="nt-chips__count">{g.programs.length}</span>
-                                </button>
-                            ))}
+                    {hasFilters ? (
+                        // The level buttons sit centred in the white space between the tab bar and the cards.
+                        <div className="nt-academics__filters">
+                            {groups && groups.length > 1 ? (
+                                <div className="nt-chips" role="group" aria-label="Program level">
+                                    {groups.map((g, i) => (
+                                        <button key={g.key} type="button" aria-pressed={i === group} onClick={() => setGroup(i)}>
+                                            {g.label}
+                                            <span className="nt-chips__count">{g.programs.length}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : null}
                         </div>
                     ) : null}
                     <div className="nt-fade-in" key={`${tab.key}-${group}`}>
                         <Carousel label={groups ? groups[Math.min(group, groups.length - 1)].label : tab.label} slideWidth="min(73rem, 88%)" className="nt-carousel--programs">
-                            {items.map((item) => (
-                                <ProgramCard key={item.id} item={item} />
-                            ))}
+                            {items.map((item) => {
+                                const image = cardImages?.[item.url];
+                                return <ProgramCard key={item.id} item={image ? { ...item, image } : item} />;
+                            })}
                         </Carousel>
                     </div>
                 </div>
@@ -244,13 +277,17 @@ export function AcademicsTabs({ data }) {
     );
 }
 
-export function PartnersShowcase({ data }) {
+export function PartnersShowcase({ data, anchor }) {
+    // "Hide the partner logo row" is used where the logos already appear elsewhere on the page.
+    const logos = data.hide_logos ? [] : data.logos;
+    const headingId = useId();
+    const industry = anchor === 'industry-collaborations';
     return (
-        <section className="nt-section nt-divider" aria-labelledby="partners-heading">
+        <section className={`nt-section ${data.hide_logos ? 'nt-partners--stories' : 'nt-divider'}${data.tone === 'gradient' ? ' nt-tone-gradient' : ''}${industry ? ' nt-partnership-industry' : ''}`} aria-labelledby={headingId}>
             <div className="container">
                 <div className="nt-split-head">
                     <div>
-                        <SectionHeading eyebrow={data.eyebrow} heading={data.heading} id="partners-heading" className="mb-0" />
+                        <SectionHeading eyebrow={data.eyebrow} heading={data.heading} id={headingId} className="mb-0" />
                     </div>
                     <div className="nt-split-head__aside">
                         {data.body ? <p className="nt-lead">{data.body}</p> : null}
@@ -262,12 +299,12 @@ export function PartnersShowcase({ data }) {
                     </div>
                 </div>
             </div>
-            {data.logos?.length ? (
-                <div className="container-fluid px-0 nt-marquee" style={{ '--nt-marquee-duration': `${Math.max(data.logos.length, 4) * 4}s` }}>
+            {logos?.length ? (
+                <div className="container-fluid px-0 nt-marquee" style={{ '--nt-marquee-duration': `${Math.max(logos.length, 4) * 4}s` }}>
                     {/* The logos are listed twice so the strip scrolls right to left without a gap; the copy is hidden from assistive technology. */}
                     <ul className="nt-logos nt-marquee__track list-unstyled m-0" aria-label="Partners">
                         {[false, true].flatMap((copy) =>
-                            data.logos.map((logo) => (
+                            logos.map((logo) => (
                                 <li key={`${copy ? 'copy-' : ''}${logo.id}`} aria-hidden={copy || undefined}>
                                     {logo.url ? (
                                         <a href={logo.url} target="_blank" rel="noopener noreferrer" tabIndex={copy ? -1 : undefined}>
@@ -283,12 +320,20 @@ export function PartnersShowcase({ data }) {
                 </div>
             ) : null}
             {data.stories?.length ? (
-                <div className="container nt-stories-wrap">
-                    <Carousel label="Partner stories" slideWidth="min(54.75rem, calc(100vw - 3rem))" gap="3rem" align="center" startIndex={1} className="nt-carousel--stories">
-                        {data.stories.map((story) => (
-                            <StoryCard key={story.id} item={story} />
-                        ))}
-                    </Carousel>
+                <div className="container">
+                    {data.stories_layout === 'text' ? (
+                        <Carousel label="Partner stories" slideWidth="min(24.375rem, 82vw)" gap="0.5rem" className="nt-carousel--stories nt-carousel--story-text">
+                            {data.stories.map((story) => (
+                                <StoryCard key={story.id} item={story} textOnly />
+                            ))}
+                        </Carousel>
+                    ) : (
+                        <Carousel label="Partner stories" slideWidth={industry ? 'min(55rem, 84%)' : 'min(55rem, calc(100vw - 3rem))'} className="nt-carousel--stories">
+                            {data.stories.map((story) => (
+                                <StoryCard key={story.id} item={story} />
+                            ))}
+                        </Carousel>
+                    )}
                     {data.stories_cta_label && data.stories_cta_url ? (
                         <div className="text-center mt-4">
                             <Cta label={data.stories_cta_label} url={data.stories_cta_url} variant="outline" />
@@ -409,7 +454,7 @@ export function LabsShowcase({ data }) {
                     </div>
                 </div>
                 {data.slides?.length ? (
-                    <Carousel label="Labs gallery" slideWidth="min(63.25rem, 88%)" gap="0rem" align="center" startIndex={1} trackClassName="nt-labs__track" onIndexChange={setIndex}>
+                    <Carousel label="Labs gallery" slideWidth="min(63.25rem, 88%)" align="center" trackClassName="nt-labs__track" onIndexChange={setIndex}>
                         {data.slides.map((slide, i) => (
                             <LabSlide key={i} slide={slide} active={inView && i === index} />
                         ))}
@@ -424,34 +469,41 @@ export function CampusShowcase({ data }) {
     const items = data.gallery?.items ?? [];
     const [active, setActive] = useState(0);
     const current = items[active] ?? null;
+    const headingId = useId();
 
     return (
-        <section className="nt-section nt-campus" aria-labelledby="campus-heading">
+        <section className="nt-section nt-divider nt-campus" aria-labelledby={headingId}>
             <div className="container">
-                <div className="nt-split-head">
+                <div className="nt-split-head mb-4 mb-lg-5">
                     <div>
-                        <SectionHeading eyebrow={data.eyebrow} heading={data.heading} id="campus-heading" className="mb-0" />
+                        <SectionHeading eyebrow={data.eyebrow || 'Campus'} heading={data.heading} id={headingId} className="mb-0" />
                     </div>
-                    {data.body ? (
-                        <div className="nt-split-head__aside">
-                            <p className="nt-lead">{data.body}</p>
-                        </div>
-                    ) : null}
+                    <div className="nt-split-head__aside">
+                        {data.body ? <p className="nt-lead">{data.body}</p> : null}
+                    </div>
                 </div>
                 <div className="nt-campus__grid">
                     <div className="nt-campus__main">
-                        {current ? <Media image={current.image} sizes="(min-width: 992px) 40vw, 100vw" className="w-100 h-100" /> : null}
+                        {current ? <Media image={current.image} sizes="(min-width: 992px) 50vw, 100vw" className="w-100 h-100" /> : null}
                         {data.gallery?.virtual_tour_url ? (
                             <a className="nt-campus__badge" href={data.gallery.virtual_tour_url} target="_blank" rel="noopener noreferrer" aria-label="360° virtual tour (opens in a new tab)">
-                                <Icon name="image" /> 360°
+                                <Icon name="image" /> 360° Virtual Tour
                             </a>
-                        ) : null}
+                        ) : (
+                            <div className="nt-campus__badge">
+                                <Icon name="image" /> 360° Virtual Tour
+                            </div>
+                        )}
                     </div>
-                    <div className="nt-campus__feature">
-                        {data.feature_title ? <h3>{data.feature_title}</h3> : null}
-                        {data.feature_body ? <p>{data.feature_body}</p> : null}
-                        <div className="d-flex flex-wrap gap-3 mt-2">
-                            <Cta label={data.cta_label} url={data.cta_url} />
+                    <div className="nt-campus__text">
+                        <h3 className="nt-campus__feature-title">
+                            {current?.title || data.feature_title || 'Smart Factory & Industry 4.0 Learning Floor'}
+                        </h3>
+                        <p className="nt-campus__body">
+                            {current?.body || data.feature_body || 'Experience hands-on training with industry-grade machines, automated assembly cells, collaborative robotics, and real-time data monitoring systems that mirror state-of-the-art manufacturing facilities.'}
+                        </p>
+                        <div className="nt-campus__actions">
+                            <Cta label={data.cta_label || 'Schedule a Campus Visit'} url={data.cta_url || '/campus'} />
                             <TourButton gallery={data.gallery} label={data.tour_label || 'Virtual tour'} />
                         </div>
                         {items.length > 1 ? (
@@ -474,7 +526,7 @@ export function Mission({ data }) {
     return (
         <section className="nt-section nt-mission on-dark" aria-labelledby="mission-heading">
             {/* Decorative India map from the design; its dots pulse in turn (see india-map.svg). */}
-            <img src={indiaMap} alt="" aria-hidden="true" className="nt-mission__map nt-reveal" width="1440" height="1512" decoding="async" />
+            <img src={indiaMap} alt="" aria-hidden="true" className="nt-mission__map nt-reveal" width="1400" height="1310" decoding="async" />
             <div className="container">
                 {data.heading ? (
                     <h2 className="nt-mission__heading" id="mission-heading">
@@ -497,8 +549,8 @@ export function Mission({ data }) {
                 ) : null}
                 {data.initiatives?.length ? (
                     <>
-                        {/* Desktop: 3-column layout matching Figma handoff */}
-                        <div className="d-none d-md-grid nt-mission__cards" style={{ gridTemplateColumns: `repeat(${Math.min(3, data.initiatives.length || 3)}, minmax(0, 1fr))` }}>
+                        {/* Two columns, so four initiatives sit in two rows. */}
+                        <div className="d-none d-md-grid nt-mission__cards" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
                             {data.initiatives.map((item) => (
                                 <IconCard key={item.id} icon={item.icon} title={item.title} body={item.body} />
                             ))}
@@ -513,7 +565,7 @@ export function Mission({ data }) {
                     </>
                 ) : null}
                 {data.cta_label && data.cta_url ? (
-                    <div className="text-center mt-5">
+                    <div className="text-start mt-5">
                         <Cta label={data.cta_label} url={data.cta_url} variant="light" />
                     </div>
                 ) : null}

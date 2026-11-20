@@ -24,10 +24,6 @@ function Field({ id, label, error, required, children, hint }) {
     );
 }
 
-/**
- * Contact / program enquiry form. Client-side checks mirror the server rules, but the
- * server's validation is authoritative. Errors are announced and focus moves to the summary.
- */
 export default function EnquiryForm({ type = 'contact', programs = [], defaultProgramId = null }) {
     const { flash, site } = usePage().props;
     const uid = useId();

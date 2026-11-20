@@ -10,9 +10,6 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-/**
- * The CV is not attached; staff download it from the CMS so it stays access-controlled.
- */
 class JobApplicationReceived extends Mailable
 {
     use Queueable, SerializesModels;

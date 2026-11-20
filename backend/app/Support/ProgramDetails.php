@@ -3,19 +3,12 @@
 namespace App\Support;
 
 use App\Models\Media;
+use App\Sections\SampleContent;
 use App\Sections\SectionRegistry;
 use Illuminate\Support\Collection;
 
-/**
- * The modules of the program page template ("Programmes - Template" designs), grouped by the page's tabs.
- * Their content is stored in the program's "details" attribute, one key per module. Every module has a
- * show/hide switch (see PageBlocks); a module without content is left out of the page automatically.
- */
 class ProgramDetails
 {
-    /**
-     * Page tabs in order: key => label.
-     */
     public const Tabs = [
         'overview' => 'Program Overview',
         'structure' => 'Program Structure',
@@ -26,12 +19,6 @@ class ProgramDetails
         'faqs' => 'FAQs',
     ];
 
-    /**
-     * Every switchable block of the page: key => [tab, label]. Blocks without stored details
-     * (hero image, overview text, faculty, enquiry form) use the program's own fields.
-     *
-     * @var array<string, array{0: string, 1: string}>
-     */
     public const Blocks = [
         'hero_image' => ['overview', 'Hero image'],
         'brochure' => ['overview', 'Download brochure button'],
@@ -63,21 +50,11 @@ class ProgramDetails
         'enquire' => ['faqs', 'Enquiry form'],
     ];
 
-    /**
-     * Switch labels for the CMS, prefixed with their tab.
-     *
-     * @return array<string, string>
-     */
     public static function blockLabels(): array
     {
         return array_map(fn (array $block): string => self::Tabs[$block[0]].': '.$block[1], self::Blocks);
     }
 
-    /**
-     * CMS form fields, one group per module, each stored under "details".
-     *
-     * @return array<int, array<string, mixed>>
-     */
     public static function fields(): array
     {
         $icon = ['name' => 'icon', 'type' => 'select', 'label' => 'Icon', 'options' => SectionRegistry::icons()];
@@ -318,27 +295,100 @@ class ProgramDetails
         ];
     }
 
-    /**
-     * Stored details ready for the page: hidden items removed, media ids turned into images and documents.
-     *
-     * @param  array<string, mixed>|null  $details
-     * @return array<string, mixed>
-     */
     public static function present(?array $details): array
     {
         $fields = self::fields();
         $details = Fields::withoutHiddenItems($fields, $details ?? []);
         $media = Media::query()->whereIn('id', Fields::mediaIds($fields, $details))->get()->keyBy('id');
 
-        return self::withMedia($fields, $details, $media);
+        return self::withSamples($fields, self::withMedia($fields, $details, $media));
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $fields
-     * @param  array<string, mixed>  $data
-     * @param  Collection<int, Media>  $media
-     * @return array<string, mixed>
-     */
+    private const SampleLists = [
+        'why_choose' => ['items'], 'class_profile' => ['mix', 'stats'], 'structure' => ['semesters'], 'learning_model' => ['cards', 'mix'],
+        'labs' => ['items'], 'admission_steps' => ['steps'], 'eligibility' => ['criteria', 'branches'], 'documents' => ['items'],
+        'outcomes' => ['stats', 'logos'], 'roles' => ['items'], 'alumni' => ['items'], 'innovations' => ['items'],
+        'awards' => ['items'], 'fees' => ['rows', 'scholarships', 'notes'], 'loans' => ['providers'], 'clubs' => ['items'],
+        'life_alumni' => ['items'], 'testimonials' => ['items'], 'faqs' => ['items'],
+    ];
+
+    private const SampleRecruiterSlugs = [
+        'cisco', 'schneider-electric', 'amns-india', 'tum-asia',
+        'festo', 'siemens', 'lt-heavy-engineering', 'micron',
+    ];
+
+    private static function withSamples(array $fields, array $details): array
+    {
+        $samples = new SampleContent;
+        foreach ($fields as $module) {
+            $key = $module['name'];
+            $data = is_array($details[$key] ?? null) ? $details[$key] : [];
+            foreach (self::SampleLists[$key] ?? [] as $list) {
+                $field = collect($module['fields'])->firstWhere('name', $list);
+                if ($field && empty($data[$list])) {
+                    $data[$list] = $samples->many(fn (int $i) => self::sampleItem($samples, $field['fields'], $i), $key === 'awards' ? 4 : 3);
+                }
+            }
+            if ($key === 'recruiter_quotes' && collect($data['items'] ?? [])->every(fn (array $item) => empty($item['logo']) && ($item['name'] ?? null) === 'SAMPLE – Company name'
+                && ($item['quote'] ?? null) === 'SAMPLE – replace with a real recruiter quote.'
+            )) {
+                $data['items'] = $samples->many(fn (int $i) => [
+                    'name' => 'Sample recruiter '.$i,
+                    'quote' => 'Sample quote. Use this space for a recruiter’s feedback on graduates and how they apply their skills in the workplace.',
+                    'logo' => null,
+                    'sample_company_slug' => self::SampleRecruiterSlugs[$i - 1],
+                ], count(self::SampleRecruiterSlugs));
+            }
+            if (in_array($key, ['innovations', 'awards'], true)) {
+                $items = array_values($data['items'] ?? []);
+                if ($key === 'awards' && count($items) === 3 && collect($items)->every(fn (array $item) => ($item['title'] ?? null) === 'SAMPLE – Award name' && ($item['text'] ?? null) === SampleContent::Text && empty($item['link_url'])
+                )) {
+                    $items[] = [...$items[0], 'title' => 'SAMPLE – Project showcase recognition'];
+                }
+                $sampleText = $key === 'awards'
+                    ? 'Sample award. A student team receives recognition for an engineering project that demonstrates thoughtful design, careful testing, and practical application.'
+                    : 'Sample story. A student team explores a practical engineering challenge through research, prototype development, and testing. The project shows how classroom ideas can guide hands-on problem solving.';
+                $data['items'] = array_map(function (array $item) use ($sampleText): array {
+                    if (! str_starts_with($item['title'] ?? '', 'SAMPLE – ')) {
+                        return $item;
+                    }
+                    if (empty($item['date']) || str_starts_with($item['date'], 'SAMPLE – Date')) {
+                        $item['date'] = 'January 10, 2026';
+                    }
+                    if (($item['text'] ?? null) === SampleContent::Text) {
+                        $item['text'] = $sampleText;
+                    }
+
+                    return $item;
+                }, $items);
+            }
+            if ($key === 'class_profile' && empty($data['image'])) {
+                $data['image'] = $samples->image();
+            }
+            if ($key === 'life_video' && empty($data['image']) && empty($data['video_url']) && empty($data['title'])) {
+                $data = [...$data, 'image' => $samples->image(), 'title' => 'A Day in the Life at NAMTECH', 'text' => SampleContent::Text];
+            }
+            if ($key === 'snapshot' && empty($data['eligibility'])) {
+                $data['eligibility'] = 'SAMPLE – eligibility';
+            }
+            $details[$key] = $data;
+        }
+
+        return $details;
+    }
+
+    private static function sampleItem(SampleContent $samples, array $fields, int $i): array
+    {
+        $item = $samples->item($fields, $i);
+        foreach ($fields as $field) {
+            if ($field['type'] === 'repeater') {
+                $item[$field['name']] = $samples->many(fn (int $j) => $samples->item($field['fields'], $j), 2);
+            }
+        }
+
+        return $item;
+    }
+
     private static function withMedia(array $fields, array $data, Collection $media): array
     {
         foreach ($fields as $field) {

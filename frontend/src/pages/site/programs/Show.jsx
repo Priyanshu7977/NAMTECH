@@ -7,28 +7,18 @@ import * as M from '../../../components/site/ProgramModules';
 import SectionRenderer from '../../../components/site/sections/SectionRenderer';
 import { Media } from '../../../components/ResponsiveImage';
 import SmartLink from '../../../components/SmartLink';
-import { initCountUp } from '../../../lib/motion';
 
 const has = (list) => Array.isArray(list) && list.length > 0;
 
-/**
- * Program page ("Programmes - Template" designs): hero, then a sticky tab bar with one panel per tab.
- * A module is shown when it has content and has not been switched off in the CMS ("Page blocks");
- * a tab with no modules left is dropped from the bar.
- */
 export default function ProgramShow({ program, details = {}, tabs, faculty, sections, hidden, breadcrumbs, programs }) {
     const show = blockSwitch(hidden);
     const d = details;
-    const hasBrochure = Boolean(d.brochure?.file) && show('brochure');
+    const hasBrochure = show('brochure');
     const hasOverview = (show('overview') && Boolean(program.body)) || show('snapshot');
     const whyInOverview = hasOverview && show('_overview') && show('why_choose') && has(d.why_choose?.items);
 
-    // [key, has content, render(lead)] per tab. "lead" is true for the first module of a tab, which
-    // carries the tab's large heading.
     const modules = {
         overview: [
-            // Overview text and snapshot share one block; each has its own switch.
-            // As in the template, "Why choose" sits under the overview text, beside the snapshot card.
             ['_overview', hasOverview, (lead) => (
                 <Overview
                     key="overview"
@@ -52,7 +42,7 @@ export default function ProgramShow({ program, details = {}, tabs, faculty, sect
         structure: [
             ['structure', has(d.structure?.semesters), (lead) => <M.Structure key="structure" data={d.structure} lead={lead} />],
             ['learning_model', has(d.learning_model?.cards) || has(d.learning_model?.mix) || Boolean(d.learning_model?.notes), (lead) => <M.LearningModel key="learning" data={d.learning_model} lead={lead} />],
-            ['labs', has(d.labs?.items), (lead) => <M.Labs key="labs" data={d.labs} lead={lead} />],
+            ['labs', has(d.labs?.items), (lead) => <M.Labs key="labs" data={d.labs} lead={lead} perLab={program.url?.startsWith('/school-of-technical-education/iptp')} />],
         ],
         admissions: [
             ['admission_steps', has(d.admission_steps?.steps), (lead) => <M.AdmissionSteps key="steps" data={d.admission_steps} lead={lead} />],
@@ -68,13 +58,23 @@ export default function ProgramShow({ program, details = {}, tabs, faculty, sect
                 <M.CardCarousel
                     key="innovations"
                     heading={d.innovations.heading || 'Student innovation and fruitful research'}
-                    intro={d.innovations.intro}
+                    intro={d.innovations.intro || 'Built, not just taught. Discover how our students are turning bold ideas into real-world breakthroughs.'}
                     items={d.innovations.items}
                     lead={lead}
-                    cta={d.innovations.cta_url ? <SmartLink href={d.innovations.cta_url} className="nt-btn">View all</SmartLink> : null}
+                    cta={<SmartLink href={d.innovations.cta_url || '/research-and-consultancy/publications'} className="nt-btn">View all</SmartLink>}
+                    variant="innovations"
                 />
             )],
-            ['awards', has(d.awards?.items), (lead) => <M.CardCarousel key="awards" heading={d.awards.heading || 'Awards & Recognitions'} intro={d.awards.intro} items={d.awards.items} lead={lead} />],
+            ['awards', has(d.awards?.items), (lead) => (
+                <M.CardCarousel
+                    key="awards"
+                    heading={d.awards.heading || 'Awards & Recognitions'}
+                    intro={d.awards.intro || 'Explore the awards and recognitions our students have earned for their work in engineering, innovation, and applied research.'}
+                    items={d.awards.items}
+                    lead={lead}
+                    variant="awards"
+                />
+            )],
         ],
         fees: [
             ['fees', Boolean(d.fees?.total) || has(d.fees?.rows) || has(d.fees?.scholarships) || has(d.fees?.notes), (lead) => <M.Fees key="fees" data={d.fees} lead={lead} />],
@@ -88,7 +88,7 @@ export default function ProgramShow({ program, details = {}, tabs, faculty, sect
         ],
         faqs: [
             ['faqs', has(d.faqs?.items), (lead) => <M.Faqs key="faqs" data={d.faqs} lead={lead} />],
-            ['enquire', true, (lead) => (
+            ['enquire', !(has(d.faqs?.items) && show('faqs')), (lead) => (
                 <div key="enquire" className="nt-prog__block nt-prog__enquire" id="enquire">
                     {lead ? <h2 className="nt-prog__title">Enquire about this program</h2> : <h3 className="nt-prog__subtitle">Enquire about this program</h3>}
                     <EnquiryForm type="program" programs={programs} defaultProgramId={program.id} />
@@ -102,58 +102,39 @@ export default function ProgramShow({ program, details = {}, tabs, faculty, sect
         .filter((tab) => tab.items.length);
 
     const [active, setActive] = useState(visibleTabs[0]?.key);
-    const anchorRef = useRef(null);
+    const barRef = useRef(null);
     const id = useId();
 
-    // Open the tab named in the address (#fees), and keep it in the address when switching.
-    useEffect(() => {
-        const fromHash = window.location.hash.slice(1);
-        if (visibleTabs.some((t) => t.key === fromHash)) setActive(fromHash);
-    }, []);
-
-    // Switching tabs further down the page returns to the top of the new panel, just under the bar.
     const select = (key) => {
+        if (!visibleTabs.some((t) => t.key === key)) return;
         setActive(key);
         window.history.replaceState(window.history.state, '', `#${key}`);
-        const anchor = anchorRef.current;
-        const header = document.querySelector('.nt-header');
-        if (!anchor) return;
-        const top = anchor.getBoundingClientRect().top + window.scrollY;
-        const navbar = header?.querySelector('.nt-mainbar');
-        if (window.scrollY > top - (header?.offsetHeight ?? 0)) {
-            window.scrollTo({ top: top - (navbar?.offsetHeight ?? 0), behavior: 'smooth' });
+        const bar = barRef.current;
+        const start = bar?.previousElementSibling;
+        if (start) {
+            const top = start.getBoundingClientRect().bottom + window.scrollY - (parseFloat(getComputedStyle(bar).top) || 0);
+            if (window.scrollY > top) window.scrollTo({ top, behavior: 'auto' });
         }
     };
 
-    const onKeyDown = (e) => {
-        const index = visibleTabs.findIndex((t) => t.key === active);
-        const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-        if (!step) return;
-        e.preventDefault();
-        const next = visibleTabs[(index + step + visibleTabs.length) % visibleTabs.length];
-        select(next.key);
-        document.getElementById(`${id}-tab-${next.key}`)?.focus();
-    };
+    useEffect(() => {
+        const fromHash = () => {
+            const key = window.location.hash.slice(1);
+            if (visibleTabs.some((t) => t.key === key)) setActive(key);
+        };
+        fromHash();
+        window.addEventListener('hashchange', fromHash);
+        return () => window.removeEventListener('hashchange', fromHash);
+    }, [visibleTabs.map((t) => t.key).join()]);
 
-    // On narrow screens the tab list scrolls sideways; keep the selected tab in view.
     useEffect(() => {
         const button = document.getElementById(`${id}-tab-${active}`);
         const list = button?.parentElement;
         if (list && list.scrollWidth > list.clientWidth) list.scrollTo({ left: button.offsetLeft - 16, behavior: 'smooth' });
     }, [active]);
 
-    // Statistics in a newly opened tab count up as they come into view.
-    const firstTab = useRef(true);
-    useEffect(() => {
-        if (firstTab.current) {
-            firstTab.current = false;
-            return undefined;
-        }
-        return initCountUp(document.getElementById(`${id}-panel`) ?? document, { immediate: true });
-    }, [active]);
-
-    const current = visibleTabs.find((t) => t.key === active) ?? visibleTabs[0];
-    const eyebrow = [program.school?.title, 'Programs'].filter(Boolean).join(' / ');
+    const listedUnderPrograms = program.url?.startsWith('/programs/') ?? true;
+    const eyebrow = [program.school?.title, listedUnderPrograms ? 'Programs' : null].filter(Boolean).join(' / ');
 
     return (
         <>
@@ -183,27 +164,28 @@ export default function ProgramShow({ program, details = {}, tabs, faculty, sect
                     ) : null}
                 </div>
             </section>
-            {/* The template goes straight from the hero to the tab bar; the hero's pill names the school. */}
 
             {visibleTabs.length ? (
                 <>
-                    <div ref={anchorRef} aria-hidden="true" />
-                    <div className="nt-prog-tabs">
+                    <nav className="nt-prog-tabs" ref={barRef} aria-label="Program sections">
                         <div className="container">
-                            <div className="nt-prog-tabs__list" role="tablist" aria-label="Program information" onKeyDown={onKeyDown}>
+                            <div className="nt-prog-tabs__list" role="tablist">
                                 {visibleTabs.map((tab) => (
-                                    <button
+                                    <a
                                         key={tab.key}
-                                        type="button"
-                                        role="tab"
+                                        href={`#${tab.key}`}
                                         id={`${id}-tab-${tab.key}`}
-                                        aria-selected={tab.key === current.key}
-                                        aria-controls={`${id}-panel`}
-                                        tabIndex={tab.key === current.key ? 0 : -1}
-                                        onClick={() => select(tab.key)}
+                                        role="tab"
+                                        aria-selected={tab.key === active}
+                                        aria-controls={`${id}-${tab.key}`}
+                                        aria-current={tab.key === active ? 'true' : undefined}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            select(tab.key);
+                                        }}
                                     >
                                         {tab.label}
-                                    </button>
+                                    </a>
                                 ))}
                             </div>
                             {program.apply_url ? (
@@ -212,12 +194,14 @@ export default function ProgramShow({ program, details = {}, tabs, faculty, sect
                                 </SmartLink>
                             ) : null}
                         </div>
-                    </div>
-                    <section className="nt-section nt-prog" id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-tab-${current.key}`} key={current.key}>
-                        <div className="container">
-                            {current.items.map(([, , render], i) => render(i === 0))}
-                        </div>
-                    </section>
+                    </nav>
+                    {visibleTabs
+                        .filter((tab) => tab.key === active)
+                        .map((tab) => (
+                            <section className="nt-section nt-prog nt-fade-in" id={`${id}-${tab.key}`} role="tabpanel" aria-labelledby={`${id}-tab-${tab.key}`} key={tab.key}>
+                                <div className="container">{tab.items.map(([, , render], i) => render(i === 0))}</div>
+                            </section>
+                        ))}
                 </>
             ) : null}
 
@@ -226,7 +210,6 @@ export default function ProgramShow({ program, details = {}, tabs, faculty, sect
     );
 }
 
-/** Overview text with the program snapshot card beside it. */
 function Overview({ program, snapshot, showBody, lead, why }) {
     return (
         <div className="nt-prog__block nt-prog-overview">

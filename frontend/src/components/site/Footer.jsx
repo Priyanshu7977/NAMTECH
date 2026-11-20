@@ -38,11 +38,35 @@ const socials = [
     ['facebook_url', 'facebook', 'Facebook'],
 ];
 
+const brandMarks = {
+    linkedin: (
+        <>
+            <rect x="2.5" y="8.5" width="4.2" height="13" />
+            <circle cx="4.6" cy="4.4" r="2.4" />
+            <path d="M9.6 8.5h4v1.8c.6-1.1 2-2.1 4.1-2.1 4.2 0 4.8 2.7 4.8 6.3v7H18.3v-6.2c0-1.5 0-3.4-2.1-3.4s-2.4 1.6-2.4 3.3v6.3H9.6z" />
+        </>
+    ),
+    x: <path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.65l-5.21-6.82-5.97 6.82H1.68l7.73-8.84L1.25 2.25h6.83l4.71 6.23zm-1.16 17.52h1.83L7.08 4.13H5.12z" />,
+    youtube: (
+        <path
+            fillRule="evenodd"
+            d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.2 3.6z"
+        />
+    ),
+    instagram: (
+        <>
+            <rect x="3" y="3" width="18" height="18" rx="5.2" fill="none" stroke="currentColor" strokeWidth="2.2" />
+            <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="2.2" />
+            <circle cx="17.4" cy="6.6" r="1.35" />
+        </>
+    ),
+    facebook: <path d="M13.6 22v-8.2h2.8l.4-3.3h-3.2V8.4c0-.9.3-1.6 1.6-1.6h1.7V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.4v3.3h2.8V22z" />,
+};
+
 export default function Footer() {
     const { site } = usePage().props;
     const { menus = {}, settings = {} } = site ?? {};
     const phones = (settings.phones ?? []).map((p) => p.number).filter(Boolean);
-    // Global settings → Show / hide; anything not switched off is shown.
     const shown = (key) => settings[key] !== false;
 
     return (
@@ -51,7 +75,7 @@ export default function Footer() {
                 <div className="nt-footer__top">
                     <div>
                         <SmartLink href="/" className="nt-footer__logo" aria-label="NAMTECH home">
-                            <img src="/images/namtech-logo-white.png" alt="NAMTECH – Institute of Manufacturing Innovation" width="700" height="192" loading="lazy" />
+                            <img src="/images/namtech-logo-white.webp" alt="NAMTECH – Institute of Manufacturing Innovation" width="700" height="192" loading="lazy" />
                         </SmartLink>
                         {shown('show_footer_social') ? (
                             <div className="nt-footer__social">
@@ -59,7 +83,13 @@ export default function Footer() {
                                     .filter(([key]) => settings[key])
                                     .map(([key, icon, label]) => (
                                         <a key={key} href={settings[key]} target="_blank" rel="noopener noreferrer" aria-label={`${label} (opens in a new tab)`}>
-                                            <Icon name={icon} strokeWidth={1.8} />
+                                            {brandMarks[icon] ? (
+                                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                                                    {brandMarks[icon]}
+                                                </svg>
+                                            ) : (
+                                                <Icon name={icon} strokeWidth={1.8} />
+                                            )}
                                         </a>
                                     ))}
                             </div>

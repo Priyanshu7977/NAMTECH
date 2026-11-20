@@ -33,9 +33,6 @@ class MenuItem extends Model
         return $this->hasMany(MenuItem::class, 'parent_id')->orderBy('sort_order');
     }
 
-    /**
-     * Linked pages follow slug changes automatically; unpublished linked pages are hidden.
-     */
     public function resolvedUrl(): ?string
     {
         if ($this->page_id) {

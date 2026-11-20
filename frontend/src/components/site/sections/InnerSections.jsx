@@ -1,6 +1,8 @@
 import usePage from '../../../hooks/usePage';
 import { useEffect, useId, useRef, useState } from 'react';
 import Carousel from '../../Carousel';
+import Tabs from '../../Tabs';
+import useStackCover from '../../../hooks/useStackCover';
 import Icon, { ArrowDot } from '../../Icon';
 import { Media } from '../../ResponsiveImage';
 import SmartLink from '../../SmartLink';
@@ -12,7 +14,6 @@ export const toneClass = (tone, fallback = 'white') => {
     return `nt-tone-${t} ${t === 'purple' ? 'on-dark' : ''}`;
 };
 
-/** Heading (with optional pill) on the left, introduction and button on the right. */
 export function SplitHead({ data, id, className = '', children }) {
     if (!data.heading && !data.eyebrow && !data.body) return null;
     return (
@@ -22,7 +23,6 @@ export function SplitHead({ data, id, className = '', children }) {
             </div>
             {data.body || (data.cta_label && data.cta_url) || children ? (
                 <div className="nt-split-head__aside">
-                    {/* An empty line in the text starts a new paragraph. */}
                     {data.body
                         ? data.body.split(/\n\s*\n/).map((para, i) => (
                               <p key={i} className="nt-lead">
@@ -115,7 +115,7 @@ export function StatCards({ data }) {
             <div className="container">
                 {data.heading || data.eyebrow ? <SectionHeading eyebrow={data.eyebrow} heading={data.heading} /> : null}
                 {data.body ? <p className="nt-lead mb-5" style={{ maxWidth: '48rem' }}>{data.body}</p> : null}
-                <div className="nt-stat-cards nt-stagger">
+                <div className={`nt-stat-cards nt-stagger${data.layout === 'lavender' ? ' nt-stat-cards--lavender' : ''}`}>
                     {(data.items ?? []).map((item, i) => (
                         <div className="nt-stat-card" key={i}>
                             {item.icon ? <Icon name={item.icon} strokeWidth={1.1} /> : null}
@@ -189,21 +189,34 @@ function PlayButton({ onClick, label }) {
 export function VideoFeature({ data }) {
     const [playing, setPlaying] = useState(false);
     const embed = data.video_url ? toEmbedUrl(data.video_url) : null;
+    const flip = data.flip_image ? ' nt-media--flip' : '';
     const media = playing && embed ? (
         <iframe src={embed} title={data.heading || 'Video'} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen className="nt-video-frame" />
     ) : (
         <>
-            <Media image={data.image} sizes="(min-width: 992px) 60vw, 100vw" className="nt-feature__media" />
+            <Media image={data.image} sizes="(min-width: 992px) 60vw, 100vw" className={`nt-feature__media${flip}`} />
             {embed ? <PlayButton onClick={() => setPlaying(true)} label={`Play video${data.heading ? `: ${data.heading}` : ''}`} /> : null}
         </>
     );
 
     if (data.layout === 'overlay') {
+        if (playing && embed) {
+            return (
+                <section className="nt-quote-feature nt-quote-feature--playing">
+                    <iframe src={embed} title={data.heading || 'Video'} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen className="nt-video-frame" />
+                </section>
+            );
+        }
         return (
             <section className="nt-quote-feature on-dark">
-                {media}
+                <Media image={data.image} sizes="100vw" className={`nt-feature__media${flip}`} />
                 <div className="container nt-quote-feature__inner">
-                    <div>
+                    <div className="nt-quote-feature__head">
+                        {embed ? (
+                            <button type="button" className="nt-quote-feature__play" onClick={() => setPlaying(true)} aria-label={`Play video${data.heading ? `: ${data.heading}` : ''}`}>
+                                <Icon name="play" />
+                            </button>
+                        ) : null}
                         {data.eyebrow ? <p className="nt-pill">{data.eyebrow}</p> : null}
                         {data.heading ? <h2>{data.heading}</h2> : null}
                     </div>
@@ -286,18 +299,22 @@ export function LeadersGrid({ data }) {
 
 export function Achievements({ data }) {
     const ranks = data.layout === 'ranks';
+    const rows = useRef([]);
+    useStackCover(rows, ranks, undefined, (data.items ?? []).length);
     return (
         <section className={`nt-section ${toneClass(data.tone)}`}>
             <div className="container">
                 <div className="row g-5">
-                    <div className="col-lg-4">
-                        <SectionHeading eyebrow={data.eyebrow} heading={data.heading} />
+                    <div className={ranks ? 'col-lg-5' : 'col-lg-4'}>
+                        <div className={ranks ? 'nt-achievements__head' : undefined}>
+                            <SectionHeading eyebrow={data.eyebrow} heading={data.heading} />
+                        </div>
                     </div>
-                    <div className="col-lg-8">
+                    <div className={ranks ? 'col-lg-7' : 'col-lg-8'}>
                         {data.body ? <p className="nt-lead mb-4">{data.body}</p> : null}
-                        <ol className="nt-achievements">
+                        <ol className={`nt-achievements ${ranks ? 'nt-achievements--ranks' : ''}`}>
                             {(data.items ?? []).map((item, i) => (
-                                <li key={i}>
+                                <li key={i} ref={(el) => (rows.current[i] = el)} style={{ '--i': i }}>
                                     <div className="nt-achievements__value">
                                         {ranks && item.logo ? <img src={item.logo.src} alt={item.logo.alt} width={item.logo.width} height={item.logo.height} loading="lazy" /> : null}
                                         <strong data-countup={/^\d{4}$/.test(item.value) ? undefined : item.value}>{item.value}</strong>
@@ -323,7 +340,14 @@ export function Pillars({ data }) {
     const refs = useRef([]);
     const uid = useId();
 
+    const split = data.layout === 'split';
+    const pill = data.layout === 'pill';
+    const stacked = split || pill;
+
+    useStackCover(refs, stacked, setActive, items.length);
+
     useEffect(() => {
+        if (stacked && window.matchMedia('(min-width: 992px)').matches) return undefined;
         if (!('IntersectionObserver' in window)) return undefined;
         const io = new IntersectionObserver(
             (entries) => entries.forEach((e) => e.isIntersecting && setActive(Number(e.target.dataset.index))),
@@ -331,17 +355,18 @@ export function Pillars({ data }) {
         );
         refs.current.forEach((el) => el && io.observe(el));
         return () => io.disconnect();
-    }, [items.length]);
+    }, [items.length, stacked]);
 
     return (
-        <section className="nt-section nt-pillars">
+        <section className={`nt-section nt-pillars ${split || pill ? 'nt-pillars--split' : ''} ${pill ? 'nt-pillars--pill' : ''}`}>
             <div className="container">
+                {split ? <SplitHead data={data} /> : null}
                 <div className="row g-4">
-                    <div className="col-lg-3">
+                    <div className={split ? 'col-lg-2' : pill ? 'col-lg-3 col-xl-2' : 'col-lg-3'}>
                         <div className="nt-pillars__nav">
-                            {data.eyebrow ? <p className="nt-pill">{data.eyebrow}</p> : null}
-                            {data.heading ? <h2 className="nt-h3">{data.heading}</h2> : null}
-                            {data.body ? <p className="nt-pillars__body">{data.body}</p> : null}
+                            {!split && data.eyebrow ? <p className="nt-pill">{data.eyebrow}</p> : null}
+                            {!split && data.heading ? <h2 className={pill ? 'visually-hidden' : 'nt-h3'}>{data.heading}</h2> : null}
+                            {!split && data.body ? <p className="nt-pillars__body">{data.body}</p> : null}
                             <ol>
                                 {items.map((item, i) => (
                                     <li key={i}>
@@ -356,9 +381,9 @@ export function Pillars({ data }) {
                             </ol>
                         </div>
                     </div>
-                    <div className="col-lg-9">
+                    <div className={split ? 'col-lg-10' : pill ? 'col-lg-9 offset-xl-1' : 'col-lg-9'}>
                         {items.map((item, i) => (
-                            <article key={i} id={`${uid}-${i}`} data-index={i} ref={(el) => (refs.current[i] = el)} className={`nt-pillar ${i === active ? 'is-active' : ''}`}>
+                            <article key={i} id={`${uid}-${i}`} data-index={i} ref={(el) => (refs.current[i] = el)} className={`nt-pillar ${i === active ? 'is-active' : ''}`} style={{ '--i': i }}>
                                 <div className="nt-pillar__text">
                                     <h3>{item.title}</h3>
                                     {item.text ? <p>{item.text}</p> : null}
@@ -516,6 +541,17 @@ export function FeatureList({ data }) {
     const id = useId();
     const tab = tabs[active];
     if (!tab) return null;
+    if (data.layout === 'band') {
+        return (
+            <section className="nt-logo-band nt-name-band" aria-label={data.heading || 'Partners'}>
+                <ul className="nt-name-band__list list-unstyled m-0 nt-stagger">
+                    {(tabs[0].items ?? []).map((item, i) => (
+                        <li key={i}>{item.text}</li>
+                    ))}
+                </ul>
+            </section>
+        );
+    }
     return (
         <section className="nt-section">
             <div className="container">
@@ -547,14 +583,15 @@ export function FeatureList({ data }) {
 }
 
 export function ContactCards({ data }) {
+    const people = data.layout === 'people';
     return (
         <section className="nt-section">
             <div className="container">
                 <SplitHead data={data} />
-                <Carousel label={data.heading || 'Contacts'} slideWidth="min(15.5rem, 80%)" gap="1rem">
+                <Carousel label={data.heading || 'Contacts'} slideWidth={people ? 'min(22.1rem, 85%)' : 'min(15.5rem, 80%)'} gap={people ? '2.5rem' : '1rem'}>
                     {(data.items ?? []).map((c, i) => (
-                        <article className="nt-contact-card" key={i}>
-                            <span className="nt-contact-card__icon"><Icon name="pin" strokeWidth={1.6} /></span>
+                        <article className={`nt-contact-card ${people ? 'nt-contact-card--person' : ''}`} key={i}>
+                            <span className="nt-contact-card__icon"><Icon name={people ? 'user' : 'pin'} strokeWidth={1.6} /></span>
                             {c.region ? <p className="nt-contact-card__region">{c.region}</p> : null}
                             <h3>{c.name}</h3>
                             {c.phone ? <a href={`tel:${c.phone.replace(/[^+\d]/g, '')}`}>{c.phone}</a> : null}
@@ -612,7 +649,6 @@ export function AccordionMedia({ data }) {
                 <div className="nt-acc-media">
                     {items.map((item, i) => (
                         <div key={i} className={`nt-acc-media__item ${i === open ? 'is-open' : ''}`}>
-                            {/* The open row shows its title inside the panel, so its button is only for screen readers. */}
                             <h3 className={i === open ? 'visually-hidden' : ''}>
                                 <button type="button" aria-expanded={i === open} aria-controls={`${id}-${i}`} onClick={() => setOpen(i === open ? -1 : i)}>
                                     {item.title}
@@ -653,6 +689,56 @@ export function NumberedList({ data }) {
     );
 }
 
+export function StoryTabs({ data }) {
+    const tabs = (data.tabs ?? []).filter((tab) => tab.cards?.length);
+    if (!tabs.length) return null;
+    const linkLabel = data.card_link_label || 'Read story';
+    const carousel = (tab) => (
+        <Carousel label={tab.label} slideWidth="min(54.7rem, 90%)" gap="2rem" className="nt-carousel--research">
+            {tab.cards.map((card, i) => (
+                <article className="nt-research-card" key={i}>
+                    <Media image={card.image} sizes="(min-width: 992px) 390px, 90vw" className="nt-research-card__media" alt="" />
+                    <div className="nt-research-card__body">
+                        {card.date ? (
+                            <p className="nt-research-card__date">
+                                <Icon name="calendar" strokeWidth={1.4} />
+                                {card.date}
+                            </p>
+                        ) : null}
+                        <h3>{card.title}</h3>
+                        {card.subtitle ? (
+                            <div className="nt-research-card__item">
+                                <h4>{card.subtitle}</h4>
+                                {card.text ? <p>{card.text}</p> : null}
+                            </div>
+                        ) : card.text ? (
+                            <p className="nt-research-card__text">{card.text}</p>
+                        ) : null}
+                        {card.link_url ? (
+                            <SmartLink href={card.link_url} className="nt-link-arrow">
+                                {linkLabel}
+                                <span className="visually-hidden">: {card.title}</span> <ArrowDot />
+                            </SmartLink>
+                        ) : null}
+                    </div>
+                </article>
+            ))}
+        </Carousel>
+    );
+    return (
+        <section className={`nt-section nt-divider nt-story-tabs ${toneClass(data.tone)}`}>
+            <div className="container">
+                <SplitHead data={data} />
+                {tabs.length > 1 ? (
+                    <Tabs label={data.heading || 'Tabs'} className="nt-story-tabs__tabs" tabs={tabs.map((tab, i) => ({ key: i, label: tab.label, content: carousel(tab) }))} />
+                ) : (
+                    carousel(tabs[0])
+                )}
+            </div>
+        </section>
+    );
+}
+
 export function CardTabs({ data }) {
     const tabs = data.tabs ?? [];
     const [active, setActive] = useState(0);
@@ -660,7 +746,6 @@ export function CardTabs({ data }) {
     return (
         <section className={`nt-section nt-card-tabs ${toneClass(data.tone)}`}>
             <div className="container">
-                {/* Heading across the page, then the introduction with the button on the right (as in the designs). */}
                 <SectionHeading eyebrow={data.eyebrow} heading={data.heading} />
                 <div className="nt-card-tabs__intro">
                     {data.body ? <p className="mb-0">{data.body}</p> : <span />}
@@ -697,12 +782,64 @@ export function TabsMedia({ data }) {
     const id = useId();
     const tab = tabs[active];
     if (!tab) return null;
+    const card = data.layout === 'card';
+    if (card) {
+        const links = tab.links ?? [];
+        const button = links.length ? links[links.length - 1] : null;
+        const textLinks = links.slice(0, -1);
+        return (
+            <section className={`nt-section nt-tabs-media nt-tabs-media--card ${data.tabs_align === 'start' ? 'nt-tabs-media--start' : ''} ${toneClass(data.tone, 'gradient')}`}>
+                <div className="container">
+                    <SplitHead data={data} />
+                </div>
+                <div className="nt-tabs-bar">
+                    <div className="container">
+                        <div className="nt-tabs nt-tabs--fill" role="tablist" aria-label={data.heading || 'Tabs'}>
+                            {tabs.map((t, i) => (
+                                <button key={i} type="button" role="tab" id={`${id}-t${i}`} aria-controls={`${id}-p`} aria-selected={i === active} tabIndex={i === active ? 0 : -1} onClick={() => setActive(i)}>
+                                    {t.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <div className="container">
+                    <div className="nt-tab-card nt-fade-in" role="tabpanel" id={`${id}-p`} aria-labelledby={`${id}-t${active}`} key={active}>
+                        {tab.image ? <Media image={tab.image} sizes="(min-width: 992px) 690px, 100vw" className="nt-tab-card__img" /> : null}
+                        <div className="nt-tab-card__body">
+                            {tab.title ? <h3>{tab.title}</h3> : null}
+                            {tab.text ? <p className="nt-tab-card__text">{tab.text}</p> : null}
+                            {tab.points?.length || textLinks.length ? (
+                                <ul className="nt-tab-card__points">
+                                    {tab.points?.map((p, i) => (
+                                        <li key={`p${i}`}>
+                                            {p.title ? <strong>{p.title}</strong> : null}
+                                            {p.text ? <p>{p.text}</p> : null}
+                                        </li>
+                                    ))}
+                                    {textLinks.map((l, i) => (
+                                        <li key={`l${i}`}>
+                                            <SmartLink href={l.url}>{l.label}</SmartLink>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : null}
+                            {button ? (
+                                <SmartLink href={button.url} className="nt-btn nt-tab-card__btn">
+                                    {button.label}
+                                </SmartLink>
+                            ) : null}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    }
     return (
         <section className={`nt-section nt-tabs-media ${toneClass(data.tone)}`}>
             <div className="container">
                 <SplitHead data={data} />
             </div>
-            {/* The bar's wrapper is a child of the section, so it stays stuck over the full-width panel below. */}
             <div className="nt-tabs-bar">
                 <div className="container">
                     <div className="nt-tabs" role="tablist" aria-label={data.heading || 'Tabs'}>
@@ -783,6 +920,31 @@ export function ImageMosaic({ data }) {
             ) : null}
         </div>
     );
+    if (data.layout === 'strip') {
+        return (
+            <section className="nt-section">
+                <div className="container">
+                    <SplitHead data={data} />
+                    <div className={`nt-mosaic-strip${data.quote ? ' has-quote' : ''}`}>
+                        {images.slice(0, 2).map((img, i) => (
+                            <Media key={i} image={img} sizes={i === 0 ? '(min-width: 992px) 360px, 100vw' : '(min-width: 992px) 900px, 100vw'} />
+                        ))}
+                        {data.quote ? (
+                            <blockquote className="nt-mosaic__quote nt-mosaic-strip__quote on-dark">
+                                <p>“{data.quote}”</p>
+                                {data.quote_name ? (
+                                    <footer>
+                                        <strong>{data.quote_name}</strong>
+                                        {data.quote_role ? <span>{data.quote_role}</span> : null}
+                                    </footer>
+                                ) : null}
+                            </blockquote>
+                        ) : null}
+                    </div>
+                </div>
+            </section>
+        );
+    }
     return (
         <section className="nt-section">
             <div className="container">
@@ -885,4 +1047,3 @@ export function PlacementTrends({ data }) {
         </section>
     );
 }
-

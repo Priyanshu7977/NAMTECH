@@ -4,9 +4,6 @@ use App\Models\Page;
 use App\Models\PageSection;
 use Illuminate\Database\Migrations\Migration;
 
-/**
- * The homepage partnerships section keeps only the corporate and academic partnership buttons.
- */
 return new class extends Migration
 {
     public function up(): void

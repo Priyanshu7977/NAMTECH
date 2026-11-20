@@ -1,13 +1,22 @@
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
-/**
- * WAI-ARIA tabs with automatic activation (arrow keys, Home/End).
- * Inactive panels are hidden but stay in the DOM (and in server-rendered HTML).
- */
 export default function Tabs({ tabs, initial = 0, label, className = '' }) {
     const [active, setActive] = useState(Math.min(initial, Math.max(0, tabs.length - 1)));
     const refs = useRef([]);
     const id = useId();
+
+    useEffect(() => {
+        if (!tabs.some((tab) => tab.anchor)) return undefined;
+        const reveal = () => {
+            const hash = window.location.hash.slice(1);
+            const index = tabs.findIndex((tab) => tab.anchor === hash);
+            if (index < 0) return;
+            setActive(index);
+        };
+        reveal();
+        window.addEventListener('hashchange', reveal);
+        return () => window.removeEventListener('hashchange', reveal);
+    }, [tabs]);
 
     const focus = (i) => {
         const next = (i + tabs.length) % tabs.length;

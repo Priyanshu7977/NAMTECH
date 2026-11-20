@@ -5,8 +5,23 @@ import SectionRenderer from '../../../components/site/sections/SectionRenderer';
 import { Media } from '../../../components/ResponsiveImage';
 import SmartLink from '../../../components/SmartLink';
 import Carousel from '../../../components/Carousel';
+import ImpactStoryShow from './ImpactStoryShow';
 
-export default function PostShow({ post, sections, latest, related, breadcrumbs, listing, hidden }) {
+export default function PostShow({ post, sections, latest, related, breadcrumbs, listing, hidden, caseStudy, sampleStoryBody, sampleStoryImages }) {
+    if (post.kind === 'story') {
+        return (
+            <ImpactStoryShow
+                post={post}
+                sections={sections}
+                related={related}
+                hidden={hidden}
+                caseStudy={caseStudy}
+                sampleBody={sampleStoryBody}
+                sampleImages={sampleStoryImages}
+            />
+        );
+    }
+
     const show = blockSwitch(hidden);
     const toc = show('contents') ? (post.toc ?? []) : [];
     const latestPosts = show('latest') ? latest : [];
@@ -35,7 +50,7 @@ export default function PostShow({ post, sections, latest, related, breadcrumbs,
                 </div>
             </section>
             <Breadcrumbs items={breadcrumbs} />
-            <article className="nt-section pt-4">
+            <article className="nt-section">
                 <div className="container">
                     <div className={sidebar ? 'row g-5' : ''}>
                         {sidebar ? (
@@ -87,7 +102,7 @@ export default function PostShow({ post, sections, latest, related, breadcrumbs,
                 <section className="nt-section nt-divider">
                     <div className="container">
                         <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-                            <h2 className="nt-h2 m-0">{post.kind === 'blog' ? 'Related Blogs' : post.kind === 'story' ? 'More Stories' : 'Featured News'}</h2>
+                            <h2 className="nt-h2 m-0">{post.kind === 'blog' ? 'Related Blogs' : 'Featured News'}</h2>
                             {listing ? <SmartLink href={listing.url} className="nt-btn nt-btn--outline">View all</SmartLink> : null}
                         </div>
                         <Carousel label="Related" slideWidth="min(21rem, 82%)" gap="1.5rem">

@@ -1,10 +1,6 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 
-/**
- * Browser entry. Public pages arrive server-rendered (Inertia SSR) and are hydrated; CMS
- * screens are rendered in the browser. Each page component loads as its own chunk.
- */
 createInertiaApp({
     resolve: (name) => {
         const pages = import.meta.glob('./pages/**/*.jsx');

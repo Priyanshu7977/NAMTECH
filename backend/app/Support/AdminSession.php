@@ -6,15 +6,8 @@ use App\Admin\ResourceRegistry;
 use App\Enums\Permission;
 use Illuminate\Http\Request;
 
-/**
- * The signed-in CMS user, their permissions and the sidebar navigation they may see,
- * shared with every CMS page (see HandleInertiaRequests). Guests get null and no navigation.
- */
 class AdminSession
 {
-    /**
-     * @return array<string, mixed>|null
-     */
     public static function user(Request $request): ?array
     {
         $user = $request->user();
@@ -33,11 +26,6 @@ class AdminSession
         ];
     }
 
-    /**
-     * Sidebar navigation filtered by what the user may access.
-     *
-     * @return array<int, array<string, mixed>>
-     */
     public static function navigation(Request $request): array
     {
         $user = $request->user();

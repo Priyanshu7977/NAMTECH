@@ -23,7 +23,6 @@ class SitemapController extends Controller
             $urls = collect([['loc' => url('/'), 'lastmod' => null]])
                 ->concat(collect(['programs', 'schools', 'faculty', 'news', 'blogs'])->map(fn ($p) => ['loc' => url($p), 'lastmod' => null]));
 
-            // Paths that redirect elsewhere are left out; the sitemap lists only final addresses.
             $redirected = Redirect::query()->pluck('from_path')->flip();
 
             foreach ([Page::class, Program::class, School::class, Centre::class, Faculty::class, Post::class, Gallery::class, Partner::class] as $class) {

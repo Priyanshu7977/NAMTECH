@@ -5,11 +5,6 @@ import usePage from '../../../hooks/usePage';
 
 export default function SchoolsIndex({ title, sections, breadcrumbs, schools, centres }) {
     const settings = usePage().props.site?.settings ?? {};
-    const hasRichSections = sections?.some((s) => ['academics_tabs', 'media_cards', 'card_grid'].includes(s.type));
-    if (hasRichSections) {
-        return <ListingShell title={title} sections={sections} breadcrumbs={breadcrumbs} />;
-    }
-
     return (
         <ListingShell title={title} sections={sections} breadcrumbs={breadcrumbs}>
             <h2 className="nt-h2">{settings.schools_listing_heading || 'MET Innovation Schools'}</h2>

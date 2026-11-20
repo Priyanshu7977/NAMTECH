@@ -17,11 +17,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Public forms. Submissions are always saved before any email is attempted, so a mail
- * outage never loses an enquiry. Spam is filtered with a honeypot, a minimum fill time
- * and per-IP throttling (see the "forms" rate limiter).
- */
 class FormController extends Controller
 {
     public function enquiry(Request $request): RedirectResponse
@@ -70,11 +65,14 @@ class FormController extends Controller
         if ($enquiry->type === 'brochure') {
             $brochure = Program::query()->find($enquiry->program_id)?->details['brochure']['file'] ?? null;
             $document = $brochure ? Media::query()->find($brochure) : null;
+            $download = $document?->isDocument() ? $document->documentUrl() : null;
 
             return back()->with('form_success', [
                 'form' => 'enquiry',
-                'message' => 'Thank you, '.$enquiry->name.'. Your brochure is ready.',
-                'download' => $document?->isDocument() ? $document->documentUrl() : null,
+                'message' => $download
+                    ? 'Thank you, '.$enquiry->name.'. Your brochure is ready.'
+                    : 'Thank you, '.$enquiry->name.'. Our team will email you the brochure shortly.',
+                'download' => $download,
             ]);
         }
 
@@ -84,10 +82,6 @@ class FormController extends Controller
         ]);
     }
 
-    /**
-     * Job application with CV upload. The CV is stored on a private disk (never public)
-     * and only Super Admins/Publishers can download it from the CMS.
-     */
     public function jobApplication(Request $request): RedirectResponse
     {
         $this->guardAgainstBots($request);
@@ -156,7 +150,6 @@ class FormController extends Controller
         $subscriber->unsubscribe_token ??= Str::random(48);
         $subscriber->save();
 
-        // The same message is shown whether or not the address was already subscribed, to avoid revealing subscribers.
         return back()->with('form_success', ['form' => 'newsletter', 'message' => 'Thank you for subscribing to the NAMTECH newsletter.']);
     }
 
@@ -167,9 +160,6 @@ class FormController extends Controller
         return redirect('/')->with('form_success', ['form' => 'newsletter', 'message' => 'You have been unsubscribed from the NAMTECH newsletter.']);
     }
 
-    /**
-     * Honeypot field and minimum time-to-complete checks (time measured by the form itself).
-     */
     private function guardAgainstBots(Request $request, string $prefix = ''): void
     {
         $field = $prefix ? $prefix.'_website' : 'website';

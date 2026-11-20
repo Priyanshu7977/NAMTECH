@@ -15,10 +15,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Administrator accounts. There is no public registration: Super Admins create accounts
- * and new users set their own password through a reset link.
- */
 class UserController extends Controller
 {
     public function index(): Response
@@ -122,9 +118,6 @@ class UserController extends Controller
         return back()->with('success', 'Password reset link sent.');
     }
 
-    /**
-     * @return array<int, array{value: string, label: string}>
-     */
     private function roles(): array
     {
         return array_map(fn (Role $role) => ['value' => $role->value, 'label' => $role->label()], Role::cases());

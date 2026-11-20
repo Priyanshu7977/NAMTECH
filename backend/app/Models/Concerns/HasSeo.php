@@ -17,10 +17,6 @@ trait HasSeo
         return $this->belongsTo(Media::class, 'og_image_id');
     }
 
-    /**
-     * @param  array{title?: string|null, description?: string|null, image?: Media|null, type?: string}  $defaults
-     * @return array<string, mixed>
-     */
     public function seo(array $defaults = []): array
     {
         $image = $this->ogImage ?? ($defaults['image'] ?? null);

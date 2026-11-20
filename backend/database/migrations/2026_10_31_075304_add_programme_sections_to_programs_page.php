@@ -4,10 +4,6 @@ use App\Models\Page;
 use App\Models\Program;
 use Illuminate\Database\Migrations\Migration;
 
-/**
- * The programs listing page follows the "All Programs" design: programmes by level, teaching style,
- * FAQs (hidden until answers are written) and a link to the schools.
- */
 return new class extends Migration
 {
     public function up(): void
@@ -35,7 +31,6 @@ return new class extends Migration
                     ['icon' => 'globe', 'title' => 'Global immersion', 'body' => 'Our curriculum is co-designed and co-delivered with academicians from global universities.', 'link_url' => null],
                 ],
             ]],
-            // Questions from the design; shown once the answers have been written in the CMS.
             ['type' => 'faq', 'is_visible' => false, 'data' => [
                 'heading' => 'Frequently Asked Questions', 'body' => 'Find answers to common questions about the Program, admissions, and student life.', 'layout' => 'centered',
                 'items' => array_map(fn (string $q) => ['question' => $q, 'answer' => null], [

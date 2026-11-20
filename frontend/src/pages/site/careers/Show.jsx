@@ -26,7 +26,7 @@ export default function JobShow({ job, breadcrumbs }) {
                 </div>
             </section>
             <Breadcrumbs items={breadcrumbs} />
-            <article className="nt-section pt-4">
+            <article className="nt-section">
                 <div className="container" style={{ maxWidth: '52rem' }}>
                     {job.summary ? <p className="nt-lead">{job.summary}</p> : null}
                     <RichText html={job.description} />

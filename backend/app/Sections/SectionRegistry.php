@@ -4,18 +4,8 @@ namespace App\Sections;
 
 use App\Support\Fields;
 
-/**
- * The controlled section builder. Editors can only add these approved components,
- * each with a fixed schema, so pages always stay within the design system.
- *
- * Field types: text, textarea, richtext, url, image, select, boolean, number, repeater, reference.
- */
 class SectionRegistry
 {
-    /**
-     * @return array<string, array{label: string, group: string, description: string, fields: array<int, array<string, mixed>>}>
-     */
-    /** @var array<string, array<string, mixed>>|null */
     private static ?array $cache = null;
 
     public static function definitions(): array
@@ -35,7 +25,6 @@ class SectionRegistry
         ];
 
         $base = [
-            // Homepage components ------------------------------------------------------------
             'home_hero' => [
                 'label' => 'Homepage hero',
                 'group' => 'Homepage',
@@ -97,6 +86,13 @@ class SectionRegistry
                     ...$cta('cta3', 'Third button'),
                     ['name' => 'category', 'type' => 'reference', 'source' => 'partnership_category_slugs', 'label' => 'Limit to category'],
                     ['name' => 'show_stories', 'type' => 'boolean', 'label' => 'Show partner stories carousel'],
+                    ['name' => 'stories_layout', 'type' => 'select', 'label' => 'Partner story cards', 'options' => ['photo' => 'Photo and text', 'text' => 'Text only (narrow cards)']],
+                    ['name' => 'sample_image', 'type' => 'image', 'label' => 'Sample story image when no partner stories are available'],
+                    ['name' => 'story_images', 'type' => 'repeater', 'label' => 'Featured partners and cover images', 'maxItems' => 8, 'fields' => [
+                        ['name' => 'slug', 'type' => 'slug', 'label' => 'Partner slug', 'required' => true],
+                        ['name' => 'image', 'type' => 'image', 'label' => 'Story cover', 'required' => true],
+                    ]],
+                    ['name' => 'hide_logos', 'type' => 'boolean', 'label' => 'Hide the partner logo row'],
                     ...$cta('stories_cta', 'Stories button'),
                 ],
             ],
@@ -161,11 +157,11 @@ class SectionRegistry
                     ['name' => 'heading', 'type' => 'text', 'label' => 'Heading', 'max' => 120],
                     ['name' => 'post_type', 'type' => 'reference', 'source' => 'post_types', 'label' => 'Post type (blank = all)'],
                     ['name' => 'limit', 'type' => 'number', 'label' => 'Number of posts', 'min' => 1, 'max' => 12],
+                    ['name' => 'sample_image', 'type' => 'image', 'label' => 'Sample insight image when no posts are available'],
                     ...$cta('cta', 'Button'),
                 ],
             ],
 
-            // Inner page components ------------------------------------------------------------
             'page_hero' => [
                 'label' => 'Page hero',
                 'group' => 'Page structure',
@@ -177,6 +173,7 @@ class SectionRegistry
                     ['name' => 'image', 'type' => 'image', 'label' => 'Image'],
                     ...$cta('cta', 'Primary button'),
                     ...$cta('secondary', 'Secondary button'),
+                    ['name' => 'button_size', 'type' => 'select', 'label' => 'Button size', 'options' => ['standard' => 'Standard', 'large' => 'Large (as on program pages)']],
                     ['name' => 'statistics_group', 'type' => 'reference', 'source' => 'statistic_groups', 'label' => 'Approved statistics to show'],
                 ],
             ],
@@ -219,7 +216,7 @@ class SectionRegistry
                     ...$heading,
                     ['name' => 'body', 'type' => 'textarea', 'label' => 'Introduction', 'max' => 600],
                     ['name' => 'columns', 'type' => 'select', 'label' => 'Columns on desktop', 'options' => ['2' => '2', '3' => '3', '4' => '4']],
-                    ['name' => 'tone', 'type' => 'select', 'label' => 'Background', 'options' => ['white' => 'White', 'lavender' => 'Lavender', 'purple' => 'Purple']],
+                    ['name' => 'tone', 'type' => 'select', 'label' => 'Background', 'options' => ['white' => 'White', 'lavender' => 'Lavender', 'gradient' => 'Lavender gradient', 'purple' => 'Purple']],
                     ['name' => 'cards', 'type' => 'repeater', 'label' => 'Cards', 'minItems' => 1, 'maxItems' => 12, 'fields' => [
                         ['name' => 'icon', 'type' => 'select', 'label' => 'Icon', 'options' => self::icons()],
                         ['name' => 'title', 'type' => 'text', 'label' => 'Title', 'max' => 80, 'required' => true],
@@ -254,6 +251,11 @@ class SectionRegistry
                         ['name' => 'subtitle', 'type' => 'text', 'label' => 'Subtitle', 'max' => 160, 'help' => 'Only shown on the "Icon, text and image", "Image with lavender story panel" and "Image on top, lavender body" styles.'],
                         ['name' => 'body', 'type' => 'textarea', 'label' => 'Text', 'max' => 800],
                         ['name' => 'meta', 'type' => 'text', 'label' => 'Highlight line', 'max' => 120, 'help' => 'Only shown on the "Image with lavender story panel" and "Cards with partner logo" styles.'],
+                        ['name' => 'sample_metrics', 'type' => 'boolean', 'label' => 'Label these figures as samples'],
+                        ['name' => 'metrics', 'type' => 'repeater', 'label' => 'Story figures', 'maxItems' => 3, 'fields' => [
+                            ['name' => 'value', 'type' => 'text', 'label' => 'Value', 'max' => 20, 'required' => true],
+                            ['name' => 'label', 'type' => 'text', 'label' => 'Description', 'max' => 60, 'required' => true],
+                        ]],
                         ['name' => 'link_url', 'type' => 'url', 'label' => 'Link'],
                     ]],
                 ],
@@ -270,6 +272,7 @@ class SectionRegistry
                         ['name' => 'title', 'type' => 'text', 'label' => 'Title', 'max' => 120],
                         ['name' => 'body', 'type' => 'richtext', 'label' => 'Text'],
                         ['name' => 'image', 'type' => 'image', 'label' => 'Image'],
+                        ['name' => 'panel_anchor', 'type' => 'slug', 'label' => 'Section anchor for tab content'],
                     ]],
                 ],
             ],
@@ -425,18 +428,14 @@ class SectionRegistry
         return self::$cache = $base + self::innerPageDefinitions($cta, $heading);
     }
 
-    /**
-     * Extra options added to existing components so they can match every inner-page design.
-     *
-     * @return array<string, array<int, array<string, mixed>>>
-     */
     private static function layoutOptions(): array
     {
         $tone = ['name' => 'tone', 'type' => 'select', 'label' => 'Background', 'options' => ['white' => 'White', 'light' => 'Light grey', 'lavender' => 'Lavender', 'gradient' => 'Lavender gradient', 'purple' => 'Purple']];
 
         return [
+            'partners_showcase' => [$tone],
             'page_hero' => [
-                ['name' => 'layout', 'type' => 'select', 'label' => 'Hero style', 'options' => ['split' => 'Purple with image', 'plain' => 'Plain title and text (no image)']],
+                ['name' => 'layout', 'type' => 'select', 'label' => 'Hero style', 'options' => ['split' => 'Purple with image', 'light' => 'Light lavender with image (dark text)', 'plain' => 'Plain title and text (no image)']],
                 ['name' => 'meta', 'type' => 'repeater', 'label' => 'Detail items (icon + text)', 'maxItems' => 4, 'fields' => [
                     ['name' => 'icon', 'type' => 'select', 'label' => 'Icon', 'options' => self::icons()],
                     ['name' => 'text', 'type' => 'text', 'label' => 'Text', 'max' => 80, 'required' => true],
@@ -445,17 +444,20 @@ class SectionRegistry
             'intro' => [
                 ['name' => 'icon', 'type' => 'select', 'label' => 'Icon above heading', 'options' => self::icons()],
                 $tone,
+                ['name' => 'align', 'type' => 'select', 'label' => 'Layout', 'options' => ['split' => 'Heading left, text right', 'center' => 'Centred heading with text below', 'statement' => 'Centred large statement text']],
             ],
             'rich_text' => [
                 ['name' => 'toc', 'type' => 'boolean', 'label' => 'Show "Sections" navigation built from H2 headings'],
                 ['name' => 'width', 'type' => 'select', 'label' => 'Width', 'options' => ['narrow' => 'Narrow (article)', 'wide' => 'Wide']],
             ],
             'image_text' => [
-                ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['side' => 'Side by side', 'panel' => 'Image with purple text panel', 'staggered' => 'Staggered (offset)']],
+                ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['side' => 'Side by side', 'panel' => 'Image with purple text panel', 'staggered' => 'Staggered (offset)', 'research' => 'Research photo and lavender text panel']],
                 $tone,
             ],
             'card_grid' => [
-                ['name' => 'style', 'type' => 'select', 'label' => 'Card style', 'options' => ['joined' => 'Joined outline grid', 'joined_light' => 'Joined grid with light lines and tall cards', 'outlined' => 'Separate outlined cards', 'filled' => 'Filled grey cards']],
+                ['name' => 'style', 'type' => 'select', 'label' => 'Card style', 'options' => ['joined' => 'Joined outline grid', 'joined_light' => 'Joined grid with light lines and tall cards', 'outlined' => 'Separate outlined cards', 'filled' => 'Filled grey cards', 'lines' => 'Icon and title with a line above (no box)', 'numbered' => 'Numbered columns with a line above (01, 02…); button below']],
+                ['name' => 'list_label', 'type' => 'text', 'label' => 'Label above the cards', 'max' => 120],
+                ['name' => 'footer', 'type' => 'textarea', 'label' => 'Note below the cards (e.g. a disclaimer)', 'max' => 400],
                 ['name' => 'cta_label', 'type' => 'text', 'label' => 'Button label', 'max' => 40],
                 ['name' => 'cta_url', 'type' => 'url', 'label' => 'Button link'],
             ],
@@ -463,7 +465,13 @@ class SectionRegistry
                 ['name' => 'layout', 'type' => 'select', 'label' => 'Card style', 'options' => [
                     'cards' => 'Image cards', 'showcase' => 'Large centred slides', 'horizontal' => 'Icon, text and image (wide)',
                     'story' => 'Image with lavender story panel', 'logo' => 'Cards with partner logo', 'tall' => 'Image on top, lavender body',
+                    'feature' => 'Large lavender card beside a square image, centred heading',
+                    'tall_wide' => 'Wide cards: image on top, lavender body (e.g. Ranks & Accreditations)',
+                    'labs' => 'Photo cards with title and text, no box (e.g. Living Labs on a purple band)',
+                    'centers' => 'Wide photo cards with partner logo, title, text and View link (e.g. Our Centers)',
+                    'partnership_tiles' => 'Outlined icon cards for partnership models',
                 ]],
+                ['name' => 'head_align', 'type' => 'select', 'label' => 'Heading', 'options' => ['split' => 'Heading left, introduction right', 'center' => 'Centred heading']],
                 $tone,
                 ['name' => 'cta_label', 'type' => 'text', 'label' => 'Button label', 'max' => 40],
                 ['name' => 'cta_url', 'type' => 'url', 'label' => 'Button link'],
@@ -472,7 +480,7 @@ class SectionRegistry
                 ['name' => 'card_link_label', 'type' => 'text', 'label' => 'Card link text', 'max' => 30, 'help' => 'e.g. Read, Know More, View'],
             ],
             'tabs' => [
-                ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['standard' => 'Standard', 'centered' => 'Centred narrow text']],
+                ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['standard' => 'Standard', 'centered' => 'Centred narrow text', 'section_panels' => 'Sections inside each tab']],
                 $tone,
             ],
             'faq' => [
@@ -490,6 +498,10 @@ class SectionRegistry
                 ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['quotes' => 'Quote cards', 'portrait' => 'Portrait with purple quote box', 'spotlight' => 'Name list with large portrait']],
                 ['name' => 'body', 'type' => 'textarea', 'label' => 'Introduction', 'max' => 600],
                 $tone,
+                ['name' => 'image', 'type' => 'image', 'label' => 'Background photo (name list style)', 'help' => 'Shown behind the quote when the selected person has no photo.'],
+                ['name' => 'photo_caption', 'type' => 'text', 'label' => 'Background photo caption', 'max' => 80],
+                ['name' => 'cta_label', 'type' => 'text', 'label' => 'Button label (name list style)', 'max' => 40],
+                ['name' => 'cta_url', 'type' => 'url', 'label' => 'Button link (name list style)'],
             ],
             'documents' => [
                 ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['grid' => 'Card grid', 'list' => 'List beside heading']],
@@ -503,16 +515,18 @@ class SectionRegistry
                 ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['band' => 'Lavender band', 'dividers' => 'Large figures with dividers']],
             ],
             'cta_band' => [$tone],
-            'logo_strip' => [$tone],
+            'logo_strip' => [
+                $tone,
+                ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['centred' => 'Centred logos with heading', 'band' => 'Full-width row (under a hero, no heading)']],
+                ['name' => 'sample_when_empty', 'type' => 'boolean', 'label' => 'Show sample partner when there are no logos'],
+                ['name' => 'custom_logos', 'type' => 'repeater', 'label' => 'Choose logos (optional)', 'help' => 'When set, these logos are shown in this order instead of the partner list.', 'maxItems' => 12, 'fields' => [
+                    ['name' => 'logo', 'type' => 'image', 'label' => 'Logo', 'required' => true],
+                    ['name' => 'name', 'type' => 'text', 'label' => 'Organisation name', 'max' => 120, 'required' => true],
+                ]],
+            ],
         ];
     }
 
-    /**
-     * Components introduced for the inner-page designs (About, Admissions, Placements,
-     * Pedagogy, Labs, Outreach, Impact, Careers, Research, Schools…).
-     *
-     * @return array<string, array<string, mixed>>
-     */
     private static function innerPageDefinitions(callable $cta, array $heading): array
     {
         $tone = ['name' => 'tone', 'type' => 'select', 'label' => 'Background', 'options' => ['white' => 'White', 'light' => 'Light grey', 'lavender' => 'Lavender', 'gradient' => 'Lavender gradient', 'purple' => 'Purple']];
@@ -560,6 +574,7 @@ class SectionRegistry
                 'group' => 'Cards',
                 'description' => 'Large figures in cards with icons (e.g. Outcomes, Why Employers Choose NAMTECH Talent). Only use verified figures.',
                 'fields' => [
+                    ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['cards' => 'White outlined cards', 'lavender' => 'Lavender cards, three then two (e.g. Scholarship Criteria)']],
                     ...$heading, $body, $tone,
                     ['name' => 'items', 'type' => 'repeater', 'label' => 'Figures', 'minItems' => 1, 'maxItems' => 6, 'fields' => [
                         $icon,
@@ -594,6 +609,7 @@ class SectionRegistry
                     ['name' => 'name', 'type' => 'text', 'label' => 'Quoted person', 'max' => 120],
                     ['name' => 'role', 'type' => 'text', 'label' => 'Their role', 'max' => 160],
                     ['name' => 'image', 'type' => 'image', 'label' => 'Image', 'required' => true],
+                    ['name' => 'flip_image', 'type' => 'boolean', 'label' => 'Mirror the photo (flip left to right)'],
                     ['name' => 'video_url', 'type' => 'url', 'label' => 'YouTube or Vimeo link (optional)'],
                 ],
             ],
@@ -630,6 +646,7 @@ class SectionRegistry
                 'fields' => [
                     ...$heading,
                     ['name' => 'body', 'type' => 'textarea', 'label' => 'Introduction', 'max' => 600],
+                    ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['nav' => 'Heading in the side column, outlined cards', 'split' => 'Heading across the top, lavender cards (e.g. Ways to Collaborate)', 'pill' => 'Pill and names beside lavender cards (e.g. School Core Pillars)']],
                     ['name' => 'items', 'type' => 'repeater', 'label' => 'Pillars', 'minItems' => 1, 'maxItems' => 10, 'fields' => [
                         ['name' => 'title', 'type' => 'text', 'label' => 'Title', 'max' => 120, 'required' => true],
                         ['name' => 'text', 'type' => 'textarea', 'label' => 'Text', 'max' => 700],
@@ -644,6 +661,9 @@ class SectionRegistry
                 'fields' => [
                     ...$heading,
                     ['name' => 'school', 'type' => 'reference', 'source' => 'school_slugs', 'label' => 'Limit to school'],
+                    ['name' => 'tone', 'type' => 'select', 'label' => 'Background', 'options' => ['light' => 'Light grey', 'white' => 'White']],
+                    ['name' => 'tab_by', 'type' => 'select', 'label' => 'Tabs', 'options' => ['level' => 'One tab per level', 'program' => 'One tab per program']],
+                    ['name' => 'card_buttons', 'type' => 'boolean', 'label' => 'Show Apply now / Learn more buttons on the cards'],
                 ],
             ],
             'events_carousel' => [
@@ -652,6 +672,7 @@ class SectionRegistry
                 'description' => 'Carousel of upcoming published events.',
                 'fields' => [
                     ...$heading, $body, ...$cta('cta', 'Button'), $tone,
+                    ['name' => 'layout', 'type' => 'select', 'label' => 'Card style', 'options' => ['cards' => 'Small cards', 'wide' => 'Wide card: photo beside a lavender panel with buttons']],
                     ['name' => 'category', 'type' => 'reference', 'source' => 'event_categories', 'label' => 'Event type'],
                     ['name' => 'school', 'type' => 'reference', 'source' => 'school_slugs', 'label' => 'School'],
                 ],
@@ -769,6 +790,7 @@ class SectionRegistry
                 'description' => 'Two-column icon list in a lavender panel, optionally in tabs (e.g. Education Loan Assistance, Why Partner with NAMTECH?).',
                 'fields' => [
                     ...$heading, $body,
+                    ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['panel' => 'Icon list in a lavender panel', 'band' => 'Names in a full-width grey row (like a logo strip, first tab only)']],
                     ['name' => 'tabs', 'type' => 'repeater', 'label' => 'Tabs (one tab = no tab bar)', 'minItems' => 1, 'maxItems' => 8, 'fields' => [
                         ['name' => 'label', 'type' => 'text', 'label' => 'Tab label', 'max' => 40],
                         ['name' => 'items', 'type' => 'repeater', 'label' => 'Items', 'maxItems' => 16, 'fields' => [
@@ -784,6 +806,7 @@ class SectionRegistry
                 'description' => 'Carousel of contact cards (e.g. Meet the NAMTECH Team in Your City).',
                 'fields' => [
                     ...$heading, $body,
+                    ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['region' => 'Regional contacts (location pin)', 'people' => 'People (wide cards with a person icon, e.g. Leadership Team)']],
                     ['name' => 'items', 'type' => 'repeater', 'label' => 'Contacts', 'minItems' => 1, 'maxItems' => 20, 'fields' => [
                         ['name' => 'region', 'type' => 'text', 'label' => 'Region', 'max' => 160],
                         ['name' => 'name', 'type' => 'text', 'label' => 'Name', 'max' => 120, 'required' => true],
@@ -834,6 +857,26 @@ class SectionRegistry
                     ['name' => 'footer', 'type' => 'textarea', 'label' => 'Closing text', 'max' => 500],
                 ],
             ],
+            'story_tabs' => [
+                'label' => 'Tabs of story cards',
+                'group' => 'Cards',
+                'description' => 'Heading and introduction, then tabs, each with a carousel of photo cards beside a lavender panel (e.g. Training & Development).',
+                'fields' => [
+                    ...$heading, $body, $tone,
+                    ['name' => 'card_link_label', 'type' => 'text', 'label' => 'Card link text', 'max' => 30, 'help' => 'e.g. Read story'],
+                    ['name' => 'tabs', 'type' => 'repeater', 'label' => 'Tabs', 'minItems' => 1, 'maxItems' => 6, 'fields' => [
+                        ['name' => 'label', 'type' => 'text', 'label' => 'Tab label', 'max' => 40, 'required' => true],
+                        ['name' => 'cards', 'type' => 'repeater', 'label' => 'Cards', 'minItems' => 1, 'maxItems' => 12, 'fields' => [
+                            ['name' => 'image', 'type' => 'image', 'label' => 'Photo', 'required' => true],
+                            ['name' => 'date', 'type' => 'text', 'label' => 'Date (optional)', 'max' => 40],
+                            ['name' => 'title', 'type' => 'text', 'label' => 'Title', 'max' => 120, 'required' => true],
+                            ['name' => 'subtitle', 'type' => 'text', 'label' => 'Highlighted item', 'max' => 140, 'help' => 'With a highlighted item, the text sits between two lines under it.'],
+                            ['name' => 'text', 'type' => 'textarea', 'label' => 'Text', 'max' => 400],
+                            ['name' => 'link_url', 'type' => 'url', 'label' => 'Link'],
+                        ]],
+                    ]],
+                ],
+            ],
             'card_tabs' => [
                 'label' => 'Tabs of icon cards',
                 'group' => 'Cards',
@@ -856,6 +899,8 @@ class SectionRegistry
                 'description' => 'Tabs, each showing an image beside a lavender panel with a title, points and links (e.g. Partnership Models).',
                 'fields' => [
                     ...$heading, $body, $tone,
+                    ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['panel' => 'Image beside a lavender panel', 'card' => 'Image beside a white card, tabs across the full width (last link is a button)']],
+                    ['name' => 'tabs_align', 'type' => 'select', 'label' => 'Tabs (white card style)', 'options' => ['fill' => 'Spread across the width, tall panel', 'start' => 'Left-aligned, compact panel (e.g. Industrial Sectors)']],
                     ['name' => 'tabs', 'type' => 'repeater', 'label' => 'Tabs', 'minItems' => 1, 'maxItems' => 8, 'fields' => [
                         ['name' => 'label', 'type' => 'text', 'label' => 'Tab label', 'max' => 60, 'required' => true],
                         ['name' => 'image', 'type' => 'image', 'label' => 'Image'],
@@ -895,6 +940,7 @@ class SectionRegistry
                     ['name' => 'images', 'type' => 'repeater', 'label' => 'Images', 'minItems' => 1, 'maxItems' => 4, 'fields' => [
                         ['name' => 'image', 'type' => 'image', 'label' => 'Image', 'required' => true],
                     ]],
+                    ['name' => 'layout', 'type' => 'select', 'label' => 'Style', 'options' => ['side' => 'Text beside the photos', 'strip' => 'Heading above; a narrow and a wide photo, quote over the wide one (e.g. Student Impact)']],
                     ['name' => 'quote', 'type' => 'textarea', 'label' => 'Quote', 'max' => 400],
                     ['name' => 'quote_name', 'type' => 'text', 'label' => 'Quoted person', 'max' => 120],
                     ['name' => 'quote_role', 'type' => 'text', 'label' => 'Their role', 'max' => 120],
@@ -943,9 +989,6 @@ class SectionRegistry
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public static function icons(): array
     {
         return [
@@ -963,51 +1006,26 @@ class SectionRegistry
         return array_key_exists($type, self::definitions());
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public static function fields(string $type): array
     {
         return self::definitions()[$type]['fields'] ?? [];
     }
 
-    /**
-     * Validation rules for one section's data, prefixed (e.g. "sections.3.data").
-     *
-     * @return array<string, mixed>
-     */
     public static function rules(string $type, string $prefix): array
     {
         return [$prefix => ['array']] + Fields::rules(self::fields($type), $prefix);
     }
 
-    /**
-     * Normalise validated data: drop unknown keys, cast types and sanitise rich text.
-     *
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
     public static function normalize(string $type, array $data): array
     {
         return Fields::normalize(self::fields($type), $data);
     }
 
-    /**
-     * All media ids referenced by a section's data.
-     *
-     * @param  array<string, mixed>  $data
-     * @return array<int, int>
-     */
     public static function mediaIds(string $type, array $data): array
     {
         return Fields::mediaIds(self::fields($type), $data);
     }
 
-    /**
-     * Section definitions for the admin builder (no closures).
-     *
-     * @return array<int, array<string, mixed>>
-     */
     public static function forAdmin(): array
     {
         return collect(self::definitions())->map(fn (array $definition, string $type): array => [

@@ -14,7 +14,6 @@ export default function Layout({ children, seo }) {
     const { site, preview } = page.props;
     const settings = site?.settings ?? {};
 
-    // Scroll reveal and count-up animations; re-run after each client-side visit.
     useEffect(() => {
         let cleanups = [];
         const run = () => {
@@ -24,7 +23,6 @@ export default function Layout({ children, seo }) {
         run();
         let pathname = window.location.pathname;
         const off = router.on('navigate', (event) => {
-            // Only a new page fades in; filter, sort and search changes on the same page do not.
             const next = new URL(event.detail.page.url, window.location.origin).pathname;
             if (next !== pathname) enterPage();
             pathname = next;
@@ -53,13 +51,11 @@ export default function Layout({ children, seo }) {
             </main>
             <Footer />
             <EnquiryModal />
-            {settings.show_floating_contact !== false ? (
-                <SmartLink href={settings.call_url || '/contact'} className="nt-floating-contact" aria-label="Contact NAMTECH">
+            {settings.call_url && settings.show_floating_contact !== false ? (
+                <SmartLink href={settings.call_url} className="nt-floating-contact" aria-label="Contact NAMTECH">
                     <Icon name="phoneChat" />
                 </SmartLink>
             ) : null}
         </>
     );
 }
-
-export const withLayout = (page) => <Layout>{page}</Layout>;

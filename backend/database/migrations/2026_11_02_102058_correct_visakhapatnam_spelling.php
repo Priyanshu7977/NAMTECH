@@ -3,9 +3,6 @@
 use App\Models\Initiative;
 use Illuminate\Database\Migrations\Migration;
 
-/**
- * Corrects the city name in the mission initiatives: Visakhapatnam, not Vishakhapatnam.
- */
 return new class extends Migration
 {
     public function up(): void

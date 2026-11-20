@@ -1,7 +1,7 @@
 import { router } from '../../../router/navigation';
 import { useState } from 'react';
 import Icon from '../../../components/Icon';
-import { PersonCard } from '../../../components/site/Cards';
+import { FacultyGrid } from '../../../components/site/Cards';
 import { Pagination } from '../../../components/site/Common';
 import { FilterTabs } from '../../../components/site/Filters';
 import Layout from '../../../components/site/Layout';
@@ -19,7 +19,7 @@ export default function FacultyIndex({ title, sections, breadcrumbs, people, sch
                 <div>
                     <label className="visually-hidden" htmlFor="faculty-type">Faculty type</label>
                     <select id="faculty-type" className="form-select" value={filters.type ?? ''} onChange={(e) => search({ type: e.target.value || undefined, page: undefined })}>
-                        <option value="">Residential and Visiting</option>
+                        <option value="">All</option>
                         {Object.entries(types).map(([value, label]) => <option key={value} value={value}>{label} Faculty</option>)}
                     </select>
                 </div>
@@ -27,19 +27,15 @@ export default function FacultyIndex({ title, sections, breadcrumbs, people, sch
                     e.preventDefault();
                     search({ q: q || undefined, page: undefined });
                 }}>
-                    <label className="visually-hidden" htmlFor="faculty-q">Name or research area</label>
-                    <input id="faculty-q" type="search" className="form-control" placeholder="Search by name or research area" value={q} onChange={(e) => setQ(e.target.value)} />
+                    <label className="visually-hidden" htmlFor="faculty-q">Search by name</label>
+                    <input id="faculty-q" type="search" className="form-control" placeholder="Search by Name" value={q} onChange={(e) => setQ(e.target.value)} />
                     <Icon name="search" strokeWidth={1.8} />
                 </form>
             </div>
             <p className="visually-hidden" role="status">{people.total} profiles found</p>
             {people.data.length ? (
-                <div className="row g-4 row-cols-1 row-cols-sm-2 row-cols-lg-4 mt-1 nt-stagger">
-                    {people.data.map((person) => (
-                        <div className="col" key={person.id}>
-                            <PersonCard person={person} headingLevel={2} />
-                        </div>
-                    ))}
+                <div className="mt-4">
+                    <FacultyGrid people={people.data} headingLevel={2} />
                 </div>
             ) : (
                 <p className="nt-empty">No faculty profiles match your search.</p>

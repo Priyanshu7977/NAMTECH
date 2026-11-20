@@ -7,7 +7,6 @@
         "build": "vite build && vite build --ssr"
     },
     "dependencies": {
-        "@fontsource/inter": "^5.3.0",
         "@fontsource/poppins": "^5.3.0",
         "@inertiajs/react": "^3.9.0",
         "@tiptap/extension-image": "^3.32.0",

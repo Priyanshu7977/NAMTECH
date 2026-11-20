@@ -6,10 +6,6 @@ use HTMLPurifier;
 use HTMLPurifier_Config;
 use Illuminate\Support\Str;
 
-/**
- * Sanitizes rich-text HTML from the CMS editor down to an allow-list of semantic
- * elements. Embeds are limited to approved video hosts.
- */
 class HtmlSanitizer
 {
     private static ?HTMLPurifier $purifier = null;
@@ -52,18 +48,12 @@ class HtmlSanitizer
         $config->set('HTML.SafeIframe', true);
         $config->set('URI.SafeIframeRegexp', '%^https://(www\.youtube-nocookie\.com/embed/|www\.youtube\.com/embed/|player\.vimeo\.com/video/)%');
         $config->set('AutoFormat.RemoveEmpty', true);
-        // Images may only come from this site's media library.
         $config->set('URI.Host', parse_url((string) config('app.url'), PHP_URL_HOST) ?: null);
         $config->set('URI.DisableExternalResources', true);
 
         return self::$purifier = new HTMLPurifier($config);
     }
 
-    /**
-     * Adds ids to H2 headings and returns the table of contents built from them.
-     *
-     * @return array{html: string|null, toc: array<int, array{id: string, text: string}>}
-     */
     public static function withHeadingAnchors(?string $html): array
     {
         if (! $html || ! str_contains($html, '<h2')) {
@@ -89,9 +79,6 @@ class HtmlSanitizer
         return ['html' => $html, 'toc' => $toc];
     }
 
-    /**
-     * Approximate reading time in minutes for an HTML body.
-     */
     public static function readingMinutes(?string $html): int
     {
         $words = str_word_count(strip_tags((string) $html));
