@@ -1,0 +1,48 @@
+# Stage 1: Build Frontend Assets
+FROM node:22-alpine AS frontend
+WORKDIR /app
+
+COPY frontend/package.json frontend/package-lock.json ./frontend/
+RUN cd frontend && npm install
+
+COPY frontend/ ./frontend/
+COPY backend/ ./backend/
+RUN cd frontend && npm run build
+
+# Stage 2: PHP Application Runtime
+FROM php:8.3-cli-alpine
+WORKDIR /app/backend
+
+RUN apk add --no-cache \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    git \
+    sqlite-dev \
+    mysql-client \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_sqlite gd zip bcmath pcntl
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+COPY backend/ ./
+COPY --from=frontend /app/backend/public/build ./public/build
+COPY --from=frontend /app/backend/bootstrap/ssr ./bootstrap/ssr
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+RUN mkdir -p storage/app/public storage/app/private storage/framework/cache/data \
+    storage/framework/sessions storage/framework/views storage/logs bootstrap/cache database \
+    && touch database/database.sqlite \
+    && chmod -R 777 storage bootstrap/cache database
+
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN sed -i -e 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 8080
+
+ENTRYPOINT ["/bin/sh", "/usr/local/bin/docker-entrypoint.sh"]
