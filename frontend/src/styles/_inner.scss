@@ -5292,3 +5292,141 @@ img {
         top: calc(var(--nt-header-offset, 6rem) + 2rem);
     }
 }
+
+
+/* ==========================================================================
+   NAMTECH Production Hotfixes (Integrated into Source)
+   - Infinite moving logo band marquee with prefers-reduced-motion
+   - Class Profile stats calibration (font-size & border collision fix)
+   - Recruiter logos sizing
+   ========================================================================== */
+
+/* Moving Logo Strip (Infinite Smooth Marquee) */
+.nt-logo-band {
+  overflow: hidden !important;
+  position: relative !important;
+  width: 100% !important;
+  padding-block: clamp(1.25rem, 2.5vw, 2.25rem) !important;
+  background: #fff !important;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+.nt-logo-band--moving .nt-logo-band__list {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  overflow: visible !important;
+  overflow-x: visible !important;
+  width: max-content !important;
+  gap: clamp(2rem, 4vw, 4rem) !important;
+  padding-inline: 0 !important;
+  margin: 0 !important;
+  animation: nt-marquee-scroll 32s linear infinite !important;
+  will-change: transform !important;
+}
+
+.nt-logo-band--moving:hover .nt-logo-band__list {
+  animation-play-state: paused !important;
+}
+
+.nt-logo-band--moving .nt-logo-band__list li {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 0.5rem !important;
+}
+
+.nt-logo-band--moving .nt-logo-band__list img {
+  height: clamp(2.5rem, 4.4vw, 3.75rem) !important;
+  max-width: 11rem !important;
+  width: auto !important;
+  object-fit: contain !important;
+  filter: grayscale(1) !important;
+  opacity: 0.65 !important;
+  mix-blend-mode: multiply !important;
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease !important;
+}
+
+.nt-logo-band--moving .nt-logo-band__list li:hover img {
+  filter: grayscale(0) !important;
+  opacity: 1 !important;
+  transform: scale(1.08) !important;
+}
+
+@keyframes nt-marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nt-logo-band--moving .nt-logo-band__list {
+    animation: none !important;
+  }
+}
+
+/* Class Profile Stats Calibration (Zero-Collision & Balanced Spacing) */
+.nt-class__stats {
+  gap: 0 !important;
+  padding: 2.25rem clamp(1.25rem, 3.5vw, 3.5rem) !important;
+}
+@media (min-width: 768px) {
+  .nt-class__stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  .nt-class__stats li {
+    padding: 0 1.25rem !important;
+    box-sizing: border-box !important;
+  }
+  .nt-class__stats li:first-child {
+    padding-left: 0 !important;
+  }
+  .nt-class__stats li + li {
+    border-left: 1px solid #c9bdf4 !important;
+    padding-left: clamp(1.25rem, 2.5vw, 2.25rem) !important;
+    padding-right: 0.75rem !important;
+  }
+}
+@media (max-width: 767.98px) {
+  .nt-class__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 2rem 1.25rem !important;
+    padding: 2rem 1.25rem !important;
+  }
+  .nt-class__stats li {
+    padding: 0 !important;
+  }
+  .nt-class__stats li + li {
+    border-left: none !important;
+    padding-left: 0 !important;
+  }
+}
+.nt-class__stats strong {
+  font-size: clamp(2rem, 1.4rem + 1.5vw, 2.85rem) !important;
+  line-height: 1.15 !important;
+  margin: 0.85rem 0 0.65rem !important;
+  display: block !important;
+  white-space: nowrap !important;
+  letter-spacing: -0.02em !important;
+}
+.nt-class__stats span {
+  font-size: clamp(0.8125rem, 0.775rem + 0.1vw, 0.9375rem) !important;
+  line-height: 1.45 !important;
+  display: block !important;
+  color: #33333d !important;
+  word-break: normal !important;
+}
+
+.nt-outcomes__stats strong {
+  white-space: nowrap !important;
+}
+
+.nt-outcomes__logos li {
+  height: 46px !important;
+}
